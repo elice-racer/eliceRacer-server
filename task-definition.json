@@ -5,7 +5,7 @@
     {
       "name": "elicerracer",
       "essential": true,
-      "image": "416835025967.dkr.ecr.ap-northeast-2.amazonaws.com/production-elicerracer",
+      "image": "416835025967.dkr.ecr.ap-northeast-2.amazonaws.com/production-elicerracer:latest",
       "cpu": 0,
       "portMappings": [
         {
