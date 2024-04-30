@@ -38,8 +38,8 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       - name: Print Image URI
-        run: echo "Image URI for ECS Task Definition: ${{ steps.login-ecr.outputs.registry }}/elicerracer:$IMAGE_TAG"
-
+        run: |
+          echo "Image URI for ECS Task Definition: ${{ steps.login-ecr.outputs.registry }}/elicerracer:$IMAGE_TAG"
 
       - name: Fill in the new image ID in the ECS task definition
         id: task-def
