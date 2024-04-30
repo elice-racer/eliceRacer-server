@@ -31,6 +31,11 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: production-elicerracer
           IMAGE_TAG: ${{ github.sha }}
+      - name: Set image tag
+        run: echo "IMAGE_TAG=$(echo $GITHUB_SHA)" >> $GITHUB_ENV
+      - name: Print image URI
+        run: echo "Image URI: ${{ steps.login-ecr.outputs.registry }}/elicerracer:$IMAGE_TAG"
+
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
