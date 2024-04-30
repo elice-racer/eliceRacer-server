@@ -41,13 +41,13 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ./task-definition.json
+          task-definition: ../../task-definition.json
           container-name: elicerracer
           image: ${{ steps.login-ecr.outputs.registry }}/elicerracer:$IMAGE_TAG
 
       - name: Deploy ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          service: elicerracer
+          service: elicerracerf
           cluster: production-eliceracer
           task-definition: ${{ steps.task-def.outputs.task-definition }}
