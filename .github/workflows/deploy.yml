@@ -70,3 +70,5 @@ jobs:
           cluster: production-eliceracer
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           codedeploy-appspec: appspec.yaml
+          codedeploy-application: production-elicerracer
+          codedeploy-deployment-group: production-elicerracer
