@@ -61,7 +61,7 @@ jobs:
           task-definition: ./task-definition.json
           container-name: elicerracer
           image: ${{ steps.build-image.outputs.image }}
-          # test
+
           # image: ${{ steps.login-ecr.outputs.registry }}/elicerracer:${{ github.sha }}
 
       - name: Deploy ECS task definition
