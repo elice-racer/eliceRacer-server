@@ -15,6 +15,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.11.1'
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - run: |
+          yarn install --frozen-lockfile
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -33,14 +50,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-      - name: Print Image URI
-        run: |
-          echo "Image URI for ECS Task Definition: ${{ steps.login-ecr.outputs.registry }}/elicerracer:$IMAGE_TAG"
-          echo "Image URI for ECS Task Definition: ${{ steps.login-ecr.outputs.registry }}/elicerracer:${{ github.sha }}"
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Fill in the new image ID in the ECS task definition
         id: task-def
@@ -48,7 +59,8 @@ jobs:
         with:
           task-definition: ./task-definition.json
           container-name: elicerracer
-          image: ${{ steps.login-ecr.outputs.registry }}/elicerracer:${{ github.sha }}
+          image: ${{ steps.build-image.outputs.image }}
+          # image: ${{ steps.login-ecr.outputs.registry }}/elicerracer:${{ github.sha }}
 
       - name: Deploy ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -56,4 +68,4 @@ jobs:
           service: elicerracer
           cluster: production-eliceracer
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          appspec-file: appspec.yaml
+          codedeploy-appspec: appspec.yaml
