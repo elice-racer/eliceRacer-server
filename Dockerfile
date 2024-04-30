@@ -1,13 +1,13 @@
 FROM node:20-alpine
 
+WORKDIR /usr/src/app
+COPY . .
 
-WORKDIR /app
+RUN yarn install
+
 COPY . .
 
 RUN yarn build
 
-
-ENV HOST 0.0.0.0
 EXPOSE 3000
-
-CMD ["yarn", "start:prod"]
+CMD ["node", "dist/main"]
