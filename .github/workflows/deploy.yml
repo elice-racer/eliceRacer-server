@@ -39,7 +39,7 @@ jobs:
 
       - name: Print Image URI
         run: |
-          echo "Image URI for ECS Task Definition: ${{ steps.login-ecr.outputs.registry }}/elicerracer:$IMAGE_TAG"
+          echo "Image URI for ECS Task Definition: ${{ steps.login-ecr.outputs.registry }}/elicerracer:${{IMAGE_TAG}}"
           echo "Image URI for ECS Task Definition: ${{ steps.login-ecr.outputs.registry }}/elicerracer:${{ github.sha }}"
 
       - name: Fill in the new image ID in the ECS task definition
