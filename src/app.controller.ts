@@ -7,6 +7,6 @@ export class AppController {
 
   @Get('health')
   healthCheck(): string {
-    return 'OK code deploy agent';
+    return 'OK auto';
   }
 }
