@@ -7,6 +7,6 @@ export class AppController {
 
   @Get('health')
   healthCheck(): string {
-    return 'OK ec2 auto 모르겠따 이젠ㅌ';
+    return 'new cluster';
   }
 }
