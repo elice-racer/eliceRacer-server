@@ -7,6 +7,6 @@ export class AppController {
 
   @Get('health')
   healthCheck(): string {
-    return 'OK auto';
+    return 'OK ec2 auto';
   }
 }
