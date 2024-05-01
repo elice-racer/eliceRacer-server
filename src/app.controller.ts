@@ -7,6 +7,6 @@ export class AppController {
 
   @Get('health')
   healthCheck(): string {
-    return 'new cluster';
+    return 'memory auto scaling';
   }
 }
