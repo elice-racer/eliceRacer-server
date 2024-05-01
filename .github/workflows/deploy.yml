@@ -68,7 +68,7 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           service: elicerracer
-          cluster: elicerracer
+          cluster: production-elicer-racer
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           codedeploy-appspec: appspec.yaml
           codedeploy-application: production-elicerracer
