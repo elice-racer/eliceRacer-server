@@ -7,6 +7,6 @@ export class AppController {
 
   @Get('health')
   healthCheck(): string {
-    return 't2 small';
+    return 'auto scale mem';
   }
 }
