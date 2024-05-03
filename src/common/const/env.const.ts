@@ -1,0 +1,19 @@
+export const ENV_DB_HOST_KEY = 'DB_HOST';
+
+export const ENV_DB_PORT_KEY = 'DB_PORT';
+
+export const ENV_DB_USERNAME_KEY = 'DB_USERNAME';
+
+export const ENV_DB_PASSWORD_KEY = 'DB_PASSWORD';
+
+export const ENV_DB_DATABASE_KEY = 'DB_DATABASE';
+
+export const ENV_MAIL_USER_KEY = 'MAIL_USER';
+
+export const ENV_MAIL_PASS_KEY = 'MAIL_PASS';
+
+export const ENV_JWT_SECRET_KEY = 'JWT_SECRET';
+
+export const ENV_ACCESS_TOKEN_EXPIRY = 'ACCESS_TOKEN_EXPIRY';
+
+export const ENV_REFRESH_TOKEN_EXPIRY = 'REFRESH_TOKEN_EXPIRY';
