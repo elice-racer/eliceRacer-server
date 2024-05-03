@@ -1,0 +1,39 @@
+{
+  "executionRoleArn": "arn:aws:iam::416835025967:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::416835025967:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "elicerracer",
+      "essential": true,
+      "image": "PLACEHOLDER_IMAGE_URI",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "hostPort": 3000,
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/production/elicerracer",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "ulimits": [
+        {
+          "name": "nofile",
+          "softLimit": 65535,
+          "hardLimit": 65535
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": ["EC2"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "family": "production-elicerracer"
+}
