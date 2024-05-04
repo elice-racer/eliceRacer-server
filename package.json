@@ -79,7 +79,7 @@
     "src/**/*.{js,jsx,ts,tsx}": [
       "eslint --cache --fix",
       "prettier --cache --write",
-      "jest --findRelatedTests"
+      "jest --findRelatedTests --passWithNoTests"
     ]
   }
 }
