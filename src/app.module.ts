@@ -4,12 +4,17 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
+  ENV_CACHE_TTL_KEY,
+  ENV_CACHE_URL_KEY,
   ENV_DB_DATABASE_KEY,
   ENV_DB_HOST_KEY,
   ENV_DB_PASSWORD_KEY,
   ENV_DB_PORT_KEY,
   ENV_DB_USERNAME_KEY,
 } from './common/const';
+import { CacheModule } from '@nestjs/cache-manager';
+import { RedisClientOptions } from 'redis';
+import { redisStore } from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -30,6 +35,15 @@ import {
         autoLoadEntities: true,
         synchronize: true,
         //TODO 삼항연산자 dev에서만 되게
+      }),
+    }),
+    CacheModule.registerAsync<RedisClientOptions>({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        store: redisStore,
+        ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
+        url: configService.get<string>(ENV_CACHE_URL_KEY),
       }),
     }),
   ],
