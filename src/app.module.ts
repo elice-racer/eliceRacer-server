@@ -16,6 +16,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { RedisClientOptions } from 'redis';
 import { redisStore } from 'cache-manager-redis-store';
 import { SmsModule } from './modules/sms/sms.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { SmsModule } from './modules/sms/sms.module';
         url: configService.get<string>(ENV_CACHE_URL_KEY),
       }),
     }),
+    AuthModule,
+    UserModule,
     SmsModule,
   ],
   controllers: [AppController],
