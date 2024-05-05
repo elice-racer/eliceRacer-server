@@ -6,6 +6,7 @@ import {
 
 //sms.service
 jest.mock('./src/modules/sms/services/sms.service');
+jest.mock('./src/modules/user/services/user.service.ts');
 
 // configServiceSetup;
 jest.mock('@nestjs/config', () => ({
