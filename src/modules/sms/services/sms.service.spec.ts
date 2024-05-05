@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SmsService } from './sms.service';
 import { ConfigService } from '@nestjs/config';
 
+jest.unmock('./sms.service');
 describe('SmsService', () => {
   let service: SmsService;
 

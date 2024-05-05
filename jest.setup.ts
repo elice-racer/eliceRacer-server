@@ -4,8 +4,8 @@ import {
   ENV_SMS_FROM_NUMBER_KEY,
 } from 'src/common/const';
 
-//sms service
-jest.mock('./src/modules/sms/services/sms.service.ts');
+//sms.service
+jest.mock('./src/modules/sms/services/sms.service');
 
 // configServiceSetup;
 jest.mock('@nestjs/config', () => ({
