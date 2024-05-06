@@ -4,10 +4,15 @@ import {
   ENV_SMS_FROM_NUMBER_KEY,
 } from 'src/common/const';
 
-//sms.service
+//Servcie
 jest.mock('./src/modules/sms/services/sms.service');
-jest.mock('./src/modules/user/services/user.service.ts');
+jest.mock('./src/modules/user/services/user.service');
 
+//Repository
+jest.mock('./src/modules/auth/repositories/sms-verification.repository');
+
+//utils
+jest.mock('./src/common/utils/verification-number-generator');
 // configServiceSetup;
 jest.mock('@nestjs/config', () => ({
   ConfigService: jest.fn().mockImplementation(() => ({
