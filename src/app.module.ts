@@ -4,20 +4,22 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
+  ENV_CACHE_HOST_KEY,
+  ENV_CACHE_PASSWORD_KEY,
+  ENV_CACHE_PORT_KEY,
   ENV_CACHE_TTL_KEY,
-  ENV_CACHE_URL_KEY,
+  ENV_CACHE_USERNAME_KEY,
   ENV_DB_DATABASE_KEY,
   ENV_DB_HOST_KEY,
   ENV_DB_PASSWORD_KEY,
   ENV_DB_PORT_KEY,
   ENV_DB_USERNAME_KEY,
 } from './common/const';
-import { CacheModule } from '@nestjs/cache-manager';
-import { RedisClientOptions } from 'redis';
-import { redisStore } from 'cache-manager-redis-store';
+import * as redisStore from 'cache-manager-ioredis';
 import { SmsModule } from './modules/sms/sms.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -40,14 +42,19 @@ import { UserModule } from './modules/user/user.module';
         //TODO 삼항연산자 dev에서만 되게
       }),
     }),
-    CacheModule.registerAsync<RedisClientOptions>({
+
+    CacheModule.registerAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService) => ({
         store: redisStore,
+        host: configService.get<string>(ENV_CACHE_HOST_KEY),
+        port: configService.get<number>(ENV_CACHE_PORT_KEY),
+        username: configService.get<string>(ENV_CACHE_USERNAME_KEY),
+        password: configService.get<string>(ENV_CACHE_PASSWORD_KEY),
         ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
-        url: configService.get<string>(ENV_CACHE_URL_KEY),
       }),
+      isGlobal: true,
+      inject: [ConfigService],
     }),
     AuthModule,
     UserModule,
