@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { SmsService } from 'src/modules/sms/services/sms.service';
 import { UserService } from 'src/modules/user/services/user.service';
-import { Users } from 'src/modules/user/entities';
+import { User } from 'src/modules/user/entities';
 import {
   BadRequestException,
   ConflictException,
@@ -45,7 +45,7 @@ describe('AuthService', () => {
 
   describe('handleCodeVerification', () => {
     it('올바른 인증번호를 입력하면 해당 유저의 정보를 반환한다', async () => {
-      const user = new Users();
+      const user = new User();
       const phoneNumber = '01012345678';
       const inputCode = '123456';
 
@@ -133,8 +133,8 @@ describe('AuthService', () => {
 
   describe('authencticatePhoneNumber', () => {
     it('번호가 존재하고 회원가입이 되어있으면 ConflictException 반환한다', async () => {
-      const user = new Users();
-      user.isVerified = true;
+      const user = new User();
+      user.isSigned = true;
 
       userService.findUserByPhoneNumber.mockResolvedValue(user);
 
@@ -144,8 +144,8 @@ describe('AuthService', () => {
     });
 
     it('번호로 회원가입이 되어있지 않으면 유저 정보를 반환한다', async () => {
-      const user = new Users();
-      user.isVerified = false;
+      const user = new User();
+      user.isSigned = false;
 
       userService.findUserByPhoneNumber.mockResolvedValue(user);
 
