@@ -23,7 +23,8 @@ export class AuthService {
     inputCode: string,
   ): Promise<Users> {
     await this.verifyCode(phoneNumber, inputCode);
-    const user = await this.userService.findUserByPhoneNumber(phoneNumber);
+    const user =
+      await this.userService.findUserByPhoneNumberWithTrack(phoneNumber);
     //TODO phoneVerificationResDto 생성 필요
     return user;
   }
@@ -41,7 +42,7 @@ export class AuthService {
     return 'OK';
   }
 
-  async handlePhoneVerification(phoneNumber: string) {
+  async handlePhoneVerification(phoneNumber: string): Promise<string> {
     // 1. 검증
     await this.authencticatePhoneNumber(phoneNumber);
     // 2. 인증번호 생성
@@ -61,7 +62,7 @@ export class AuthService {
   async authencticatePhoneNumber(phoneNumber: string): Promise<string> {
     const user = await this.userService.findUserByPhoneNumber(phoneNumber);
 
-    if (user.isVerified)
+    if (user?.isVerified)
       throw new ConflictException('이미 사용하고 있는 번호 입니다.');
 
     return 'OK';
