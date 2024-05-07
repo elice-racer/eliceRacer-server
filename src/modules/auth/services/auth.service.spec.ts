@@ -11,6 +11,8 @@ import {
 import { smsVerificationRepository } from '../repositories';
 import { generateVerificationCode } from 'src/common/utils';
 
+jest.unmock('./auth.service');
+
 describe('AuthService', () => {
   let service: AuthService;
   let userService: jest.Mocked<UserService>;
@@ -48,7 +50,7 @@ describe('AuthService', () => {
       const inputCode = '123456';
 
       smsVerificationRepo.getVerificationCode.mockResolvedValue(inputCode);
-      userService.findUserByPhoneNumber.mockResolvedValue(user);
+      userService.findUserByPhoneNumberWithTrack.mockResolvedValue(user);
 
       const result = await service.handleCodeVerification(
         phoneNumber,
