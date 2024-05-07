@@ -1,18 +1,22 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entity/base-entity';
+import { Track } from 'src/modules/track/entities/track.entity';
 
 export type UserRole = 'admin' | 'racer' | 'coach';
 
 @Entity()
-export class Users extends BaseEntity {
-  @Column()
+export class User extends BaseEntity {
+  @Column({ nullable: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
+  username: string;
+
+  @Column({ nullable: true })
   password: string;
 
   @Column()
-  name: string;
+  realName: string;
 
   @Column()
   phoneNumber: string;
@@ -27,8 +31,9 @@ export class Users extends BaseEntity {
   role: UserRole;
 
   @Column({ default: false })
-  isVerified: boolean;
+  isSigned: boolean;
 
-  @Column({ default: false })
-  isSessionValid: boolean;
+  @ManyToMany(() => Track)
+  @JoinTable()
+  track: Track[] | null;
 }
