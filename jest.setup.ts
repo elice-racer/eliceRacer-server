@@ -10,9 +10,11 @@ jest.mock('./src/modules/user/services/user.service');
 
 //Repository
 jest.mock('./src/modules/auth/repositories/sms-verification.repository');
+jest.mock('./src/modules/user/repositories/user.repository');
 
 //utils
 jest.mock('./src/common/utils/verification-number-generator');
+jest.mock('./src/common/utils/password-hash');
 // configServiceSetup;
 jest.mock('@nestjs/config', () => ({
   ConfigService: jest.fn().mockImplementation(() => ({
