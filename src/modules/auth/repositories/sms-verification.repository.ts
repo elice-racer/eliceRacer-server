@@ -8,10 +8,10 @@ export class smsVerificationRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   //TODO return값
-  async getSmsVerification(key: string) {
+  async getVerificationCode(key: string) {
     return this.cacheManager.get(key);
   }
-  async setSmsVerification(key: string, value: string): Promise<void> {
+  async setVerificationCode(key: string, value: string): Promise<void> {
     return this.cacheManager.set(key, value);
   }
 }

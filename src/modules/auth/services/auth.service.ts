@@ -8,7 +8,7 @@ import { SmsService } from 'src/modules/sms/services/sms.service';
 import { UserService } from 'src/modules/user/services/user.service';
 import { smsVerificationRepository } from '../repositories';
 import { generateVerificationCode } from 'src/common/utils';
-import { Users } from 'src/modules/user/entities';
+import { User } from 'src/modules/user/entities';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +21,7 @@ export class AuthService {
   async handleCodeVerification(
     phoneNumber: string,
     inputCode: string,
-  ): Promise<Users> {
+  ): Promise<User> {
     await this.verifyCode(phoneNumber, inputCode);
     const user =
       await this.userService.findUserByPhoneNumberWithTrack(phoneNumber);
@@ -62,7 +62,7 @@ export class AuthService {
   async authencticatePhoneNumber(phoneNumber: string): Promise<string> {
     const user = await this.userService.findUserByPhoneNumber(phoneNumber);
 
-    if (user?.isVerified)
+    if (user?.isSigned)
       throw new ConflictException('이미 사용하고 있는 번호 입니다.');
 
     return 'OK';
