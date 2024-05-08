@@ -15,6 +15,7 @@ import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
+import { Track } from 'src/modules/track/entities';
 
 jest.unmock('./auth.service');
 
@@ -221,6 +222,20 @@ describe('AuthService', () => {
   describe('handleCodeVerification', () => {
     it('올바른 인증번호를 입력하면 해당 유저의 정보를 반환한다', async () => {
       const user = new User();
+      const track = new Track();
+      user.track = [track];
+
+      const verifyCodeResDto = {
+        email: user.email,
+        realName: user.realName,
+        track: user.track
+          ? user.track.map((track) => ({
+              trackName: track.trackName,
+              generation: track.generation,
+            }))
+          : [],
+      };
+
       const phoneNumber = '01012345678';
       const inputCode = '123456';
 
@@ -232,7 +247,7 @@ describe('AuthService', () => {
         inputCode,
       );
 
-      expect(result).toEqual(user);
+      expect(result).toEqual(verifyCodeResDto);
     });
   });
 
