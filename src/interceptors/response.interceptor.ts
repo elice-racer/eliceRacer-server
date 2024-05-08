@@ -6,7 +6,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { ResponseDto } from 'src/common/dtos';
+import { ResponseDto } from 'src/common/dto';
 
 @Injectable()
 export class ResponseInterceptor<T>
