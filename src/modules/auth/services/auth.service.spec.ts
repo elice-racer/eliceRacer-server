@@ -7,17 +7,25 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { smsVerificationRepository } from '../repositories';
+import { SmsVerificationRepository } from '../repositories';
 import { generateVerificationCode } from 'src/common/utils';
+import * as argon2 from 'argon2';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
 
 jest.unmock('./auth.service');
 
 describe('AuthService', () => {
   let service: AuthService;
   let userService: jest.Mocked<UserService>;
-  let smsVerificationRepo: jest.Mocked<smsVerificationRepository>;
+  let smsVerificationRepo: jest.Mocked<SmsVerificationRepository>;
   let smsService: jest.Mocked<SmsService>;
+  let jwtService: jest.Mocked<JwtService>;
+  let configService: jest.Mocked<ConfigService>;
+  let refreshTokenRepo: jest.Mocked<RefreshTokenRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,14 +33,20 @@ describe('AuthService', () => {
         AuthService,
         SmsService,
         UserService,
-        smsVerificationRepository,
+        JwtService,
+        ConfigService,
+        SmsVerificationRepository,
+        RefreshTokenRepository,
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
     userService = module.get(UserService);
     smsService = module.get(SmsService);
-    smsVerificationRepo = module.get(smsVerificationRepository);
+    jwtService = module.get(JwtService);
+    configService = module.get(ConfigService);
+    smsVerificationRepo = module.get(SmsVerificationRepository);
+    refreshTokenRepo = module.get(RefreshTokenRepository);
   });
 
   afterEach(() => {
@@ -41,6 +55,158 @@ describe('AuthService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('refresh', () => {
+    it('유효하지 않은 refresh token으로 재발급을 시도하면 UnauthorizedException를 반환한다', async () => {
+      const invalidRefreshToken = 'invalid-refresh-token';
+
+      jwtService.verify.mockImplementation(() => {
+        throw new UnauthorizedException();
+      });
+
+      await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('유효기간이 지난 refresh token으로 재발급을 시도하면 UnauthorizedException를 반환한다', async () => {
+      const invalidRefreshToken = 'invalid-refresh-token';
+
+      refreshTokenRepo.getRefreshToken.mockResolvedValue(null);
+
+      await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+    it('유효한 리프레시 토큰을 이용해서 액세스 토큰을 재발급한다', async () => {
+      const refreshToken = 'valid-refresh-token';
+      const expectedAccessToken = 'new-access-token';
+
+      jwtService.verify.mockReturnValue({
+        sub: 'userId-uuid',
+        jti: 'jwt-uuid',
+      });
+      // refreshTokenRepo.getRefreshToken 모의 처리
+      jest
+        .spyOn(refreshTokenRepo, 'getRefreshToken')
+        .mockResolvedValue(refreshToken);
+      // createAccessToken 모의 처리
+      jest
+        .spyOn(service, 'createAccessToken')
+        .mockReturnValue(expectedAccessToken);
+
+      userService.findUserById.mockResolvedValue(new User());
+
+      const result = await service.refresh(refreshToken);
+
+      expect(result).toEqual({ accessToken: expectedAccessToken });
+    });
+  });
+
+  describe('login', () => {
+    it('유효한 이메일또는 아이디와 비밀번호로 로그인 시 액세스 토큰과 리프레시 토큰을 발급받는다', async () => {
+      const email = 'valid@test.com';
+      const password = 'validPassword';
+
+      const user = new User();
+      user.email = email;
+      user.password = 'hashedPassword';
+      user.isSigned = true;
+
+      const expectedAccessToken = 'access-token';
+      const expectedRefreshToken = 'refresh-token';
+
+      userService.findUserByEmailOrUsername.mockResolvedValue(user);
+      jest.spyOn(argon2, 'verify').mockResolvedValue(true);
+      jest.spyOn(service, 'validateUser').mockResolvedValue(user);
+
+      jest
+        .spyOn(service, 'createAccessToken')
+        .mockReturnValue(expectedAccessToken);
+      jest
+        .spyOn(service, 'createRefreshToken')
+        .mockReturnValue(expectedRefreshToken);
+
+      const result = await service.login(email, password);
+
+      expect(result).toEqual({
+        accessToken: expectedAccessToken,
+        refreshToken: expectedRefreshToken,
+      });
+    });
+  });
+
+  describe('createToken', () => {
+    it('access token을 생성한다.', () => {
+      const payload = {
+        sub: 'uuid',
+        iat: Math.floor(Date.now() / 1000),
+        jti: 'uuid',
+      };
+      const expectedToken = `access-token`;
+
+      configService.get.mockReturnValue('15m');
+      jwtService.sign.mockReturnValue(expectedToken);
+
+      const result = service.createAccessToken(payload);
+      expect(result).toEqual(expectedToken);
+    });
+
+    it('refresh token을 생성한다.', () => {
+      const payload = {
+        sub: 'uuid',
+        iat: Math.floor(Date.now() / 1000),
+        jti: 'uuid',
+      };
+      const expectedToken = `refresh-token`;
+
+      configService.get.mockReturnValue('3d');
+      jwtService.sign.mockReturnValue(expectedToken);
+
+      const result = service.createRefreshToken(payload);
+      expect(result).toEqual(expectedToken);
+    });
+  });
+
+  describe('validateUser', () => {
+    it('이메일 또는 아이디와 비밀번호가 올바른 경우 사용자를 반환한다', async () => {
+      const email = 'valid@example.com';
+      const password = 'validPassword';
+      const hashedPassword = 'hashedPassword';
+
+      const user = new User();
+      user.email = email;
+      user.password = hashedPassword;
+      user.isSigned = true;
+
+      userService.findUserByEmailOrUsername.mockResolvedValue(user);
+      (argon2.verify as jest.Mock).mockResolvedValue(true);
+
+      const result = await service.validateUser(email, password);
+
+      expect(argon2.verify).toHaveBeenCalledWith(hashedPassword, password);
+      expect(result.isSigned).toBeTruthy();
+      expect(result).toEqual(user);
+    });
+
+    it('비밀번호가 틀릴 경우 UnauthorizedException를 반환한다', async () => {
+      const email = 'test@test.com';
+      const password = 'wrongPassword';
+      const hashedPassword = 'hashedPassword';
+      const user = new User();
+
+      user.email = email;
+      user.password = hashedPassword;
+      user.isSigned = true;
+
+      userService.findUserByEmailOrUsername.mockResolvedValue(user);
+      (argon2.verify as jest.Mock).mockResolvedValue(false);
+
+      await expect(service.validateUser(email, password)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
   });
 
   describe('handleCodeVerification', () => {
@@ -132,11 +298,12 @@ describe('AuthService', () => {
   });
 
   describe('authencticatePhoneNumber', () => {
-    it('번호가 존재하고 회원가입이 되어있으면 ConflictException 반환한다', async () => {
+    it('회원가입이 되어있으면 ConflictException 반환한다', async () => {
       const user = new User();
-      user.isSigned = true;
 
-      userService.findUserByPhoneNumber.mockResolvedValue(user);
+      userService.findUserByPhoneNumberIncludingNonMembers.mockResolvedValue(
+        user,
+      );
 
       await expect(
         service.authencticatePhoneNumber('01012345678'),
@@ -144,10 +311,9 @@ describe('AuthService', () => {
     });
 
     it('번호로 회원가입이 되어있지 않으면 유저 정보를 반환한다', async () => {
-      const user = new User();
-      user.isSigned = false;
-
-      userService.findUserByPhoneNumber.mockResolvedValue(user);
+      userService.findUserByPhoneNumberIncludingNonMembers.mockResolvedValue(
+        undefined,
+      );
 
       const result = await service.authencticatePhoneNumber('01012345678');
 
