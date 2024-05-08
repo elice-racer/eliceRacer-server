@@ -3,20 +3,73 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { SmsService } from 'src/modules/sms/services/sms.service';
 import { UserService } from 'src/modules/user/services/user.service';
-import { smsVerificationRepository } from '../repositories';
-import { generateVerificationCode } from 'src/common/utils';
+import { SmsVerificationRepository } from '../repositories';
 import { User } from 'src/modules/user/entities';
+import { generateVerificationCode } from 'src/common/utils';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as argon2 from 'argon2';
+import {
+  ENV_ACCESS_TOKEN_EXPIRY,
+  ENV_REFRESH_TOKEN_EXPIRY,
+} from 'src/common/const';
+import { TokenPayload } from '../types';
+import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly smsService: SmsService,
     private readonly userService: UserService,
-    private readonly smsVerificationRepo: smsVerificationRepository,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly smsVerificationRepo: SmsVerificationRepository,
+    private readonly refreshTokenRepo: RefreshTokenRepository,
   ) {}
+
+  async login(identifier: string, password: string) {
+    const user = await this.validateUser(identifier, password);
+
+    const payload: TokenPayload = { userId: user.id, email: user.email };
+    const accessToken = this.createAccessToken(payload);
+    const refreshToken = this.createRefreshToken(payload);
+
+    await this.refreshTokenRepo.setRefreshToken(
+      user.id,
+      refreshToken,
+      60 * 60 * 24 * 3, //3일
+    );
+
+    return { accessToken, refreshToken };
+  }
+
+  //access token 생성
+  createAccessToken(payload: TokenPayload): string {
+    const expiresIn = this.configService.get<string>(ENV_ACCESS_TOKEN_EXPIRY);
+
+    return this.jwtService.sign(payload, { expiresIn });
+  }
+
+  //refresh token 생성
+  createRefreshToken(payload: TokenPayload): string {
+    const expiresIn = this.configService.get<string>(ENV_REFRESH_TOKEN_EXPIRY);
+
+    return this.jwtService.sign(payload, { expiresIn });
+  }
+
+  //로그인시 사용
+  async validateUser(identifier: string, password: string): Promise<User> {
+    const user = await this.userService.findUserByEmailOrUsername(identifier);
+
+    if (!user || !(await argon2.verify(user.password, password)))
+      throw new UnauthorizedException('유효하지 않은 유저입니다');
+
+    return user;
+  }
 
   async handleCodeVerification(
     phoneNumber: string,
@@ -60,10 +113,12 @@ export class AuthService {
   }
 
   async authencticatePhoneNumber(phoneNumber: string): Promise<string> {
-    const user = await this.userService.findUserByPhoneNumber(phoneNumber);
+    const user =
+      await this.userService.findUserByPhoneNumberIncludingNonMembers(
+        phoneNumber,
+      );
 
-    if (user?.isSigned)
-      throw new ConflictException('이미 사용하고 있는 번호 입니다.');
+    if (user) throw new ConflictException('이미 사용하고 있는 번호 입니다.');
 
     return 'OK';
   }
