@@ -16,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
 import { Track } from 'src/modules/track/entities';
+import { VerifyCodeResDto } from '../dto';
 
 jest.unmock('./auth.service');
 
@@ -225,7 +226,7 @@ describe('AuthService', () => {
       const track = new Track();
       user.track = [track];
 
-      const verifyCodeResDto = {
+      const verifyCodeResDto: VerifyCodeResDto = {
         email: user.email,
         realName: user.realName,
         track: user.track

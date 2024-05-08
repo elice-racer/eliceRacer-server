@@ -21,7 +21,7 @@ import {
 } from 'src/common/const';
 import { TokenPayload, TokenPayloadRes } from '../types';
 import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
-import { VerifyCodeResDto } from 'src/common/dto/verify-code-res-dto';
+import { LoginResDto, VerifyCodeResDto } from '../dto';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +35,7 @@ export class AuthService {
   ) {}
 
   async logout(refreshToken: string) {
+    //TODO try catch
     const payloadRes: TokenPayloadRes = this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>(ENV_JWT_SECRET_KEY),
     });
@@ -65,7 +66,7 @@ export class AuthService {
     return { accessToken };
   }
 
-  async login(identifier: string, password: string) {
+  async login(identifier: string, password: string): Promise<LoginResDto> {
     const user = await this.validateUser(identifier, password);
 
     const payload: TokenPayload = this.createTokenPayload(user.id);
@@ -125,7 +126,7 @@ export class AuthService {
     };
   }
 
-  async verifyCode(phoneNumber: string, inputCode: string) {
+  async verifyCode(phoneNumber: string, inputCode: string): Promise<string> {
     const storedCode =
       await this.smsVerificationRepo.getVerificationCode(phoneNumber);
 
