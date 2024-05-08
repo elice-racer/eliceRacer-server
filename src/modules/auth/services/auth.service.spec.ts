@@ -25,6 +25,7 @@ describe('AuthService', () => {
   let smsService: jest.Mocked<SmsService>;
   let jwtService: jest.Mocked<JwtService>;
   let configService: jest.Mocked<ConfigService>;
+  let refreshTokenRepo: jest.Mocked<RefreshTokenRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,6 +46,7 @@ describe('AuthService', () => {
     jwtService = module.get(JwtService);
     configService = module.get(ConfigService);
     smsVerificationRepo = module.get(SmsVerificationRepository);
+    refreshTokenRepo = module.get(RefreshTokenRepository);
   });
 
   afterEach(() => {
@@ -54,6 +56,54 @@ describe('AuthService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('refresh', () => {
+    it('유효하지 않은 refresh token으로 재발급을 시도하면 UnauthorizedException를 반환한다', async () => {
+      const invalidRefreshToken = 'invalid-refresh-token';
+
+      jwtService.verify.mockImplementation(() => {
+        throw new UnauthorizedException();
+      });
+
+      await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('유효기간이 지난 refresh token으로 재발급을 시도하면 UnauthorizedException를 반환한다', async () => {
+      const invalidRefreshToken = 'invalid-refresh-token';
+
+      refreshTokenRepo.getRefreshToken.mockResolvedValue(null);
+
+      await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+    it('유효한 리프레시 토큰을 이용해서 액세스 토큰을 재발급한다', async () => {
+      const refreshToken = 'valid-refresh-token';
+      const expectedAccessToken = 'new-access-token';
+
+      jwtService.verify.mockReturnValue({
+        sub: 'userId-uuid',
+        jti: 'jwt-uuid',
+      });
+      // refreshTokenRepo.getRefreshToken 모의 처리
+      jest
+        .spyOn(refreshTokenRepo, 'getRefreshToken')
+        .mockResolvedValue(refreshToken);
+      // createAccessToken 모의 처리
+      jest
+        .spyOn(service, 'createAccessToken')
+        .mockReturnValue(expectedAccessToken);
+
+      userService.findUserById.mockResolvedValue(new User());
+
+      const result = await service.refresh(refreshToken);
+
+      expect(result).toEqual({ accessToken: expectedAccessToken });
+    });
+  });
+
   describe('login', () => {
     it('유효한 이메일또는 아이디와 비밀번호로 로그인 시 액세스 토큰과 리프레시 토큰을 발급받는다', async () => {
       const email = 'valid@test.com';
@@ -89,7 +139,11 @@ describe('AuthService', () => {
 
   describe('createToken', () => {
     it('access token을 생성한다.', () => {
-      const payload = { userId: 'uuid', email: 'test@example.com' };
+      const payload = {
+        sub: 'uuid',
+        iat: Math.floor(Date.now() / 1000),
+        jti: 'uuid',
+      };
       const expectedToken = `access-token`;
 
       configService.get.mockReturnValue('15m');
@@ -100,7 +154,11 @@ describe('AuthService', () => {
     });
 
     it('refresh token을 생성한다.', () => {
-      const payload = { userId: 'uuid', email: 'test@example.com' };
+      const payload = {
+        sub: 'uuid',
+        iat: Math.floor(Date.now() / 1000),
+        jti: 'uuid',
+      };
       const expectedToken = `refresh-token`;
 
       configService.get.mockReturnValue('3d');
