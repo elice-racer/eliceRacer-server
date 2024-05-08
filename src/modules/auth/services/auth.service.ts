@@ -21,6 +21,7 @@ import {
 } from 'src/common/const';
 import { TokenPayload, TokenPayloadRes } from '../types';
 import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
+import { VerifyCodeResDto } from 'src/common/dto/verify-code-res-dto';
 
 @Injectable()
 export class AuthService {
@@ -107,12 +108,21 @@ export class AuthService {
   async handleCodeVerification(
     phoneNumber: string,
     inputCode: string,
-  ): Promise<User> {
+  ): Promise<VerifyCodeResDto> {
     await this.verifyCode(phoneNumber, inputCode);
     const user =
       await this.userService.findUserByPhoneNumberWithTrack(phoneNumber);
-    //TODO phoneVerificationResDto 생성 필요
-    return user;
+
+    return {
+      email: user.email,
+      realName: user.realName,
+      track: user.track
+        ? user.track.map((track) => ({
+            trackName: track.trackName,
+            generation: track.generation,
+          }))
+        : [],
+    };
   }
 
   async verifyCode(phoneNumber: string, inputCode: string) {
