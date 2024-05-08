@@ -15,6 +15,18 @@ export class UserRepository extends Repository<User> {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
+  async findUserByEmailOrUsername(
+    identifier: string,
+  ): Promise<User> | undefined {
+    return this.repo
+      .createQueryBuilder('user')
+      .where(
+        '(user.email = :identifier OR user.username = :identifier) AND user.isSigned = :isSigned',
+        { identifier, isSigned: true },
+      )
+      .getOne();
+  }
+
   async mergeUser(
     user: User,
     dto: CreateUserDto,
