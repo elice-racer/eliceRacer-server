@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 
 @Injectable()
-export class smsVerificationRepository {
+export class SmsVerificationRepository {
   // constructor() {}
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
