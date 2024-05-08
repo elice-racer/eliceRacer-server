@@ -57,13 +57,22 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('logout', () => {
+    it('사용자의 refreshToken을 삭제한다', async () => {
+      const refresToken = 'valid-refresh-token';
+      const jti = 'jwt-uuid';
+      jwtService.verify.mockReturnValue({
+        sub: 'userId-uuid',
+        jti,
+      });
+
+      await service.logout(refresToken);
+      expect(refreshTokenRepo.deleteRefreshToken).toHaveBeenCalledWith(jti);
+    });
+  });
   describe('refresh', () => {
     it('유효하지 않은 refresh token으로 재발급을 시도하면 UnauthorizedException를 반환한다', async () => {
       const invalidRefreshToken = 'invalid-refresh-token';
-
-      jwtService.verify.mockImplementation(() => {
-        throw new UnauthorizedException();
-      });
 
       await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
         UnauthorizedException,
