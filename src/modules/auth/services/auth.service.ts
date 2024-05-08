@@ -13,11 +13,13 @@ import { generateVerificationCode } from 'src/common/utils';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ENV_ACCESS_TOKEN_EXPIRY,
+  ENV_JWT_SECRET_KEY,
   ENV_REFRESH_TOKEN_EXPIRY,
 } from 'src/common/const';
-import { TokenPayload } from '../types';
+import { TokenPayload, TokenPayloadRes } from '../types';
 import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
 
 @Injectable()
@@ -31,15 +33,39 @@ export class AuthService {
     private readonly refreshTokenRepo: RefreshTokenRepository,
   ) {}
 
+  async refresh(refreshToken: string) {
+    const payloadRes: TokenPayloadRes = this.jwtService.verify(refreshToken, {
+      secret: this.configService.get<string>(ENV_JWT_SECRET_KEY),
+    });
+
+    if (!payloadRes || !payloadRes.sub) {
+      throw new UnauthorizedException('유효하지 않은 토큰입니다');
+    }
+    const isNotExpired = await this.refreshTokenRepo.getRefreshToken(
+      payloadRes.jti,
+    );
+
+    if (!isNotExpired)
+      throw new UnauthorizedException('유효하지 않은 토큰입니다');
+
+    const user = await this.userService.findUserById(payloadRes.sub);
+    if (!user) throw new UnauthorizedException('유효하지 않은 유저입니다');
+
+    const payload: TokenPayload = this.createTokenPayload(user.id);
+
+    const accessToken = this.createAccessToken(payload);
+    return { accessToken };
+  }
+
   async login(identifier: string, password: string) {
     const user = await this.validateUser(identifier, password);
 
-    const payload: TokenPayload = { userId: user.id, email: user.email };
+    const payload: TokenPayload = this.createTokenPayload(user.id);
     const accessToken = this.createAccessToken(payload);
     const refreshToken = this.createRefreshToken(payload);
 
     await this.refreshTokenRepo.setRefreshToken(
-      user.id,
+      payload.jti,
       refreshToken,
       60 * 60 * 24 * 3, //3일
     );
@@ -121,5 +147,13 @@ export class AuthService {
     if (user) throw new ConflictException('이미 사용하고 있는 번호 입니다.');
 
     return 'OK';
+  }
+
+  createTokenPayload(userId: string): TokenPayload {
+    return {
+      sub: userId,
+      iat: Math.floor(Date.now() / 1000),
+      jti: uuidv4(),
+    };
   }
 }
