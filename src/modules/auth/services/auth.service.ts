@@ -33,6 +33,13 @@ export class AuthService {
     private readonly refreshTokenRepo: RefreshTokenRepository,
   ) {}
 
+  async logout(refreshToken: string) {
+    const payloadRes: TokenPayloadRes = this.jwtService.verify(refreshToken, {
+      secret: this.configService.get<string>(ENV_JWT_SECRET_KEY),
+    });
+
+    await this.refreshTokenRepo.deleteRefreshToken(payloadRes.jti);
+  }
   async refresh(refreshToken: string) {
     const payloadRes: TokenPayloadRes = this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>(ENV_JWT_SECRET_KEY),
