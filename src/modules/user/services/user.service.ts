@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User } from '../entities';
 import { CreateUserDto } from '../dto';
@@ -8,8 +8,14 @@ import { hashPassword } from 'src/common/utils/password-hash';
 export class UserService {
   constructor(private readonly userRepo: UserRepository) {}
 
+  async validate(userId: string): Promise<User> | undefined {
+    const user = await this.findUserById(userId);
+    if (!user) throw new NotFoundException('존재하지 않는 회원입니다');
+    return user;
+  }
+
   async handleSignUp(dto: CreateUserDto) {
-    const user = await this.findUserByPhoneNumber(dto.phoneNumber);
+    const user = await this.findUserByPhoneNumberWithTrack(dto.phoneNumber);
 
     const hashedPassword = await hashPassword(dto.password);
 
@@ -29,14 +35,25 @@ export class UserService {
   async createUser(dto: CreateUserDto, hashPassword: string) {
     return this.userRepo.createUser(dto, hashPassword);
   }
+  async findUserByEmailOrUsername(
+    identifier: string,
+  ): Promise<User> | undefined {
+    return this.userRepo.findUserByEmailOrUsername(identifier);
+  }
 
-  async findUserByPhoneNumber(phoneNumber: string): Promise<User> | undefined {
-    return this.userRepo.findOneBy({ phoneNumber });
+  async findUserByPhoneNumberIncludingNonMembers(
+    phoneNumber: string,
+  ): Promise<User> | undefined {
+    return this.userRepo.findOne({ where: { phoneNumber, isSigned: true } });
   }
 
   async findUserByPhoneNumberWithTrack(
     phoneNumber: string,
   ): Promise<User> | undefined {
     return this.userRepo.findUserByPhoneNumberWithTrack(phoneNumber);
+  }
+
+  async findUserById(userId: string): Promise<User> | undefined {
+    return this.userRepo.findOne({ where: { id: userId, isSigned: true } });
   }
 }
