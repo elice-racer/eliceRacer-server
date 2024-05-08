@@ -4,7 +4,6 @@ import { Cache } from 'cache-manager';
 
 @Injectable()
 export class RefreshTokenRepository {
-  // constructor() {}
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async getRefreshToken(key: string) {
@@ -16,5 +15,9 @@ export class RefreshTokenRepository {
     ttl: number,
   ): Promise<void> {
     return this.cacheManager.set(key, value, ttl);
+  }
+
+  async deleteRefreshToken(key: string): Promise<void> {
+    this.cacheManager.del(key);
   }
 }
