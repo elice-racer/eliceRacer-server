@@ -1,0 +1,113 @@
+{
+  "executionRoleArn": "<EXECUTION_ROLE_ARN>",
+  "taskRoleArn": "<TASK_ROLE_ARN>",
+  "containerDefinitions": [
+    {
+      "name": "elicerracer",
+      "essential": true,
+      "image": "PLACEHOLDER_IMAGE_URI",
+      "secrets": [
+        {
+          "name": "DB_HOST",
+          "valueFrom": "<PARA_STORE_ARN>DB_HOST"
+        },
+        {
+          "name": "DB_PROT",
+          "valueFrom": "<PARA_STORE_ARN>DB_PROT"
+        },
+        {
+          "name": "DB_USERNAME",
+          "valueFrom": "<PARA_STORE_ARN>DB_USERNAME"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "<PARA_STORE_ARN>DB_PASSWORD"
+        },
+        {
+          "name": "DB_DATABASE",
+          "valueFrom": "<PARA_STORE_ARN>DB_DATABASE"
+        },
+        {
+          "name": "MAIL_USER",
+          "valueFrom": "<PARA_STORE_ARN>MAIL_USER"
+        },
+        {
+          "name": "MAIL_PASS",
+          "valueFrom": "<PARA_STORE_ARN>MAIL_PASS"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "<PARA_STORE_ARN>JWT_SECRET"
+        },
+        {
+          "name": "ACCESS_TOKEN_EXPIRY",
+          "valueFrom": "<PARA_STORE_ARN>ACCESS_TOKEN_EXPIRY"
+        },
+        {
+          "name": "REFRESH_TOKEN_EXPIRY",
+          "valueFrom": "<PARA_STORE_ARN>REFRESH_TOKEN_EXPIRY"
+        },
+        {
+          "name": "CACHE_TTL",
+          "valueFrom": "<PARA_STORE_ARN>CACHE_TTL"
+        },
+        {
+          "name": "CACHE_HOST",
+          "valueFrom": "<PARA_STORE_ARN>CACHE_HOST"
+        },
+        {
+          "name": "CACHE_PORT",
+          "valueFrom": "<PARA_STORE_ARN>CACHE_PORT"
+        },
+        {
+          "name": "CACHE_USERNAME",
+          "valueFrom": "<PARA_STORE_ARN>CACHE_USERNAME"
+        },
+        {
+          "name": "CACHE_PASSWORD",
+          "valueFrom": "<PARA_STORE_ARN>CACHE_PASSWORD"
+        },
+        {
+          "name": "SMS_API_KEY",
+          "valueFrom": "<PARA_STORE_ARN>SMS_API_KEY"
+        },
+        {
+          "name": "SMS_API_SECRET",
+          "valueFrom": "<PARA_STORE_ARN>SMS_API_SECRET"
+        },
+        {
+          "name": "SMS_FROM_NUMBER",
+          "valueFrom": "<PARA_STORE_ARN>SMS_FROM_NUMBER"
+        }
+      ],
+      "cpu": 0,
+      "portMappings": [
+        {
+          "hostPort": 3000,
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/production/elicerracer",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "ulimits": [
+        {
+          "name": "nofile",
+          "softLimit": 65535,
+          "hardLimit": 65535
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": ["EC2"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "family": "production-elicerracer"
+}
