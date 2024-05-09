@@ -15,6 +15,20 @@ export class UserRepository extends Repository<User> {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
+  async registerPhone(phoneNumber: string) {
+    const user = new User();
+    user.phoneNumber = phoneNumber;
+    user.status = 1;
+
+    return this.repo.save(user);
+  }
+  async mergePhone(user: User): Promise<User> {
+    const mergedPhone = this.repo.merge(user, {
+      status: 1,
+    });
+
+    return this.repo.save(mergedPhone);
+  }
   async findUserByEmailOrUsername(
     identifier: string,
   ): Promise<User> | undefined {
@@ -22,8 +36,8 @@ export class UserRepository extends Repository<User> {
     return this.repo
       .createQueryBuilder('users')
       .where(
-        '(users.email = :identifier OR users.username = :identifier) AND users.isSigned = :isSigned',
-        { identifier, isSigned: true },
+        '(users.email = :identifier OR users.username = :identifier) AND users.status = :status',
+        { identifier, status: 2 },
       )
       .getOne();
   }
@@ -37,7 +51,7 @@ export class UserRepository extends Repository<User> {
       username: dto.username,
       password: hashedPassword,
       realName: dto.realName,
-      isSigned: true,
+      status: 2,
     });
 
     return this.repo.save(mergedUser);
@@ -48,12 +62,12 @@ export class UserRepository extends Repository<User> {
     user.realName = dto.realName;
     user.password = hashedPassword;
     user.phoneNumber = dto.phoneNumber;
-    user.isSigned = true;
+    user.status = 2;
 
     return this.repo.save(user);
   }
 
-  async findUserByPhoneNumberWithTrack(
+  async findAnyUserByPhoneWithTrack(
     phoneNumber: string,
   ): Promise<User> | undefined {
     return this.repo
