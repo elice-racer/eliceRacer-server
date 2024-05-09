@@ -221,7 +221,28 @@ describe('AuthService', () => {
   });
 
   describe('handleCodeVerification', () => {
-    it('올바른 인증번호를 입력하면 해당 유저의 정보를 반환한다', async () => {
+    it('해당 번호로 회원가입 한 유저가 존재하지 않으면 비어있는 유저 정보를 반환한다', async () => {
+      const verifyCodeResDto = {
+        email: '',
+        realName: '',
+        track: [],
+      };
+
+      const phoneNumber = '01012345678';
+      const inputCode = '123456';
+
+      smsVerificationRepo.getVerificationCode.mockResolvedValue(inputCode);
+      userService.findUserByPhoneNumberWithTrack.mockResolvedValue(undefined);
+
+      const result = await service.handleCodeVerification(
+        phoneNumber,
+        inputCode,
+      );
+
+      expect(result).toEqual(verifyCodeResDto);
+    });
+
+    it('해당 번호로 회원가입 하지 않은 유저가 존재하면 유저 정보를 반환한다', async () => {
       const user = new User();
       const track = new Track();
       user.track = [track];
