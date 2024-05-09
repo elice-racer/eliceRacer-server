@@ -4,7 +4,11 @@ import { UserRepository } from '../repositories';
 import { CreateUserDto } from '../dto';
 import { User } from '../entities';
 import { hashPassword } from 'src/common/utils/password-hash';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 jest.unmock('./user.service');
 
@@ -38,7 +42,7 @@ describe('UserService', () => {
       const user = new User();
 
       user.id = userId;
-      user.isSigned = true;
+      user.status = 2;
 
       jest.spyOn(service, 'findUserById').mockResolvedValue(user);
       const result = await service.validate(userId);
@@ -58,37 +62,34 @@ describe('UserService', () => {
     it('동일한 아이디로 회원가입한 유저가 존재하면 ConfliectException을 반환한다', async () => {
       const user = new User();
       user.username = createUserDto.username;
+      user.status = 2;
       jest
-        .spyOn(service, 'findUserByPhoneNumberWithTrack')
+        .spyOn(service, 'findAnyUserByPhoneWithTrack')
         .mockResolvedValue(user);
 
       await expect(service.handleSignUp(createUserDto)).rejects.toThrow(
         ConflictException,
       );
     });
-    it('유저가 존재하지 않으면 새롭게 생성한다', async () => {
+
+    it('번호 인증을 하지 않은 유저는 UnauthorizedException을 반환한다', async () => {
       const user = new User();
-      const hashedPassword = 'hashedPassword';
+      user.status = 0;
+      user.username = createUserDto.username;
       jest
-        .spyOn(service, 'findUserByPhoneNumberWithTrack')
-        .mockResolvedValue(undefined);
+        .spyOn(service, 'findAnyUserByPhoneWithTrack')
+        .mockResolvedValue(user);
 
-      (hashPassword as jest.Mock).mockResolvedValue(hashedPassword);
-      jest.spyOn(service, 'createUser').mockResolvedValue(user);
-
-      await service.handleSignUp(createUserDto);
-
-      expect(service.createUser).toHaveBeenCalledWith(
-        createUserDto,
-        hashedPassword,
+      await expect(service.handleSignUp(createUserDto)).rejects.toThrow(
+        UnauthorizedException,
       );
     });
-
-    it('회원 가입 하지 않은 유저가 존재하면 업데이트 한다', async () => {
+    it('번호 인증 완료된 유저는 업데이트 한다', async () => {
       const user = new User();
       const hashedPassword = 'hashedPassword';
+      user.status = 1;
       jest
-        .spyOn(service, 'findUserByPhoneNumberWithTrack')
+        .spyOn(service, 'findAnyUserByPhoneWithTrack')
         .mockResolvedValue(user);
       (hashPassword as jest.Mock).mockResolvedValue(hashedPassword);
       jest.spyOn(service, 'mergeUser').mockResolvedValue(user);
@@ -106,20 +107,20 @@ describe('UserService', () => {
   describe('creatUser', () => {
     it('사용자를 생성한다', async () => {
       const user = new User();
-      user.isSigned = true;
+      user.status = 2;
 
       userRepo.createUser.mockResolvedValue(user);
       const result = await service.createUser(createUserDto, 'hashedPassword');
 
       expect(result).toEqual(user);
-      expect(result.isSigned).toBe(true);
+      expect(result.status).toBe(2);
     });
   });
 
   describe('mergeUser', () => {
     it('유저의 정보를 수정한다', async () => {
       const user = new User();
-      user.isSigned = true;
+      user.status = 2;
 
       userRepo.mergeUser.mockResolvedValue(user);
       const result = await service.mergeUser(
@@ -129,7 +130,7 @@ describe('UserService', () => {
       );
 
       expect(result).toEqual(user);
-      expect(result.isSigned).toBe(true);
+      expect(result.status).toBe(2);
     });
   });
 
@@ -155,16 +156,14 @@ describe('UserService', () => {
     it('해당 번호를 가진 회원 가입한 유저가 존재하면 유저를 반환한다', async () => {
       const user = new User();
       userRepo.findOne.mockResolvedValue(user);
-      const result =
-        await service.findUserByPhoneNumberIncludingNonMembers('01012345678');
+      const result = await service.findUserByPhoneNumber('01012345678');
 
       expect(result).toEqual(user);
     });
 
     it('해당 번호를 가진 회원가입한 유저가 존재하지 않으면 undefined를 반환한다', async () => {
       userRepo.findOne.mockResolvedValue(undefined);
-      const result =
-        await service.findUserByPhoneNumberIncludingNonMembers('01012345678');
+      const result = await service.findUserByPhoneNumber('01012345678');
 
       expect(result).toBe(undefined);
     });
@@ -173,17 +172,15 @@ describe('UserService', () => {
   describe('findUserByPhoneNumberWithTrack', () => {
     it('해당 번호를 가진 유저가 존재하면 트랙을 포함해서 유저를 반환한다', async () => {
       const user = new User();
-      userRepo.findUserByPhoneNumberWithTrack.mockResolvedValue(user);
-      const result =
-        await service.findUserByPhoneNumberWithTrack('01012345678');
+      userRepo.findAnyUserByPhoneWithTrack.mockResolvedValue(user);
+      const result = await service.findAnyUserByPhoneWithTrack('01012345678');
 
       expect(result).toEqual(user);
     });
 
     it('해당 번호를 가진 유저가 존재하지 않으면 undefined를 반환한다', async () => {
-      userRepo.findUserByPhoneNumberWithTrack.mockResolvedValue(undefined);
-      const result =
-        await service.findUserByPhoneNumberWithTrack('01012345678');
+      userRepo.findAnyUserByPhoneWithTrack.mockResolvedValue(undefined);
+      const result = await service.findAnyUserByPhoneWithTrack('01012345678');
 
       expect(result).toBe(undefined);
     });

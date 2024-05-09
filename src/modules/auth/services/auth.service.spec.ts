@@ -123,7 +123,7 @@ describe('AuthService', () => {
       const user = new User();
       user.email = email;
       user.password = 'hashedPassword';
-      user.isSigned = true;
+      user.status = 2;
 
       const expectedAccessToken = 'access-token';
       const expectedRefreshToken = 'refresh-token';
@@ -189,7 +189,7 @@ describe('AuthService', () => {
       const user = new User();
       user.email = email;
       user.password = hashedPassword;
-      user.isSigned = true;
+      user.status = 2;
 
       userService.findUserByEmailOrUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(true);
@@ -197,7 +197,7 @@ describe('AuthService', () => {
       const result = await service.validateUser(email, password);
 
       expect(argon2.verify).toHaveBeenCalledWith(hashedPassword, password);
-      expect(result.isSigned).toBeTruthy();
+      expect(result.status).toBe(2);
       expect(result).toEqual(user);
     });
 
@@ -209,8 +209,7 @@ describe('AuthService', () => {
 
       user.email = email;
       user.password = hashedPassword;
-      user.isSigned = true;
-
+      user.status = 2;
       userService.findUserByEmailOrUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(false);
 
@@ -232,7 +231,7 @@ describe('AuthService', () => {
       const inputCode = '123456';
 
       smsVerificationRepo.getVerificationCode.mockResolvedValue(inputCode);
-      userService.findUserByPhoneNumberWithTrack.mockResolvedValue(undefined);
+      userService.findAnyUserByPhoneWithTrack.mockResolvedValue(undefined);
 
       const result = await service.handleCodeVerification(
         phoneNumber,
@@ -262,7 +261,7 @@ describe('AuthService', () => {
       const inputCode = '123456';
 
       smsVerificationRepo.getVerificationCode.mockResolvedValue(inputCode);
-      userService.findUserByPhoneNumberWithTrack.mockResolvedValue(user);
+      userService.findAnyUserByPhoneWithTrack.mockResolvedValue(user);
 
       const result = await service.handleCodeVerification(
         phoneNumber,
@@ -347,9 +346,7 @@ describe('AuthService', () => {
     it('회원가입이 되어있으면 ConflictException 반환한다', async () => {
       const user = new User();
 
-      userService.findUserByPhoneNumberIncludingNonMembers.mockResolvedValue(
-        user,
-      );
+      userService.findUserByPhoneNumber.mockResolvedValue(user);
 
       await expect(
         service.authencticatePhoneNumber('01012345678'),
@@ -357,9 +354,7 @@ describe('AuthService', () => {
     });
 
     it('번호로 회원가입이 되어있지 않으면 유저 정보를 반환한다', async () => {
-      userService.findUserByPhoneNumberIncludingNonMembers.mockResolvedValue(
-        undefined,
-      );
+      userService.findUserByPhoneNumber.mockResolvedValue(undefined);
 
       const result = await service.authencticatePhoneNumber('01012345678');
 

@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User } from '../entities';
@@ -19,15 +20,16 @@ export class UserService {
   }
 
   async handleSignUp(dto: CreateUserDto) {
-    const user = await this.findUserByPhoneNumberWithTrack(dto.phoneNumber);
+    const user = await this.findAnyUserByPhoneWithTrack(dto.phoneNumber);
 
-    if (user?.username === dto.username)
+    if (!user || user?.status === 0)
+      throw new UnauthorizedException('핸드폰 인증을 완료해주세요');
+
+    if (user?.username === dto.username && user.status === 2)
       throw new ConflictException('이미 존재하는 아이디입니다');
     const hashedPassword = await hashPassword(dto.password);
 
-    if (user) await this.mergeUser(user, dto, hashedPassword);
-
-    if (!user) await this.createUser(dto, hashedPassword);
+    await this.mergeUser(user, dto, hashedPassword);
   }
 
   async mergeUser(
@@ -38,6 +40,12 @@ export class UserService {
     return this.userRepo.mergeUser(user, dto, hashedPassword);
   }
 
+  async mergePhone(user: User) {
+    return this.userRepo.mergePhone(user);
+  }
+  async registerPhone(phoneNumber: string) {
+    return this.userRepo.registerPhone(phoneNumber);
+  }
   async createUser(dto: CreateUserDto, hashPassword: string) {
     return this.userRepo.createUser(dto, hashPassword);
   }
@@ -47,19 +55,21 @@ export class UserService {
     return this.userRepo.findUserByEmailOrUsername(identifier);
   }
 
-  async findUserByPhoneNumberIncludingNonMembers(
-    phoneNumber: string,
-  ): Promise<User> | undefined {
-    return this.userRepo.findOne({ where: { phoneNumber, isSigned: true } });
+  async findUserByEmail(email: string) {
+    return this.userRepo.findOne({ where: { email, status: 2 } });
   }
 
-  async findUserByPhoneNumberWithTrack(
+  async findUserByPhoneNumber(phoneNumber: string): Promise<User> | undefined {
+    return this.userRepo.findOne({ where: { phoneNumber, status: 2 } });
+  }
+
+  async findAnyUserByPhoneWithTrack(
     phoneNumber: string,
   ): Promise<User> | undefined {
-    return this.userRepo.findUserByPhoneNumberWithTrack(phoneNumber);
+    return this.userRepo.findAnyUserByPhoneWithTrack(phoneNumber);
   }
 
   async findUserById(userId: string): Promise<User> | undefined {
-    return this.userRepo.findOne({ where: { id: userId, isSigned: true } });
+    return this.userRepo.findOne({ where: { id: userId, status: 2 } });
   }
 }
