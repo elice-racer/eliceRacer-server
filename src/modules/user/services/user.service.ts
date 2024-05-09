@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User } from '../entities';
 import { CreateUserDto } from '../dto';
@@ -17,6 +21,8 @@ export class UserService {
   async handleSignUp(dto: CreateUserDto) {
     const user = await this.findUserByPhoneNumberWithTrack(dto.phoneNumber);
 
+    if (user?.username === dto.username)
+      throw new ConflictException('이미 존재하는 아이디입니다');
     const hashedPassword = await hashPassword(dto.password);
 
     if (user) await this.mergeUser(user, dto, hashedPassword);
