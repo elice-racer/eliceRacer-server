@@ -225,7 +225,7 @@ describe('AuthService', () => {
       const verifyCodeResDto = {
         email: '',
         realName: '',
-        track: [],
+        tracks: [],
       };
 
       const phoneNumber = '01012345678';
@@ -245,13 +245,13 @@ describe('AuthService', () => {
     it('해당 번호로 회원가입 하지 않은 유저가 존재하면 유저 정보를 반환한다', async () => {
       const user = new User();
       const track = new Track();
-      user.track = [track];
+      user.tracks = [track];
 
       const verifyCodeResDto: VerifyCodeResDto = {
         email: user.email,
         realName: user.realName,
-        track: user.track
-          ? user.track.map((track) => ({
+        tracks: user.tracks
+          ? user.tracks.map((track) => ({
               trackName: track.trackName,
               generation: track.generation,
             }))

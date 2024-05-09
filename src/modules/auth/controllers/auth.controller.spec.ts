@@ -60,7 +60,7 @@ describe('AuthController', () => {
       const resDto: VerifyCodeResDto = {
         email: 'user@example.com',
         realName: '홍길동',
-        track: [],
+        tracks: [],
       };
 
       authService.handleCodeVerification.mockResolvedValue(resDto);

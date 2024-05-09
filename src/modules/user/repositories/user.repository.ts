@@ -58,7 +58,7 @@ export class UserRepository extends Repository<User> {
   ): Promise<User> | undefined {
     return this.repo
       .createQueryBuilder('users')
-      .leftJoinAndSelect('users.track', 'tracks')
+      .leftJoinAndSelect('users.tracks', 'tracks')
       .where('users.phoneNumber = :phoneNumber', { phoneNumber })
       .getOne();
   }
