@@ -32,6 +32,16 @@ jobs:
       - run: |
           yarn install --frozen-lockfile
 
+      - name: Setup Task Definition
+        run: |
+          sed -i 's|<TASK_ROLE_ARN>|${{ secrets.TASK_ROLE_ARN }}|g' task-definition.json
+          sed -i 's|<EXECUTION_ROLE_ARN>|${{ secrets.EXECUTION_ROLE_ARN }}|g' task-definition.json
+          sed -i 's|<PARA_STORE_ARN>|${{ secrets.PARA_STORE_ARN }}|g' task-definition.json
+        env:
+          TASK_ROLE_ARN: ${{ secrets.TASK_ROLE_ARN }}
+          EXECUTION_ROLE_ARN: ${{ secrets.EXECUTION_ROLE_ARN }}
+          PARA_STORE_ARN: ${{ secrets.PARA_STORE_ARN }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
