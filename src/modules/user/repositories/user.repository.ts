@@ -1,8 +1,9 @@
 import { EntityManager, Repository } from 'typeorm';
-import { User } from '../entities';
+import { User, UserRole, UserStatus } from '../entities';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto';
+import { CreateAdminDto } from 'src/modules/admin/dto/create-admin.dto';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -15,20 +16,24 @@ export class UserRepository extends Repository<User> {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
+  // 인증번호 검증 후 (등록 안된 회원)
   async registerPhone(phoneNumber: string) {
     const user = new User();
     user.phoneNumber = phoneNumber;
-    user.status = 1;
+    user.status = UserStatus.VERIFIED;
 
     return this.repo.save(user);
   }
+
+  // 인증번호 검증 후(등록된 회원)
   async mergePhone(user: User): Promise<User> {
     const mergedPhone = this.repo.merge(user, {
-      status: 1,
+      status: UserStatus.VERIFIED,
     });
 
     return this.repo.save(mergedPhone);
   }
+
   async findUserByEmailOrUsername(
     identifier: string,
   ): Promise<User> | undefined {
@@ -37,11 +42,12 @@ export class UserRepository extends Repository<User> {
       .createQueryBuilder('users')
       .where(
         '(users.email = :identifier OR users.username = :identifier) AND users.status = :status',
-        { identifier, status: 2 },
+        { identifier, status: UserStatus.VERIFIED_AND_REGISTERED },
       )
       .getOne();
   }
 
+  // 유저 코치 회원가입시 사용
   async mergeUser(
     user: User,
     dto: CreateUserDto,
@@ -51,22 +57,26 @@ export class UserRepository extends Repository<User> {
       username: dto.username,
       password: hashedPassword,
       realName: dto.realName,
-      status: 2,
+      status: UserStatus.VERIFIED_AND_REGISTERED,
     });
 
     return this.repo.save(mergedUser);
   }
-  async createUser(dto: CreateUserDto, hashedPassword: string): Promise<User> {
+
+  // 관리자 회원가입
+  async createAdmin(
+    dto: CreateAdminDto,
+    hashedPassword: string,
+  ): Promise<User> {
     const user = new User();
-    user.username = dto.username;
+    user.email = dto.email;
     user.realName = dto.realName;
     user.password = hashedPassword;
-    user.phoneNumber = dto.phoneNumber;
-    user.status = 2;
-
+    user.role = UserRole.ADMIN;
     return this.repo.save(user);
   }
 
+  // 회원가입하지 않은 유저까지 모두 검색
   async findAnyUserByPhoneWithTrack(
     phoneNumber: string,
   ): Promise<User> | undefined {

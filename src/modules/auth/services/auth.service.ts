@@ -106,6 +106,7 @@ export class AuthService {
     return user;
   }
 
+  // 인증번호 검증
   async handleCodeVerification(
     phoneNumber: string,
     inputCode: string,
@@ -117,8 +118,8 @@ export class AuthService {
     if (!user) {
       await this.userService.registerPhone(phoneNumber);
       return {
-        email: '', // 또는 null, undefined
-        realName: '', // 또는 null, undefined
+        email: '',
+        realName: '',
         tracks: [],
       };
     }
