@@ -2,13 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { UserRepository } from '../repositories';
 import { CreateUserDto } from '../dto';
-import { User } from '../entities';
+import { User, UserStatus } from '../entities';
 import { hashPassword } from 'src/common/utils/password-hash';
 import {
   ConflictException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { CreateAdminDto } from 'src/modules/admin/dto/create-admin.dto';
 
 jest.unmock('./user.service');
 
@@ -42,7 +43,7 @@ describe('UserService', () => {
       const user = new User();
 
       user.id = userId;
-      user.status = 2;
+      user.status = UserStatus.VERIFIED_AND_REGISTERED;
 
       jest.spyOn(service, 'findUserById').mockResolvedValue(user);
       const result = await service.validate(userId);
@@ -62,7 +63,7 @@ describe('UserService', () => {
     it('동일한 아이디로 회원가입한 유저가 존재하면 ConfliectException을 반환한다', async () => {
       const user = new User();
       user.username = createUserDto.username;
-      user.status = 2;
+      user.status = UserStatus.VERIFIED_AND_REGISTERED;
       jest
         .spyOn(service, 'findAnyUserByPhoneWithTrack')
         .mockResolvedValue(user);
@@ -87,7 +88,7 @@ describe('UserService', () => {
     it('번호 인증 완료된 유저는 업데이트 한다', async () => {
       const user = new User();
       const hashedPassword = 'hashedPassword';
-      user.status = 1;
+      user.status = UserStatus.VERIFIED;
       jest
         .spyOn(service, 'findAnyUserByPhoneWithTrack')
         .mockResolvedValue(user);
@@ -104,23 +105,25 @@ describe('UserService', () => {
     });
   });
 
-  describe('creatUser', () => {
-    it('사용자를 생성한다', async () => {
+  describe('creatAdmin', () => {
+    it('관리자를 생성한다', async () => {
       const user = new User();
-      user.status = 2;
-
-      userRepo.createUser.mockResolvedValue(user);
-      const result = await service.createUser(createUserDto, 'hashedPassword');
+      const dto: CreateAdminDto = {
+        email: 'test@elicer.com',
+        password: 'password',
+        realName: 'admin',
+      };
+      userRepo.createAdmin.mockResolvedValue(user);
+      const result = await service.createAdmin(dto, 'hashedPassword');
 
       expect(result).toEqual(user);
-      expect(result.status).toBe(2);
     });
   });
 
   describe('mergeUser', () => {
     it('유저의 정보를 수정한다', async () => {
       const user = new User();
-      user.status = 2;
+      user.status = UserStatus.VERIFIED_AND_REGISTERED;
 
       userRepo.mergeUser.mockResolvedValue(user);
       const result = await service.mergeUser(
