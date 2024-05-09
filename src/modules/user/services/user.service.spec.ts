@@ -4,7 +4,7 @@ import { UserRepository } from '../repositories';
 import { CreateUserDto } from '../dto';
 import { User } from '../entities';
 import { hashPassword } from 'src/common/utils/password-hash';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 jest.unmock('./user.service');
 
@@ -55,6 +55,17 @@ describe('UserService', () => {
   });
 
   describe('handleSignUp', () => {
+    it('동일한 아이디로 회원가입한 유저가 존재하면 ConfliectException을 반환한다', async () => {
+      const user = new User();
+      user.username = createUserDto.username;
+      jest
+        .spyOn(service, 'findUserByPhoneNumberWithTrack')
+        .mockResolvedValue(user);
+
+      await expect(service.handleSignUp(createUserDto)).rejects.toThrow(
+        ConflictException,
+      );
+    });
     it('유저가 존재하지 않으면 새롭게 생성한다', async () => {
       const user = new User();
       const hashedPassword = 'hashedPassword';
@@ -73,7 +84,7 @@ describe('UserService', () => {
       );
     });
 
-    it('유저가 존재하면 업데이트 한다', async () => {
+    it('회원 가입 하지 않은 유저가 존재하면 업데이트 한다', async () => {
       const user = new User();
       const hashedPassword = 'hashedPassword';
       jest
