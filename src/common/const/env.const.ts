@@ -1,0 +1,37 @@
+export const ENV_DB_HOST_KEY = 'DB_HOST';
+
+export const ENV_DB_PORT_KEY = 'DB_PORT';
+
+export const ENV_DB_USERNAME_KEY = 'DB_USERNAME';
+
+export const ENV_DB_PASSWORD_KEY = 'DB_PASSWORD';
+
+export const ENV_DB_DATABASE_KEY = 'DB_DATABASE';
+
+export const ENV_MAIL_USER_KEY = 'MAIL_USER';
+
+export const ENV_MAIL_PASS_KEY = 'MAIL_PASS';
+
+export const ENV_JWT_SECRET_KEY = 'JWT_SECRET';
+
+export const ENV_ACCESS_TOKEN_EXPIRY = 'ACCESS_TOKEN_EXPIRY';
+
+export const ENV_REFRESH_TOKEN_EXPIRY = 'REFRESH_TOKEN_EXPIRY';
+
+export const ENV_CACHE_TTL_KEY = 'CACHE_TTL';
+
+export const ENV_CACHE_HOST_KEY = 'CACHE_HOST';
+
+export const ENV_CACHE_PORT_KEY = 'CACHE_PORT';
+
+export const ENV_CACHE_USERNAME_KEY = 'CACHE_USERNAME';
+
+export const ENV_CACHE_PASSWORD_KEY = 'CACHE_PASSWORD';
+
+export const ENV_CACHE_URL_KEY = 'CACHE_URL';
+
+export const ENV_SMS_API_KEY = 'SMS_API_KEY';
+
+export const ENV_SMS_API_SECRET_KEY = 'SMS_API_SECRET';
+
+export const ENV_SMS_FROM_NUMBER_KEY = 'SMS_FROM_NUMBER';
