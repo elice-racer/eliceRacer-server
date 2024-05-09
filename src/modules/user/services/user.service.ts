@@ -5,9 +5,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepository } from '../repositories';
-import { User } from '../entities';
+import { User, UserStatus } from '../entities';
 import { CreateUserDto } from '../dto';
 import { hashPassword } from 'src/common/utils/password-hash';
+import { CreateAdminDto } from 'src/modules/admin/dto/create-admin.dto';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,7 @@ export class UserService {
     return user;
   }
 
+  // 회원가입 컨트롤
   async handleSignUp(dto: CreateUserDto) {
     const user = await this.findAnyUserByPhoneWithTrack(dto.phoneNumber);
 
@@ -32,6 +34,7 @@ export class UserService {
     await this.mergeUser(user, dto, hashedPassword);
   }
 
+  // 회원가입 시 유저 업데이트
   async mergeUser(
     user: User,
     dto: CreateUserDto,
@@ -40,29 +43,33 @@ export class UserService {
     return this.userRepo.mergeUser(user, dto, hashedPassword);
   }
 
+  // 번호 검증 후 (등록된 유저) status 변경
   async mergePhone(user: User) {
     return this.userRepo.mergePhone(user);
   }
+  // 번호 검증 후 (등록 안 된 유저) status 변경
   async registerPhone(phoneNumber: string) {
     return this.userRepo.registerPhone(phoneNumber);
   }
-  async createUser(dto: CreateUserDto, hashPassword: string) {
-    return this.userRepo.createUser(dto, hashPassword);
+
+  // 관리자 생성
+  async createAdmin(dto: CreateAdminDto, hashPassword: string) {
+    return this.userRepo.createAdmin(dto, hashPassword);
   }
+
   async findUserByEmailOrUsername(
     identifier: string,
   ): Promise<User> | undefined {
     return this.userRepo.findUserByEmailOrUsername(identifier);
   }
 
-  async findUserByEmail(email: string) {
-    return this.userRepo.findOne({ where: { email, status: 2 } });
-  }
-
   async findUserByPhoneNumber(phoneNumber: string): Promise<User> | undefined {
-    return this.userRepo.findOne({ where: { phoneNumber, status: 2 } });
+    return this.userRepo.findOne({
+      where: { phoneNumber, status: UserStatus.VERIFIED_AND_REGISTERED },
+    });
   }
 
+  // 모든 유저 (회원가입 하지 않은 유저까지) 검색
   async findAnyUserByPhoneWithTrack(
     phoneNumber: string,
   ): Promise<User> | undefined {
@@ -70,6 +77,8 @@ export class UserService {
   }
 
   async findUserById(userId: string): Promise<User> | undefined {
-    return this.userRepo.findOne({ where: { id: userId, status: 2 } });
+    return this.userRepo.findOne({
+      where: { id: userId, status: UserStatus.VERIFIED_AND_REGISTERED },
+    });
   }
 }
