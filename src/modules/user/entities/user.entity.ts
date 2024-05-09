@@ -2,9 +2,18 @@ import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entity/base-entity';
 import { Track } from 'src/modules/track/entities/track.entity';
 
-export type UserRole = 'admin' | 'racer' | 'coach';
+export enum UserRole {
+  RACER = 'RACER',
+  COACH = 'COACH',
+  ADMIN = 'ADMIN',
+}
 
-@Entity()
+export enum UserStatus {
+  UNVERIFIED = 0,
+  VERIFIED = 1,
+  VERIFIED_AND_REGISTERED = 2,
+}
+@Entity({ name: 'users' })
 export class User extends BaseEntity {
   @Column({ nullable: true })
   email: string;
@@ -15,7 +24,7 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   realName: string;
 
   @Column()
@@ -27,13 +36,21 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   github: string;
 
-  @Column({ default: 'racer' })
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.RACER,
+  })
   role: UserRole;
 
-  @Column({ default: false })
-  isSigned: boolean;
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.UNVERIFIED,
+  })
+  status: UserStatus;
 
   @ManyToMany(() => Track)
   @JoinTable()
-  track: Track[] | null;
+  tracks: Track[] | null;
 }

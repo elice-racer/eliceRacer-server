@@ -112,13 +112,22 @@ export class AuthService {
   ): Promise<VerifyCodeResDto> {
     await this.verifyCode(phoneNumber, inputCode);
     const user =
-      await this.userService.findUserByPhoneNumberWithTrack(phoneNumber);
+      await this.userService.findAnyUserByPhoneWithTrack(phoneNumber);
 
+    if (!user) {
+      await this.userService.registerPhone(phoneNumber);
+      return {
+        email: '', // 또는 null, undefined
+        realName: '', // 또는 null, undefined
+        tracks: [],
+      };
+    }
+    await this.userService.mergePhone(user);
     return {
       email: user.email,
       realName: user.realName,
-      track: user.track
-        ? user.track.map((track) => ({
+      tracks: user.tracks
+        ? user.tracks.map((track) => ({
             trackName: track.trackName,
             generation: track.generation,
           }))
@@ -157,10 +166,7 @@ export class AuthService {
   }
 
   async authencticatePhoneNumber(phoneNumber: string): Promise<string> {
-    const user =
-      await this.userService.findUserByPhoneNumberIncludingNonMembers(
-        phoneNumber,
-      );
+    const user = await this.userService.findUserByPhoneNumber(phoneNumber);
 
     if (user) throw new ConflictException('이미 사용하고 있는 번호 입니다.');
 
