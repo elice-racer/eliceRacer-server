@@ -114,6 +114,13 @@ export class AuthService {
     const user =
       await this.userService.findUserByPhoneNumberWithTrack(phoneNumber);
 
+    if (!user) {
+      return {
+        email: '', // 또는 null, undefined
+        realName: '', // 또는 null, undefined
+        track: [],
+      };
+    }
     return {
       email: user.email,
       realName: user.realName,
