@@ -18,10 +18,11 @@ export class UserRepository extends Repository<User> {
   async findUserByEmailOrUsername(
     identifier: string,
   ): Promise<User> | undefined {
+    console.log(identifier);
     return this.repo
-      .createQueryBuilder('user')
+      .createQueryBuilder('users')
       .where(
-        '(user.email = :identifier OR user.username = :identifier) AND user.isSigned = :isSigned',
+        '(users.email = :identifier OR users.username = :identifier) AND users.isSigned = :isSigned',
         { identifier, isSigned: true },
       )
       .getOne();
@@ -43,6 +44,7 @@ export class UserRepository extends Repository<User> {
   }
   async createUser(dto: CreateUserDto, hashedPassword: string): Promise<User> {
     const user = new User();
+    user.username = dto.username;
     user.realName = dto.realName;
     user.password = hashedPassword;
     user.phoneNumber = dto.phoneNumber;
@@ -55,8 +57,8 @@ export class UserRepository extends Repository<User> {
     phoneNumber: string,
   ): Promise<User> | undefined {
     return this.repo
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.track', 'track')
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.track', 'tracks')
       .where('users.phoneNumber = :phoneNumber', { phoneNumber })
       .getOne();
   }

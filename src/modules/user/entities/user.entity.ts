@@ -4,7 +4,7 @@ import { Track } from 'src/modules/track/entities/track.entity';
 
 export type UserRole = 'admin' | 'racer' | 'coach';
 
-@Entity()
+@Entity({ name: 'users' })
 export class User extends BaseEntity {
   @Column({ nullable: true })
   email: string;
