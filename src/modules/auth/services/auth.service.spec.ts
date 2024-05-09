@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { SmsService } from 'src/modules/sms/services/sms.service';
 import { UserService } from 'src/modules/user/services/user.service';
-import { User } from 'src/modules/user/entities';
+import { User, UserStatus } from 'src/modules/user/entities';
 import {
   BadRequestException,
   ConflictException,
@@ -98,6 +98,7 @@ describe('AuthService', () => {
         sub: 'userId-uuid',
         jti: 'jwt-uuid',
       });
+
       // refreshTokenRepo.getRefreshToken 모의 처리
       jest
         .spyOn(refreshTokenRepo, 'getRefreshToken')
@@ -123,7 +124,7 @@ describe('AuthService', () => {
       const user = new User();
       user.email = email;
       user.password = 'hashedPassword';
-      user.status = 2;
+      user.status = UserStatus.VERIFIED_AND_REGISTERED;
 
       const expectedAccessToken = 'access-token';
       const expectedRefreshToken = 'refresh-token';
@@ -189,7 +190,7 @@ describe('AuthService', () => {
       const user = new User();
       user.email = email;
       user.password = hashedPassword;
-      user.status = 2;
+      user.status = UserStatus.VERIFIED_AND_REGISTERED;
 
       userService.findUserByEmailOrUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(true);
@@ -209,7 +210,7 @@ describe('AuthService', () => {
 
       user.email = email;
       user.password = hashedPassword;
-      user.status = 2;
+      user.status = UserStatus.VERIFIED_AND_REGISTERED;
       userService.findUserByEmailOrUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(false);
 
