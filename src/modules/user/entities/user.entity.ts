@@ -35,5 +35,5 @@ export class User extends BaseEntity {
 
   @ManyToMany(() => Track)
   @JoinTable()
-  track: Track[] | null;
+  tracks: Track[] | null;
 }

@@ -118,14 +118,14 @@ export class AuthService {
       return {
         email: '', // 또는 null, undefined
         realName: '', // 또는 null, undefined
-        track: [],
+        tracks: [],
       };
     }
     return {
       email: user.email,
       realName: user.realName,
-      track: user.track
-        ? user.track.map((track) => ({
+      tracks: user.tracks
+        ? user.tracks.map((track) => ({
             trackName: track.trackName,
             generation: track.generation,
           }))
