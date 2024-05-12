@@ -1,1 +1,1 @@
-export * from './sms-verification.repository';
+export * from './verification.repository';

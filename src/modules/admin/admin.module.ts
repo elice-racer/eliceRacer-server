@@ -3,11 +3,11 @@ import { AdminController } from './controllers/admin.controller';
 import { AdminService } from './services/admin.service';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../mail/mail.module';
-import { VerifyEmailRepository } from './repositories/verify-email.repository';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [UserModule, MailModule],
+  imports: [AuthModule, UserModule, MailModule],
   controllers: [AdminController],
-  providers: [AdminService, VerifyEmailRepository],
+  providers: [AdminService],
 })
 export class AdminModule {}

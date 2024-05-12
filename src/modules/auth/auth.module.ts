@@ -3,11 +3,13 @@ import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './services/auth.service';
 import { SmsModule } from '../sms/sms.module';
 import { UserModule } from '../user/user.module';
-import { SmsVerificationRepository } from './repositories';
+import { VerificationRepository } from './repositories';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ENV_ACCESS_TOKEN_EXPIRY, ENV_JWT_SECRET_KEY } from 'src/common/const';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository';
+import { VerificationService } from './services/verification.service';
+import { RefreshTokenService } from './services/refresh-token.service';
 @Module({
   imports: [
     ConfigModule,
@@ -25,6 +27,13 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository'
     UserModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, SmsVerificationRepository, RefreshTokenRepository],
+  providers: [
+    AuthService,
+    VerificationService,
+    RefreshTokenService,
+    VerificationRepository,
+    RefreshTokenRepository,
+  ],
+  exports: [VerificationService, RefreshTokenService],
 })
 export class AuthModule {}

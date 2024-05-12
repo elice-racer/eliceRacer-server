@@ -3,10 +3,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from '../services/auth.service';
 import { UserService } from 'src/modules/user/services/user.service';
 import { SmsService } from 'src/modules/sms/services/sms.service';
-import { SmsVerificationRepository } from '../repositories';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
 import {
   LoginReqDto,
   LoginResDto,
@@ -16,6 +14,8 @@ import {
   VerifyCodeReqDto,
   VerifyCodeResDto,
 } from '../dto';
+import { VerificationService } from '../services/verification.service';
+import { RefreshTokenService } from '../services/refresh-token.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -28,10 +28,10 @@ describe('AuthController', () => {
         AuthService,
         SmsService,
         UserService,
-        SmsVerificationRepository,
         JwtService,
         ConfigService,
-        RefreshTokenRepository,
+        VerificationService,
+        RefreshTokenService,
       ],
     }).compile();
 

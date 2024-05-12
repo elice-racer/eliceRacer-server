@@ -9,25 +9,25 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { SmsVerificationRepository } from '../repositories';
 import { generateVerificationCode } from 'src/common/utils';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
 import { Track } from 'src/modules/track/entities';
 import { VerifyCodeResDto } from '../dto';
+import { RefreshTokenService } from './refresh-token.service';
+import { VerificationService } from './verification.service';
 
 jest.unmock('./auth.service');
 
 describe('AuthService', () => {
   let service: AuthService;
   let userService: jest.Mocked<UserService>;
-  let smsVerificationRepo: jest.Mocked<SmsVerificationRepository>;
   let smsService: jest.Mocked<SmsService>;
   let jwtService: jest.Mocked<JwtService>;
   let configService: jest.Mocked<ConfigService>;
-  let refreshTokenRepo: jest.Mocked<RefreshTokenRepository>;
+  let refreshTokenService: jest.Mocked<RefreshTokenService>;
+  let verificationService: jest.Mocked<VerificationService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,8 +37,8 @@ describe('AuthService', () => {
         UserService,
         JwtService,
         ConfigService,
-        SmsVerificationRepository,
-        RefreshTokenRepository,
+        VerificationService,
+        RefreshTokenService,
       ],
     }).compile();
 
@@ -47,8 +47,8 @@ describe('AuthService', () => {
     smsService = module.get(SmsService);
     jwtService = module.get(JwtService);
     configService = module.get(ConfigService);
-    smsVerificationRepo = module.get(SmsVerificationRepository);
-    refreshTokenRepo = module.get(RefreshTokenRepository);
+    verificationService = module.get(VerificationService);
+    refreshTokenService = module.get(RefreshTokenService);
   });
 
   afterEach(() => {
@@ -69,7 +69,7 @@ describe('AuthService', () => {
       });
 
       await service.logout(refresToken);
-      expect(refreshTokenRepo.deleteRefreshToken).toHaveBeenCalledWith(jti);
+      expect(refreshTokenService.deleteRefreshToken).toHaveBeenCalledWith(jti);
     });
   });
   describe('refresh', () => {
@@ -84,7 +84,7 @@ describe('AuthService', () => {
     it('유효기간이 지난 refresh token으로 재발급을 시도하면 UnauthorizedException를 반환한다', async () => {
       const invalidRefreshToken = 'invalid-refresh-token';
 
-      refreshTokenRepo.getRefreshToken.mockResolvedValue(null);
+      refreshTokenService.getRefreshToken.mockResolvedValue(null);
 
       await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
         UnauthorizedException,
@@ -101,7 +101,7 @@ describe('AuthService', () => {
 
       // refreshTokenRepo.getRefreshToken 모의 처리
       jest
-        .spyOn(refreshTokenRepo, 'getRefreshToken')
+        .spyOn(refreshTokenService, 'getRefreshToken')
         .mockResolvedValue(refreshToken);
       // createAccessToken 모의 처리
       jest
@@ -231,7 +231,7 @@ describe('AuthService', () => {
       const phoneNumber = '01012345678';
       const inputCode = '123456';
 
-      smsVerificationRepo.getVerificationCode.mockResolvedValue(inputCode);
+      verificationService.getVerificationCode.mockResolvedValue(inputCode);
       userService.findAnyUserByPhoneWithTrack.mockResolvedValue(undefined);
 
       const result = await service.handleCodeVerification(
@@ -261,7 +261,7 @@ describe('AuthService', () => {
       const phoneNumber = '01012345678';
       const inputCode = '123456';
 
-      smsVerificationRepo.getVerificationCode.mockResolvedValue(inputCode);
+      verificationService.getVerificationCode.mockResolvedValue(inputCode);
       userService.findAnyUserByPhoneWithTrack.mockResolvedValue(user);
 
       const result = await service.handleCodeVerification(
@@ -275,7 +275,7 @@ describe('AuthService', () => {
 
   describe('verifyCode', () => {
     it('유효시간이 지난 인증번호를 입력하면 NotFoundException을 반환한다', async () => {
-      smsVerificationRepo.getVerificationCode.mockResolvedValue(null);
+      verificationService.getVerificationCode.mockResolvedValue(null);
 
       await expect(service.verifyCode('01012345678', '123456')).rejects.toThrow(
         NotFoundException,
@@ -286,7 +286,7 @@ describe('AuthService', () => {
       const inputCode = '123450';
       const storedCode = '123456';
 
-      smsVerificationRepo.getVerificationCode.mockResolvedValue(storedCode);
+      verificationService.getVerificationCode.mockResolvedValue(storedCode);
 
       await expect(
         service.verifyCode('01012345678', inputCode),
@@ -297,7 +297,7 @@ describe('AuthService', () => {
       const phoneNumber = '01012345678';
       const inputCode = '123456';
 
-      smsVerificationRepo.getVerificationCode.mockResolvedValue(inputCode);
+      verificationService.getVerificationCode.mockResolvedValue(inputCode);
       const result = await service.verifyCode(phoneNumber, inputCode);
 
       expect(result).toBe('OK');
@@ -308,38 +308,15 @@ describe('AuthService', () => {
       const phoneNumber = '01012345678';
       const verificationCode = '123456';
 
-      jest.spyOn(service, 'authencticatePhoneNumber').mockResolvedValue('OK');
-      jest.spyOn(service, 'setVerificationCode').mockResolvedValue();
       (generateVerificationCode as jest.Mock).mockReturnValue(verificationCode);
       const result = await service.handlePhoneVerification(phoneNumber);
 
-      expect(service.authencticatePhoneNumber).toHaveBeenCalledWith(
-        phoneNumber,
-      );
-      expect(service.setVerificationCode).toHaveBeenCalledWith(
-        phoneNumber,
-        verificationCode,
-      );
       expect(smsService.sendVerificationCode).toHaveBeenCalledWith(
         phoneNumber,
         verificationCode,
       );
 
       expect(result).toEqual('Success');
-    });
-  });
-
-  describe('setSmsVerification', () => {
-    it('핸드폰 번호와 인증 번호를 저장한다', async () => {
-      const phoneNumber = '01012345678';
-      const verificationCode = '123456';
-
-      await service.setVerificationCode(phoneNumber, verificationCode);
-
-      expect(smsVerificationRepo.setVerificationCode).toHaveBeenCalledWith(
-        phoneNumber,
-        verificationCode,
-      );
     });
   });
 
