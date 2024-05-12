@@ -4,22 +4,23 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  ENV_CACHE_TTL_KEY,
-  ENV_CACHE_URL_KEY,
+  // ENV_CACHE_TTL_KEY,
+  // ENV_CACHE_URL_KEY,
   ENV_DB_DATABASE_KEY,
   ENV_DB_HOST_KEY,
   ENV_DB_PASSWORD_KEY,
   ENV_DB_PORT_KEY,
   ENV_DB_USERNAME_KEY,
 } from './common/const';
-import * as redisStore from 'cache-manager-ioredis';
+// import * as redisStore from 'cache-manager-ioredis';
 import { SmsModule } from './modules/sms/sms.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import { CacheModule } from '@nestjs/cache-manager';
+// import { CacheModule } from '@nestjs/cache-manager';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { AdminModule } from './modules/admin/admin.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -43,22 +44,22 @@ import { AdminModule } from './modules/admin/admin.module';
       }),
     }),
 
-    CacheModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const cacheUrl = configService.get<string>(ENV_CACHE_URL_KEY);
-        console.log(`Cache URL: ${cacheUrl}`); // URL 출력
+    // CacheModule.registerAsync({
+    //   imports: [ConfigModule],
+    //   useFactory: (configService: ConfigService) => {
+    //     const cacheUrl = configService.get<string>(ENV_CACHE_URL_KEY);
+    //     console.log(`Cache URL: ${cacheUrl}`); // URL 출력
 
-        return {
-          store: redisStore,
-          url: cacheUrl,
-          ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
-        };
-      },
-      isGlobal: true,
-      inject: [ConfigService],
-    }),
-
+    //     return {
+    //       store: redisStore,
+    //       url: cacheUrl,
+    //       ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
+    //     };
+    //   },
+    //   isGlobal: true,
+    //   inject: [ConfigService],
+    // }),
+    RedisModule,
     AuthModule,
     UserModule,
     SmsModule,
