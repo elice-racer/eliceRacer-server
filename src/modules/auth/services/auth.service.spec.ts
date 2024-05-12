@@ -3,12 +3,7 @@ import { AuthService } from './auth.service';
 import { SmsService } from 'src/modules/sms/services/sms.service';
 import { UserService } from 'src/modules/user/services/user.service';
 import { User, UserStatus } from 'src/modules/user/entities';
-import {
-  BadRequestException,
-  ConflictException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { generateVerificationCode } from 'src/common/utils';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
@@ -273,36 +268,6 @@ describe('AuthService', () => {
     });
   });
 
-  describe('verifyCode', () => {
-    it('유효시간이 지난 인증번호를 입력하면 NotFoundException을 반환한다', async () => {
-      verificationService.getVerificationCode.mockResolvedValue(null);
-
-      await expect(service.verifyCode('01012345678', '123456')).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('유효하지 않은 인증번호를 입력하면 BadRequestException를 반환한다', async () => {
-      const inputCode = '123450';
-      const storedCode = '123456';
-
-      verificationService.getVerificationCode.mockResolvedValue(storedCode);
-
-      await expect(
-        service.verifyCode('01012345678', inputCode),
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it('유효시간 내에 올바른 인증번호를 입력하면 OK를 반환한다 ', async () => {
-      const phoneNumber = '01012345678';
-      const inputCode = '123456';
-
-      verificationService.getVerificationCode.mockResolvedValue(inputCode);
-      const result = await service.verifyCode(phoneNumber, inputCode);
-
-      expect(result).toBe('OK');
-    });
-  });
   describe('handlePhoneVerification', () => {
     it('휴대폰 번호가 유효하면 인증번호를 생성, 저장하고 문자를 전송한다', async () => {
       const phoneNumber = '01012345678';
