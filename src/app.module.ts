@@ -4,9 +4,8 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  ENV_CACHE_HOST_KEY,
-  ENV_CACHE_PORT_KEY,
   ENV_CACHE_TTL_KEY,
+  ENV_CACHE_URL_KEY,
   ENV_DB_DATABASE_KEY,
   ENV_DB_HOST_KEY,
   ENV_DB_PASSWORD_KEY,
@@ -48,9 +47,8 @@ import { AdminModule } from './modules/admin/admin.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         store: redisStore,
+        url: configService.get<string>(ENV_CACHE_URL_KEY),
         ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
-        host: configService.get<string>(ENV_CACHE_HOST_KEY),
-        port: configService.get<number>(ENV_CACHE_PORT_KEY),
       }),
       isGlobal: true,
       inject: [ConfigService],
