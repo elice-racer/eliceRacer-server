@@ -21,6 +21,9 @@ export class LoggingInterceptor implements NestInterceptor {
 
     const { ip, method, originalUrl } = request;
 
+    if (originalUrl.includes('/api/health')) {
+      return next.handle(); // 로그를 생성하지 않고 요청을 그대로 진행
+    }
     const userAgent = request.headers['user-agent'] || '';
     const user = request.user as User;
     const userId = user?.id || 'Anonymous';
