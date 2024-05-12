@@ -45,7 +45,7 @@ import { AdminModule } from './modules/admin/admin.module';
 
     CacheModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         store: redisStore,
         url: configService.get<string>(ENV_CACHE_URL_KEY),
         ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
