@@ -45,14 +45,20 @@ import { AdminModule } from './modules/admin/admin.module';
 
     CacheModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        store: redisStore,
-        url: configService.get<string>(ENV_CACHE_URL_KEY),
-        ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
-      }),
+      useFactory: (configService: ConfigService) => {
+        const cacheUrl = configService.get<string>(ENV_CACHE_URL_KEY);
+        console.log(`Cache URL: ${cacheUrl}`); // URL 출력
+
+        return {
+          store: redisStore,
+          url: cacheUrl,
+          ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
+        };
+      },
       isGlobal: true,
       inject: [ConfigService],
     }),
+
     AuthModule,
     UserModule,
     SmsModule,
