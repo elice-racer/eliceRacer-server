@@ -1,8 +1,6 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SmsService } from 'src/modules/sms/services/sms.service';
@@ -111,7 +109,7 @@ export class AuthService {
     phoneNumber: string,
     inputCode: string,
   ): Promise<VerifyCodeResDto> {
-    await this.verifyCode(phoneNumber, inputCode);
+    await this.verificationService.verifyCode(phoneNumber, inputCode);
     const user =
       await this.userService.findAnyUserByPhoneWithTrack(phoneNumber);
 
@@ -134,19 +132,6 @@ export class AuthService {
           }))
         : [],
     };
-  }
-
-  async verifyCode(phoneNumber: string, inputCode: string): Promise<string> {
-    const storedCode =
-      await this.verificationService.getVerificationCode(phoneNumber);
-
-    if (storedCode === null)
-      throw new NotFoundException('인증번호를 찾을 수 없습니다');
-
-    if (inputCode !== storedCode) {
-      throw new BadRequestException('인증번호가 일치하지 않습니다');
-    }
-    return 'OK';
   }
 
   async handlePhoneVerification(phoneNumber: string): Promise<string> {
