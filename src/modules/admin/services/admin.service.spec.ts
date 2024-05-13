@@ -2,28 +2,33 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import { User, UserRole } from 'src/modules/user/entities';
-import { UserService } from 'src/modules/user/services/user.service';
 import { ConflictException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { generateToken } from 'src/common/utils/verification-token-genertator';
 import { MailService } from 'src/modules/mail/mail.service';
 import { VerificationService } from 'src/modules/auth/services/verification.service';
+import { AdminRepository } from '../repositories';
 
 describe('AdminService', () => {
   let service: AdminService;
-  let userService: jest.Mocked<UserService>;
   let mailService: jest.Mocked<MailService>;
   let verificationService: jest.Mocked<VerificationService>;
+  let adminRepo: jest.Mocked<AdminRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AdminService, UserService, MailService, VerificationService],
+      providers: [
+        AdminService,
+        MailService,
+        VerificationService,
+        AdminRepository,
+      ],
     }).compile();
 
     service = module.get<AdminService>(AdminService);
-    userService = module.get(UserService);
     mailService = module.get(MailService);
     verificationService = module.get(VerificationService);
+    adminRepo = module.get(AdminRepository);
   });
 
   it('should be defined', () => {
@@ -83,7 +88,7 @@ describe('AdminService', () => {
         realName: 'Test User',
       };
 
-      userService.findAnyUserByEmail.mockResolvedValue(new User());
+      adminRepo.findAnyAdminByEmail.mockResolvedValue(new User());
 
       await expect(service.createAdmin(duplicateUserDto)).rejects.toThrow(
         ConflictException,
@@ -102,10 +107,10 @@ describe('AdminService', () => {
       newUser.role = UserRole.ADMIN;
       newUser.status = 0;
 
-      userService.findAnyUserByEmail.mockResolvedValue(null);
+      adminRepo.findAnyAdminByEmail.mockResolvedValue(null);
       (argon2.hash as jest.Mock).mockResolvedValue('hashedPassword');
 
-      userService.createAdmin.mockResolvedValue(newUser);
+      adminRepo.createAdmin.mockResolvedValue(newUser);
 
       const result = await service.createAdmin(dto);
 

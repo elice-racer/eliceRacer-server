@@ -8,7 +8,6 @@ import { UserRepository } from '../repositories';
 import { User, UserStatus } from '../entities';
 import { CreateUserDto } from '../dto';
 import { hashPassword } from 'src/common/utils/password-hash';
-import { CreateAdminDto } from 'src/modules/admin/dto/create-admin.dto';
 
 @Injectable()
 export class UserService {
@@ -22,7 +21,7 @@ export class UserService {
 
   // 회원가입 컨트롤
   async handleSignUp(dto: CreateUserDto) {
-    const user = await this.findAnyUserByPhoneWithTrack(dto.phoneNumber);
+    const user = await this.findAnyUserByPhone(dto.phoneNumber);
 
     if (!user || user?.status === 0)
       throw new UnauthorizedException('핸드폰 인증을 완료해주세요');
@@ -43,45 +42,6 @@ export class UserService {
     return this.userRepo.mergeUser(user, dto, hashedPassword);
   }
 
-  async mergeAfterVerificationEamil(user: User) {
-    return this.userRepo.mergeAfterVerificationEamil(user);
-  }
-  // 번호 검증 후 (등록된 유저) status 변경
-  async mergeAfterVerificationPhone(user: User) {
-    return this.userRepo.mergeAfterVerificationPhone(user);
-  }
-  // 번호 검증 후 (등록 안 된 유저) status 변경
-  async registerPhone(phoneNumber: string) {
-    return this.userRepo.registerPhone(phoneNumber);
-  }
-
-  // 관리자 생성
-  async createAdmin(dto: CreateAdminDto, hashPassword: string) {
-    return this.userRepo.createAdmin(dto, hashPassword);
-  }
-
-  async findAnyUserByEmail(email: string): Promise<User> | undefined {
-    return this.userRepo.findOneBy({ email });
-  }
-  async findUserByEmailOrUsername(
-    identifier: string,
-  ): Promise<User> | undefined {
-    return this.userRepo.findUserByEmailOrUsername(identifier);
-  }
-
-  async findUserByPhoneNumber(phoneNumber: string): Promise<User> | undefined {
-    return this.userRepo.findOne({
-      where: { phoneNumber, status: UserStatus.VERIFIED_AND_REGISTERED },
-    });
-  }
-
-  // 모든 유저 (회원가입 하지 않은 유저까지) 검색
-  async findAnyUserByPhoneWithTrack(
-    phoneNumber: string,
-  ): Promise<User> | undefined {
-    return this.userRepo.findAnyUserByPhoneWithTrack(phoneNumber);
-  }
-
   async findAnyUserById(userId: string): Promise<User> | undefined {
     return this.userRepo.findOneBy({ id: userId });
   }
@@ -89,5 +49,8 @@ export class UserService {
     return this.userRepo.findOne({
       where: { id: userId, status: UserStatus.VERIFIED_AND_REGISTERED },
     });
+  }
+  async findAnyUserByPhone(phoneNumber: string): Promise<User> | undefined {
+    return this.userRepo.findOneBy({ phoneNumber });
   }
 }
