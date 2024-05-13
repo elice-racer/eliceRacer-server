@@ -6,7 +6,7 @@ import { Cache } from 'cache-manager';
 export class RefreshTokenRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  async getRefreshToken(key: string) {
+  async getRefreshToken(key: string): Promise<string> {
     return this.cacheManager.get(key);
   }
   async setRefreshToken(

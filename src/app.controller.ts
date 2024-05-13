@@ -8,7 +8,7 @@ export class AppController {
 
   @Get('health')
   healthCheck(): string {
-    return 'OK';
+    return 'PARAMETER';
   }
 
   @Get('/cache')

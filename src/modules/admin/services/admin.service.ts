@@ -4,14 +4,14 @@ import { CreateAdminDto } from '../dto/create-admin.dto';
 import * as argon2 from 'argon2';
 import { generateToken } from 'src/common/utils/verification-token-genertator';
 import { MailService } from 'src/modules/mail/mail.service';
-import { VerifyEmailRepository } from '../repositories/verify-email.repository';
+import { VerificationService } from 'src/modules/auth/services/verification.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     private readonly userService: UserService,
     private readonly mailService: MailService,
-    private readonly verifyEmailRepo: VerifyEmailRepository,
+    private readonly verificationService: VerificationService,
   ) {}
 
   async signup(dto: CreateAdminDto) {
@@ -19,7 +19,7 @@ export class AdminService {
 
     const [admin] = await Promise.all([
       this.createAdmin(dto),
-      this.verifyEmailRepo.setRefreshToken(
+      this.verificationService.setVerificationCode(
         dto.email,
         verificationToken,
         60 * 60,

@@ -7,7 +7,7 @@ import { ConflictException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { generateToken } from 'src/common/utils/verification-token-genertator';
 import { MailService } from 'src/modules/mail/mail.service';
-import { VerifyEmailRepository } from '../repositories/verify-email.repository';
+import { VerificationService } from 'src/modules/auth/services/verification.service';
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -16,12 +16,7 @@ describe('AdminService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AdminService,
-        UserService,
-        MailService,
-        VerifyEmailRepository,
-      ],
+      providers: [AdminService, UserService, MailService, VerificationService],
     }).compile();
 
     service = module.get<AdminService>(AdminService);

@@ -48,6 +48,10 @@
           "valueFrom": "<PARA_STORE_ARN>REFRESH_TOKEN_EXPIRY"
         },
         {
+          "name": "CACHE_URL",
+          "valueFrom": "<PARA_STORE_ARN>CACHE_URL"
+        },
+        {
           "name": "CACHE_TTL",
           "valueFrom": "<PARA_STORE_ARN>CACHE_TTL"
         },
@@ -58,14 +62,6 @@
         {
           "name": "CACHE_PORT",
           "valueFrom": "<PARA_STORE_ARN>CACHE_PORT"
-        },
-        {
-          "name": "CACHE_USERNAME",
-          "valueFrom": "<PARA_STORE_ARN>CACHE_USERNAME"
-        },
-        {
-          "name": "CACHE_PASSWORD",
-          "valueFrom": "<PARA_STORE_ARN>CACHE_PASSWORD"
         },
         {
           "name": "SMS_API_KEY",

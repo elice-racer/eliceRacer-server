@@ -1,13 +1,10 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SmsService } from 'src/modules/sms/services/sms.service';
 import { UserService } from 'src/modules/user/services/user.service';
-import { SmsVerificationRepository } from '../repositories';
 import { User } from 'src/modules/user/entities';
 import { generateVerificationCode } from 'src/common/utils';
 import { JwtService } from '@nestjs/jwt';
@@ -20,8 +17,9 @@ import {
   ENV_REFRESH_TOKEN_EXPIRY,
 } from 'src/common/const';
 import { TokenPayload, TokenPayloadRes } from '../types';
-import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
 import { LoginResDto, VerifyCodeResDto } from '../dto';
+import { VerificationService } from './verification.service';
+import { RefreshTokenService } from './refresh-token.service';
 
 @Injectable()
 export class AuthService {
@@ -30,8 +28,8 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly smsVerificationRepo: SmsVerificationRepository,
-    private readonly refreshTokenRepo: RefreshTokenRepository,
+    private readonly verificationService: VerificationService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   async logout(refreshToken: string) {
@@ -40,7 +38,7 @@ export class AuthService {
       secret: this.configService.get<string>(ENV_JWT_SECRET_KEY),
     });
 
-    await this.refreshTokenRepo.deleteRefreshToken(payloadRes.jti);
+    await this.refreshTokenService.deleteRefreshToken(payloadRes.jti);
   }
   async refresh(refreshToken: string) {
     const payloadRes: TokenPayloadRes = this.jwtService.verify(refreshToken, {
@@ -50,7 +48,7 @@ export class AuthService {
     if (!payloadRes || !payloadRes.sub) {
       throw new UnauthorizedException('유효하지 않은 토큰입니다');
     }
-    const isNotExpired = await this.refreshTokenRepo.getRefreshToken(
+    const isNotExpired = await this.refreshTokenService.getRefreshToken(
       payloadRes.jti,
     );
 
@@ -73,7 +71,7 @@ export class AuthService {
     const accessToken = this.createAccessToken(payload);
     const refreshToken = this.createRefreshToken(payload);
 
-    await this.refreshTokenRepo.setRefreshToken(
+    await this.refreshTokenService.setRefreshToken(
       payload.jti,
       refreshToken,
       60 * 60 * 24 * 3, //3일
@@ -111,7 +109,7 @@ export class AuthService {
     phoneNumber: string,
     inputCode: string,
   ): Promise<VerifyCodeResDto> {
-    await this.verifyCode(phoneNumber, inputCode);
+    await this.verificationService.verifyCode(phoneNumber, inputCode);
     const user =
       await this.userService.findAnyUserByPhoneWithTrack(phoneNumber);
 
@@ -136,34 +134,21 @@ export class AuthService {
     };
   }
 
-  async verifyCode(phoneNumber: string, inputCode: string): Promise<string> {
-    const storedCode =
-      await this.smsVerificationRepo.getVerificationCode(phoneNumber);
-
-    if (storedCode === null)
-      throw new NotFoundException('인증번호를 찾을 수 없습니다');
-
-    if (inputCode !== storedCode) {
-      throw new BadRequestException('인증번호가 일치하지 않습니다');
-    }
-    return 'OK';
-  }
-
   async handlePhoneVerification(phoneNumber: string): Promise<string> {
     // 1. 검증
     await this.authencticatePhoneNumber(phoneNumber);
     // 2. 인증번호 생성
     const generatedCode = generateVerificationCode();
     // 3. 인증번호 저장
-    await this.setVerificationCode(phoneNumber, generatedCode);
+    await this.verificationService.setVerificationCode(
+      phoneNumber,
+      generatedCode,
+      600,
+    );
     // 4. 메세지 전송
     await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
 
     return 'Success';
-  }
-
-  async setVerificationCode(phoneNumber: string, inputCode: string) {
-    await this.smsVerificationRepo.setVerificationCode(phoneNumber, inputCode);
   }
 
   async authencticatePhoneNumber(phoneNumber: string): Promise<string> {

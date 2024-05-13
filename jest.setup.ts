@@ -13,13 +13,14 @@ jest.mock('@nestjs/jwt');
 jest.mock('./src/modules/sms/services/sms.service');
 jest.mock('./src/modules/user/services/user.service');
 jest.mock('./src/modules/auth/services/auth.service');
+jest.mock('./src/modules/auth/services/verification.service');
+jest.mock('./src/modules/auth/services/refresh-token.service');
 jest.mock('./src/modules/mail/mail.service');
 
 //Repository
-jest.mock('./src/modules/auth/repositories/sms-verification.repository');
+jest.mock('./src/modules/auth/repositories/verification.repository');
 jest.mock('./src/modules/user/repositories/user.repository');
 jest.mock('./src/modules/auth/repositories/refresh-token.repository');
-jest.mock('./src/modules/admin/repositories/verify-email.repository');
 
 //utils
 jest.mock('./src/common/utils/verification-number-generator');
