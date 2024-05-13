@@ -10,9 +10,12 @@ import { ENV_ACCESS_TOKEN_EXPIRY, ENV_JWT_SECRET_KEY } from 'src/common/const';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository';
 import { VerificationService } from './services/verification.service';
 import { RefreshTokenService } from './services/refresh-token.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
 @Module({
   imports: [
     ConfigModule,
+    PassportModule.register({ defaultStrategy: 'jwt', session: false }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -33,6 +36,8 @@ import { RefreshTokenService } from './services/refresh-token.service';
     RefreshTokenService,
     VerificationRepository,
     RefreshTokenRepository,
+
+    JwtStrategy,
   ],
   exports: [VerificationService, RefreshTokenService],
 })
