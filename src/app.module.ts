@@ -5,9 +5,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   ENV_CACHE_HOST_KEY,
+  ENV_CACHE_PASSWORD_KEY,
   // ENV_CACHE_PASSWORD_KEY,
   ENV_CACHE_PORT_KEY,
   ENV_CACHE_TTL_KEY,
+  ENV_CACHE_USERNAME_KEY,
   // ENV_CACHE_USERNAME_KEY,
   ENV_DB_DATABASE_KEY,
   ENV_DB_HOST_KEY,
@@ -52,6 +54,8 @@ import { AdminModule } from './modules/admin/admin.module';
         store: redisStore,
         host: configService.get<string>(ENV_CACHE_HOST_KEY),
         port: configService.get<number>(ENV_CACHE_PORT_KEY),
+        username: configService.get<string>(ENV_CACHE_USERNAME_KEY),
+        password: configService.get<string>(ENV_CACHE_PASSWORD_KEY),
         ttl: configService.get<number>(ENV_CACHE_TTL_KEY),
       }),
       isGlobal: true,

@@ -4,7 +4,6 @@ import { Cache } from 'cache-manager';
 
 @Injectable()
 export class VerificationRepository {
-  // constructor() {}
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   //TODO return값
