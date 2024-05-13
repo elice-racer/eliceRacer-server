@@ -1,8 +1,12 @@
+import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserStatus } from 'src/modules/user/entities';
 import { UserRepository } from 'src/modules/user/repositories';
 
 export class AuthRepository {
-  constructor(private readonly userRepo: UserRepository) {}
+  constructor(
+    @InjectRepository(UserRepository)
+    private userRepo: UserRepository,
+  ) {}
 
   async findUserById(userId: string): Promise<User> | undefined {
     return this.userRepo.findOne({
