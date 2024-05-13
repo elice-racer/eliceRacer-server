@@ -1,17 +1,17 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { UserService } from 'src/modules/user/services/user.service';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import * as argon2 from 'argon2';
 import { generateToken } from 'src/common/utils/verification-token-genertator';
 import { MailService } from 'src/modules/mail/mail.service';
 import { VerificationService } from 'src/modules/auth/services/verification.service';
+import { AdminRepository } from '../repositories';
 
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly verificationService: VerificationService,
+    private readonly adminRepo: AdminRepository,
   ) {}
   async verifyEmail(id: string, token: string) {
     const result = await this.verificationService.verifyCode(id, token);
@@ -19,9 +19,9 @@ export class AdminService {
 
     this.verificationService.deleteVerificationCode(id);
     //TODO merge방식으로할지 update방식으로 할지 고민해보기
-    const admin = await this.userService.findAnyUserById(id);
+    const admin = await this.adminRepo.findAnyAdminById(id);
 
-    if (result) this.userService.mergeAfterVerificationEamil(admin);
+    if (result) this.adminRepo.mergeAfterVerification(admin);
     return result;
   }
 
@@ -45,12 +45,12 @@ export class AdminService {
   }
 
   async createAdmin(dto: CreateAdminDto) {
-    const user = await this.userService.findAnyUserByEmail(dto.email);
+    const user = await this.adminRepo.findAnyAdminByEmail(dto.email);
 
     if (user) throw new ConflictException('이미 가입한 회원입니다');
 
     const hashedPassword = await argon2.hash(dto.password);
 
-    return await this.userService.createAdmin(dto, hashedPassword);
+    return await this.adminRepo.createAdmin(dto, hashedPassword);
   }
 }
