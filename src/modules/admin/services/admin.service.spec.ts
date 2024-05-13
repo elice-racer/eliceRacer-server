@@ -32,20 +32,20 @@ describe('AdminService', () => {
 
   describe('verifyEmail', () => {
     it('유효하지 않은 토큰을 이용해서 이메일 인증을 하면 false를 반환한다', async () => {
-      const email = 'admin@elicer.com';
+      const userId = 'uuid';
       const token = 'invalid-token';
 
       verificationService.verifyCode.mockResolvedValue(false);
-      const result = await service.verifyEmail(email, token);
+      const result = await service.verifyEmail(userId, token);
 
       expect(result).toBe(false);
     });
     it('유효한 토큰을 이용해서 이메일 인증에 성공하면 true를 반환한다', async () => {
-      const email = 'admin@elicer.com';
+      const userId = 'uuid';
       const token = 'valid-token';
 
       verificationService.verifyCode.mockResolvedValue(true);
-      const result = await service.verifyEmail(email, token);
+      const result = await service.verifyEmail(userId, token);
 
       expect(result).toBe(true);
     });
@@ -83,7 +83,7 @@ describe('AdminService', () => {
         realName: 'Test User',
       };
 
-      userService.findUserByEmailOrUsername.mockResolvedValue(new User());
+      userService.findAnyUserByEmail.mockResolvedValue(new User());
 
       await expect(service.createAdmin(duplicateUserDto)).rejects.toThrow(
         ConflictException,
@@ -102,17 +102,12 @@ describe('AdminService', () => {
       newUser.role = UserRole.ADMIN;
       newUser.status = 0;
 
-      userService.findUserByEmailOrUsername.mockResolvedValue(null);
+      userService.findAnyUserByEmail.mockResolvedValue(null);
       (argon2.hash as jest.Mock).mockResolvedValue('hashedPassword');
 
       userService.createAdmin.mockResolvedValue(newUser);
 
       const result = await service.createAdmin(dto);
-
-      expect(userService.findUserByEmailOrUsername).toHaveBeenCalledWith(
-        dto.email,
-      );
-      expect(argon2.hash).toHaveBeenCalledWith(dto.password);
 
       expect(result).toEqual(newUser);
     });

@@ -13,38 +13,39 @@ export class AdminService {
     private readonly mailService: MailService,
     private readonly verificationService: VerificationService,
   ) {}
-  async verifyEmail(email: string, token: string) {
-    const result = await this.verificationService.verifyCode(email, token);
+  async verifyEmail(id: string, token: string) {
+    const result = await this.verificationService.verifyCode(id, token);
     if (!result) return result;
 
+    this.verificationService.deleteVerificationCode(id);
     //TODO merge방식으로할지 update방식으로 할지 고민해보기
-    const admin = await this.userService.findUserByEmailOrUsername(email);
+    const admin = await this.userService.findAnyUserById(id);
 
-    if (result) this.userService.mergeAfterVerification(admin);
+    if (result) this.userService.mergeAfterVerificationEamil(admin);
     return result;
   }
 
   async signup(dto: CreateAdminDto) {
     const verificationToken = generateToken();
 
-    const [admin] = await Promise.all([
-      this.createAdmin(dto),
+    const admin = await this.createAdmin(dto);
+
+    await Promise.all([
       this.verificationService.setVerificationCode(
-        dto.email,
+        admin.id,
         verificationToken,
         60 * 60,
       ),
+      this.mailService.sendVerificationEmail(
+        admin,
+        verificationToken,
+        'admins',
+      ),
     ]);
-
-    await this.mailService.sendVerificationEmail(
-      admin,
-      verificationToken,
-      'admins',
-    );
   }
 
   async createAdmin(dto: CreateAdminDto) {
-    const user = await this.userService.findUserByEmailOrUsername(dto.email);
+    const user = await this.userService.findAnyUserByEmail(dto.email);
 
     if (user) throw new ConflictException('이미 가입한 회원입니다');
 
