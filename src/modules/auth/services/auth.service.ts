@@ -131,7 +131,7 @@ export class AuthService {
     }
 
     //기존에 등록된 유저는 상태만 변경
-    await this.userService.mergeAfterVerification(user);
+    await this.userService.mergeAfterVerificationPhone(user);
     return {
       email: user.email,
       realName: user.realName,

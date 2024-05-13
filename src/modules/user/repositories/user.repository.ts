@@ -25,8 +25,15 @@ export class UserRepository extends Repository<User> {
     return this.repo.save(user);
   }
 
+  async mergeAfterVerificationEamil(user: User): Promise<User> {
+    const mergedUser = this.repo.merge(user, {
+      status: UserStatus.VERIFIED_AND_REGISTERED,
+    });
+
+    return this.repo.save(mergedUser);
+  }
   // 인증번호 검증 후(등록된 회원)
-  async mergeAfterVerification(user: User): Promise<User> {
+  async mergeAfterVerificationPhone(user: User): Promise<User> {
     const mergedUser = this.repo.merge(user, {
       status: UserStatus.VERIFIED,
     });
