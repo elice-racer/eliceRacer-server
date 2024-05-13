@@ -13,6 +13,16 @@ export class AdminService {
     private readonly mailService: MailService,
     private readonly verificationService: VerificationService,
   ) {}
+  async verifyEmail(email: string, token: string) {
+    const result = await this.verificationService.verifyCode(email, token);
+    if (!result) return result;
+
+    //TODO merge방식으로할지 update방식으로 할지 고민해보기
+    const admin = await this.userService.findUserByEmailOrUsername(email);
+
+    if (result) this.userService.mergeAfterVerification(admin);
+    return result;
+  }
 
   async signup(dto: CreateAdminDto) {
     const verificationToken = generateToken();

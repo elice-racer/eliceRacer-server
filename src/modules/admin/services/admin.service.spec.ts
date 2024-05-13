@@ -13,6 +13,7 @@ describe('AdminService', () => {
   let service: AdminService;
   let userService: jest.Mocked<UserService>;
   let mailService: jest.Mocked<MailService>;
+  let verificationService: jest.Mocked<VerificationService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,10 +23,32 @@ describe('AdminService', () => {
     service = module.get<AdminService>(AdminService);
     userService = module.get(UserService);
     mailService = module.get(MailService);
+    verificationService = module.get(VerificationService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('verifyEmail', () => {
+    it('유효하지 않은 토큰을 이용해서 이메일 인증을 하면 false를 반환한다', async () => {
+      const email = 'admin@elicer.com';
+      const token = 'invalid-token';
+
+      verificationService.verifyCode.mockResolvedValue(false);
+      const result = await service.verifyEmail(email, token);
+
+      expect(result).toBe(false);
+    });
+    it('유효한 토큰을 이용해서 이메일 인증에 성공하면 true를 반환한다', async () => {
+      const email = 'admin@elicer.com';
+      const token = 'valid-token';
+
+      verificationService.verifyCode.mockResolvedValue(true);
+      const result = await service.verifyEmail(email, token);
+
+      expect(result).toBe(true);
+    });
   });
   describe('signUp', () => {
     it('관리자를 생성하고 이메일 인증 토큰을 이용해 인증 메일을 보낸다', async () => {
