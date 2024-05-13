@@ -18,4 +18,8 @@ export class VerificationRepository {
   ): Promise<void> {
     return this.cacheManager.set(key, value, ttl);
   }
+
+  async deleteVerificationCode(key: string): Promise<void> {
+    this.cacheManager.del(key);
+  }
 }

@@ -3,7 +3,11 @@ import { AuthService } from './auth.service';
 import { SmsService } from 'src/modules/sms/services/sms.service';
 import { UserService } from 'src/modules/user/services/user.service';
 import { User, UserStatus } from 'src/modules/user/entities';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { generateVerificationCode } from 'src/common/utils';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
@@ -216,6 +220,14 @@ describe('AuthService', () => {
   });
 
   describe('handleCodeVerification', () => {
+    it('유효하지 않은 번호로 인증을 시도하면 BadRequestException 반환한다', async () => {
+      verificationService.verifyCode.mockResolvedValue(false);
+
+      await expect(
+        service.handleCodeVerification('01012345678', '123456'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
     it('해당 번호로 회원가입 한 유저가 존재하지 않으면 비어있는 유저 정보를 반환한다', async () => {
       const verifyCodeResDto = {
         email: '',
@@ -226,7 +238,7 @@ describe('AuthService', () => {
       const phoneNumber = '01012345678';
       const inputCode = '123456';
 
-      verificationService.getVerificationCode.mockResolvedValue(inputCode);
+      verificationService.verifyCode.mockResolvedValue(true);
       userService.findAnyUserByPhoneWithTrack.mockResolvedValue(undefined);
 
       const result = await service.handleCodeVerification(
@@ -256,7 +268,7 @@ describe('AuthService', () => {
       const phoneNumber = '01012345678';
       const inputCode = '123456';
 
-      verificationService.getVerificationCode.mockResolvedValue(inputCode);
+      verificationService.verifyCode.mockResolvedValue(true);
       userService.findAnyUserByPhoneWithTrack.mockResolvedValue(user);
 
       const result = await service.handleCodeVerification(
@@ -265,6 +277,7 @@ describe('AuthService', () => {
       );
 
       expect(result).toEqual(verifyCodeResDto);
+      expect(userService.mergeAfterVerification).toHaveBeenCalledWith(user);
     });
   });
 

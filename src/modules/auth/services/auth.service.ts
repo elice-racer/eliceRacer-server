@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -109,10 +110,17 @@ export class AuthService {
     phoneNumber: string,
     inputCode: string,
   ): Promise<VerifyCodeResDto> {
-    await this.verificationService.verifyCode(phoneNumber, inputCode);
+    const result = await this.verificationService.verifyCode(
+      phoneNumber,
+      inputCode,
+    );
+    if (!result) throw new BadRequestException('유효하지 않은 번호입니다');
+    await this.verificationService.deleteVerificationCode(phoneNumber);
+
     const user =
       await this.userService.findAnyUserByPhoneWithTrack(phoneNumber);
 
+    // 등록되어있지 않은 유저는 번호 등록
     if (!user) {
       await this.userService.registerPhone(phoneNumber);
       return {
@@ -121,7 +129,9 @@ export class AuthService {
         tracks: [],
       };
     }
-    await this.userService.mergePhone(user);
+
+    //기존에 등록된 유저는 상태만 변경
+    await this.userService.mergeAfterVerification(user);
     return {
       email: user.email,
       realName: user.realName,
