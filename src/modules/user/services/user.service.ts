@@ -44,8 +44,8 @@ export class UserService {
   }
 
   // 번호 검증 후 (등록된 유저) status 변경
-  async mergePhone(user: User) {
-    return this.userRepo.mergePhone(user);
+  async mergeAfterVerification(user: User) {
+    return this.userRepo.mergeAfterVerification(user);
   }
   // 번호 검증 후 (등록 안 된 유저) status 변경
   async registerPhone(phoneNumber: string) {

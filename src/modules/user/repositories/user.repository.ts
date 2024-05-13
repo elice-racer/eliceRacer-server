@@ -26,18 +26,17 @@ export class UserRepository extends Repository<User> {
   }
 
   // 인증번호 검증 후(등록된 회원)
-  async mergePhone(user: User): Promise<User> {
-    const mergedPhone = this.repo.merge(user, {
+  async mergeAfterVerification(user: User): Promise<User> {
+    const mergedUser = this.repo.merge(user, {
       status: UserStatus.VERIFIED,
     });
 
-    return this.repo.save(mergedPhone);
+    return this.repo.save(mergedUser);
   }
 
   async findUserByEmailOrUsername(
     identifier: string,
   ): Promise<User> | undefined {
-    console.log(identifier);
     return this.repo
       .createQueryBuilder('users')
       .where(
