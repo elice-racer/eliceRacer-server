@@ -277,7 +277,9 @@ describe('AuthService', () => {
       );
 
       expect(result).toEqual(verifyCodeResDto);
-      expect(userService.mergeAfterVerification).toHaveBeenCalledWith(user);
+      expect(userService.mergeAfterVerificationPhone).toHaveBeenCalledWith(
+        user,
+      );
     });
   });
 

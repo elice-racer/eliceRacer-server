@@ -43,9 +43,12 @@ export class UserService {
     return this.userRepo.mergeUser(user, dto, hashedPassword);
   }
 
+  async mergeAfterVerificationEamil(user: User) {
+    return this.userRepo.mergeAfterVerificationEamil(user);
+  }
   // 번호 검증 후 (등록된 유저) status 변경
-  async mergeAfterVerification(user: User) {
-    return this.userRepo.mergeAfterVerification(user);
+  async mergeAfterVerificationPhone(user: User) {
+    return this.userRepo.mergeAfterVerificationPhone(user);
   }
   // 번호 검증 후 (등록 안 된 유저) status 변경
   async registerPhone(phoneNumber: string) {
@@ -57,6 +60,9 @@ export class UserService {
     return this.userRepo.createAdmin(dto, hashPassword);
   }
 
+  async findAnyUserByEmail(email: string): Promise<User> | undefined {
+    return this.userRepo.findOneBy({ email });
+  }
   async findUserByEmailOrUsername(
     identifier: string,
   ): Promise<User> | undefined {
@@ -76,6 +82,9 @@ export class UserService {
     return this.userRepo.findAnyUserByPhoneWithTrack(phoneNumber);
   }
 
+  async findAnyUserById(userId: string): Promise<User> | undefined {
+    return this.userRepo.findOneBy({ id: userId });
+  }
   async findUserById(userId: string): Promise<User> | undefined {
     return this.userRepo.findOne({
       where: { id: userId, status: UserStatus.VERIFIED_AND_REGISTERED },
