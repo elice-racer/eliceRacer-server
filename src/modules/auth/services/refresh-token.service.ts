@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
+import { RefreshTokenRepository } from '../repositories';
 
 @Injectable()
 export class RefreshTokenService {
