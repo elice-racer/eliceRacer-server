@@ -1,9 +1,13 @@
 import { User, UserRole, UserStatus } from 'src/modules/user/entities';
 import { UserRepository } from 'src/modules/user/repositories';
 import { CreateAdminDto } from '../dto';
+import { InjectRepository } from '@nestjs/typeorm';
 
 export class AdminRepository {
-  constructor(private readonly userRepo: UserRepository) {}
+  constructor(
+    @InjectRepository(UserRepository)
+    private userRepo: UserRepository,
+  ) {}
 
   async findAnyAdminById(userId: string): Promise<User> | undefined {
     return this.userRepo.findOneBy({ id: userId });
