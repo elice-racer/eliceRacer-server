@@ -5,7 +5,6 @@ import { generateVerificationCode } from 'src/common/utils';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
-import { v4 as uuidv4 } from 'uuid';
 import {
   ENV_ACCESS_TOKEN_EXPIRY,
   ENV_JWT_SECRET_KEY,
@@ -17,6 +16,7 @@ import { VerificationService } from './verification.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { AuthRepository } from '../repositories';
 import { BusinessException } from 'src/exception';
+import { genId } from 'src/common/utils/id-generator';
 
 @Injectable()
 export class AuthService {
@@ -202,7 +202,7 @@ export class AuthService {
     return {
       sub: userId,
       iat: Math.floor(Date.now() / 1000),
-      jti: uuidv4(),
+      jti: genId(),
     };
   }
 }

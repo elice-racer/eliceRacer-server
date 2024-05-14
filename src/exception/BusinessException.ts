@@ -1,4 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
+import { genId } from 'src/common/utils/id-generator';
 
 export type ErrorDomain =
   | 'generic'
@@ -19,15 +20,7 @@ export class BusinessException extends Error {
     public readonly status: HttpStatus,
   ) {
     super(message);
-    this.id = BusinessException.genId();
+    this.id = genId();
     this.timestamp = new Date();
-  }
-
-  private static genId(length = 12): string {
-    const p = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    return [...Array(length)].reduce(
-      (a) => a + p[Math.floor(Math.random() * p.length)],
-      '',
-    );
   }
 }
