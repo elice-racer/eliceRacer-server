@@ -10,6 +10,6 @@ import { TrackModule } from '../track/track.module';
   imports: [TypeOrmModule.forFeature([User]), TrackModule],
   controllers: [UserController],
   providers: [UserService, UserRepository],
-  exports: [UserService],
+  exports: [UserService, UserRepository],
 })
 export class UserModule {}

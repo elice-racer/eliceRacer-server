@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from '../dto/create-admin.dto';
-import { User, UserRole } from 'src/modules/user/entities';
-import { ConflictException } from '@nestjs/common';
+import { User, UserRole, UserStatus } from 'src/modules/user/entities';
 import * as argon2 from 'argon2';
 import { generateToken } from 'src/common/utils/verification-token-genertator';
 import { MailService } from 'src/modules/mail/mail.service';
 import { VerificationService } from 'src/modules/auth/services/verification.service';
 import { AdminRepository } from '../repositories';
+import { BusinessException } from 'src/exception';
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -53,6 +53,10 @@ describe('AdminService', () => {
       const result = await service.verifyEmail(userId, token);
 
       expect(result).toBe(true);
+      expect(adminRepo.updateStatusAfterVerification).toHaveBeenCalledWith(
+        userId,
+        UserStatus.VERIFIED_AND_REGISTERED,
+      );
     });
   });
   describe('signUp', () => {
@@ -81,7 +85,7 @@ describe('AdminService', () => {
     });
   });
   describe('createAdmin', () => {
-    it('이미 등록된 이메일 주소로 등록을 시도하면 ConflictException 에러가 발생한다 ', async () => {
+    it('이미 등록된 이메일 주소로 등록을 시도하면 BusinessException 에러가 발생한다 ', async () => {
       const duplicateUserDto: CreateAdminDto = {
         email: 'test@elicer.com',
         password: 'test',
@@ -91,7 +95,7 @@ describe('AdminService', () => {
       adminRepo.findAnyAdminByEmail.mockResolvedValue(new User());
 
       await expect(service.createAdmin(duplicateUserDto)).rejects.toThrow(
-        ConflictException,
+        BusinessException,
       );
     });
 

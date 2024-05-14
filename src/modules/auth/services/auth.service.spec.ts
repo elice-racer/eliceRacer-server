@@ -2,21 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { SmsService } from 'src/modules/sms/services/sms.service';
 import { UserService } from 'src/modules/user/services/user.service';
-import { User, UserStatus } from 'src/modules/user/entities';
-import {
-  BadRequestException,
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { generateVerificationCode } from 'src/common/utils';
-import * as argon2 from 'argon2';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { Track } from 'src/modules/track/entities';
-import { VerifyCodeResDto } from '../dto';
 import { RefreshTokenService } from './refresh-token.service';
+import { User, UserStatus } from 'src/modules/user/entities';
 import { VerificationService } from './verification.service';
 import { AuthRepository } from '../repositories';
+import { Track } from 'src/modules/track/entities';
+import { VerifyCodeResDto } from '../dto';
+import { BusinessException } from 'src/exception';
+import { generateVerificationCode } from 'src/common/utils';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import * as argon2 from 'argon2';
 
 jest.unmock('./auth.service');
 
@@ -75,21 +71,21 @@ describe('AuthService', () => {
   });
 
   describe('refresh', () => {
-    it('유효하지 않은 refresh token으로 재발급을 시도하면 UnauthorizedException를 반환한다', async () => {
+    it('유효하지 않은 refresh token으로 재발급을 시도하면 BusinessException를 반환한다', async () => {
       const invalidRefreshToken = 'invalid-refresh-token';
 
       await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
-        UnauthorizedException,
+        BusinessException,
       );
     });
 
-    it('유효기간이 지난 refresh token으로 재발급을 시도하면 UnauthorizedException를 반환한다', async () => {
+    it('유효기간이 지난 refresh token으로 재발급을 시도하면 BusinessException를 반환한다', async () => {
       const invalidRefreshToken = 'invalid-refresh-token';
 
       refreshTokenService.getRefreshToken.mockResolvedValue(null);
 
       await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
-        UnauthorizedException,
+        BusinessException,
       );
     });
     it('유효한 리프레시 토큰을 이용해서 액세스 토큰을 재발급한다', async () => {
@@ -204,7 +200,7 @@ describe('AuthService', () => {
       expect(result).toEqual(user);
     });
 
-    it('비밀번호가 틀릴 경우 UnauthorizedException를 반환한다', async () => {
+    it('비밀번호가 틀릴 경우 BusinessException를 반환한다', async () => {
       const email = 'test@test.com';
       const password = 'wrongPassword';
       const hashedPassword = 'hashedPassword';
@@ -217,7 +213,7 @@ describe('AuthService', () => {
       (argon2.verify as jest.Mock).mockResolvedValue(false);
 
       await expect(service.validateUser(email, password)).rejects.toThrow(
-        UnauthorizedException,
+        BusinessException,
       );
     });
   });
@@ -228,7 +224,7 @@ describe('AuthService', () => {
 
       await expect(
         service.handleCodeVerification('01012345678', '123456'),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(BusinessException);
     });
 
     it('해당 번호로 회원가입 한 유저가 존재하지 않으면 비어있는 유저 정보를 반환한다', async () => {
@@ -280,7 +276,10 @@ describe('AuthService', () => {
       );
 
       expect(result).toEqual(verifyCodeResDto);
-      expect(authRepo.mergeAfterVerification).toHaveBeenCalledWith(user);
+      expect(authRepo.updateUserStatus).toHaveBeenCalledWith(
+        user.id,
+        UserStatus.VERIFIED,
+      );
     });
   });
 
@@ -302,14 +301,14 @@ describe('AuthService', () => {
   });
 
   describe('authencticatePhoneNumber', () => {
-    it('회원가입이 되어있으면 ConflictException 반환한다', async () => {
+    it('회원가입이 되어있으면 BusinessException 반환한다', async () => {
       const user = new User();
 
       authRepo.findUserByPhoneNumber.mockResolvedValue(user);
 
       await expect(
         service.authencticatePhoneNumber('01012345678'),
-      ).rejects.toThrow(ConflictException);
+      ).rejects.toThrow(BusinessException);
     });
 
     it('번호로 회원가입이 되어있지 않으면 유저 정보를 반환한다', async () => {

@@ -34,6 +34,9 @@ export class AuthRepository {
     return this.userRepo.save(user);
   }
 
+  async updateUserStatus(userId: string, newStatus: UserStatus): Promise<void> {
+    await this.userRepo.update(userId, { status: newStatus });
+  }
   async mergeAfterVerification(user: User): Promise<User> {
     const mergedUser = this.userRepo.merge(user, {
       status: UserStatus.VERIFIED,

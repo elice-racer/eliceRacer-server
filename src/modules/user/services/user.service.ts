@@ -1,13 +1,9 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User, UserStatus } from '../entities';
 import { CreateUserDto } from '../dto';
 import { hashPassword } from 'src/common/utils/password-hash';
+import { BusinessException } from 'src/exception';
 
 @Injectable()
 export class UserService {
@@ -15,7 +11,14 @@ export class UserService {
 
   async validate(userId: string): Promise<User> | undefined {
     const user = await this.findUserById(userId);
-    if (!user) throw new NotFoundException('존재하지 않는 회원입니다');
+    if (!user)
+      throw new BusinessException(
+        'user',
+        `유저를 찾을 수 없습니다`,
+        `유저를 찾을 수 없습니다`,
+        HttpStatus.BAD_REQUEST,
+      );
+
     return user;
   }
 
@@ -24,10 +27,20 @@ export class UserService {
     const user = await this.findAnyUserByPhone(dto.phoneNumber);
 
     if (!user || user?.status === 0)
-      throw new UnauthorizedException('핸드폰 인증을 완료해주세요');
+      throw new BusinessException(
+        'user',
+        `핸드폰 미인증`,
+        `핸드폰 인증을 완료해주세요`,
+        HttpStatus.UNAUTHORIZED,
+      );
 
     if (user?.username === dto.username && user.status === 2)
-      throw new ConflictException('이미 존재하는 아이디입니다');
+      throw new BusinessException(
+        'user',
+        `이미 가입된 아이디`,
+        `이미 존재하는 아이디 입니다`,
+        HttpStatus.CONFLICT,
+      );
     const hashedPassword = await hashPassword(dto.password);
 
     await this.mergeUser(user, dto, hashedPassword);
