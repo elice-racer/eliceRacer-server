@@ -7,5 +7,5 @@ export class Track extends BaseEntity {
   @Column()
   trackName: string;
   @Column()
-  generation: number;
+  generation: string;
 }

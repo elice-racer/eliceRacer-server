@@ -2,7 +2,8 @@ import { EntityManager, Repository } from 'typeorm';
 import { Track } from '../entities';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { TrackDto } from '../dto';
-import { NotFoundException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
+import { BusinessException } from 'src/exception/BusinessException';
 
 export class TrackRespository extends Repository<Track> {
   constructor(
@@ -25,8 +26,13 @@ export class TrackRespository extends Repository<Track> {
   async updateTrack(trackId: string, dto: TrackDto): Promise<Track> {
     const track = await this.repo.findOneBy({ id: trackId });
 
-    if (!track) throw new NotFoundException('트랙이 존재하지 않습니다');
-
+    if (!track)
+      throw new BusinessException(
+        'track',
+        `트랙을 찾을 수 없습니다.`,
+        `트랙을 찾을 수 없습니다. 먼저 트랙을 생성하세요.`,
+        HttpStatus.NOT_FOUND,
+      );
     track.trackName = dto.trackName;
     track.generation = dto.generation;
 
