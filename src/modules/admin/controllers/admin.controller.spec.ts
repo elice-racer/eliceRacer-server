@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminController } from './admin.controller';
 import { AdminService } from '../services/admin.service';
 import { MailService } from 'src/modules/mail/mail.service';
-import { VerifyEmailRepository } from '../repositories/verify-email.repository';
-import { UserService } from 'src/modules/user/services/user.service';
+import { VerificationService } from 'src/modules/auth/services/verification.service';
+import { AdminRepository } from '../repositories';
 
 describe('AdminController', () => {
   let controller: AdminController;
@@ -13,9 +13,9 @@ describe('AdminController', () => {
       controllers: [AdminController],
       providers: [
         AdminService,
-        VerifyEmailRepository,
-        UserService,
         MailService,
+        VerificationService,
+        AdminRepository,
       ],
     }).compile();
 

@@ -1,4 +1,4 @@
-export type TrackDto = {
+export type TrackResDto = {
   trackName: string;
   generation: string;
 };

@@ -1,45 +1,66 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { UserService } from 'src/modules/user/services/user.service';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import * as argon2 from 'argon2';
 import { generateToken } from 'src/common/utils/verification-token-genertator';
 import { MailService } from 'src/modules/mail/mail.service';
-import { VerifyEmailRepository } from '../repositories/verify-email.repository';
+import { VerificationService } from 'src/modules/auth/services/verification.service';
+import { AdminRepository } from '../repositories';
+import { UserStatus } from 'src/modules/user/entities';
+import { BusinessException } from 'src/exception';
 
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly userService: UserService,
     private readonly mailService: MailService,
-    private readonly verifyEmailRepo: VerifyEmailRepository,
+    private readonly verificationService: VerificationService,
+    private readonly adminRepo: AdminRepository,
   ) {}
+  async verifyEmail(id: string, token: string) {
+    const result = await this.verificationService.verifyCode(id, token);
+    if (!result) return result;
+
+    this.verificationService.deleteVerificationCode(id);
+
+    if (result)
+      this.adminRepo.updateStatusAfterVerification(
+        id,
+        UserStatus.VERIFIED_AND_REGISTERED,
+      );
+    return result;
+  }
 
   async signup(dto: CreateAdminDto) {
     const verificationToken = generateToken();
 
-    const [admin] = await Promise.all([
-      this.createAdmin(dto),
-      this.verifyEmailRepo.setRefreshToken(
-        dto.email,
+    const admin = await this.createAdmin(dto);
+
+    await Promise.all([
+      this.verificationService.setVerificationCode(
+        admin.id,
         verificationToken,
         60 * 60,
       ),
+      this.mailService.sendVerificationEmail(
+        admin,
+        verificationToken,
+        'admins',
+      ),
     ]);
-
-    await this.mailService.sendVerificationEmail(
-      admin,
-      verificationToken,
-      'admins',
-    );
   }
 
   async createAdmin(dto: CreateAdminDto) {
-    const user = await this.userService.findUserByEmailOrUsername(dto.email);
+    const user = await this.adminRepo.findAnyAdminByEmail(dto.email);
 
-    if (user) throw new ConflictException('이미 가입한 회원입니다');
+    if (user)
+      throw new BusinessException(
+        'admin',
+        `${dto.email} already exist`,
+        `${dto.email} already exist`,
+        HttpStatus.BAD_REQUEST,
+      );
 
     const hashedPassword = await argon2.hash(dto.password);
 
-    return await this.userService.createAdmin(dto, hashedPassword);
+    return await this.adminRepo.createAdmin(dto, hashedPassword);
   }
 }

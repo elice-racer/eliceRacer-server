@@ -3,13 +3,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 
 @Injectable()
-export class VerifyEmailRepository {
+export class VerificationRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  async getRefreshToken(key: string) {
+  //TODO return값
+  async getVerificationCode(key: string): Promise<string> {
     return this.cacheManager.get(key);
   }
-  async setRefreshToken(
+  async setVerificationCode(
     key: string,
     value: string,
     ttl: number,
@@ -17,7 +18,7 @@ export class VerifyEmailRepository {
     return this.cacheManager.set(key, value, ttl);
   }
 
-  async deleteRefreshToken(key: string): Promise<void> {
+  async deleteVerificationCode(key: string): Promise<void> {
     this.cacheManager.del(key);
   }
 }
