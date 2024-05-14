@@ -8,13 +8,11 @@ describe('TrackService', () => {
   let service: TrackService;
   let trackRepo: jest.Mocked<TrackRespository>;
   const dto: TrackDto = {
-    trackName: 'Track',
-    generation: '1',
+    trackName: 'Track1',
   };
 
   const resDto: TrackResDto = {
-    trackName: 'Track',
-    generation: '1',
+    trackName: 'Track1',
   };
 
   beforeEach(async () => {
@@ -34,7 +32,6 @@ describe('TrackService', () => {
     it('track을 생성한다', async () => {
       const track = new Track();
       track.trackName = resDto.trackName;
-      track.generation = resDto.generation;
 
       trackRepo.createTrack.mockResolvedValue(track);
       const result = await service.createTrack(dto);
@@ -47,7 +44,6 @@ describe('TrackService', () => {
     it('track을 업데이트 한다', async () => {
       const track = new Track();
       track.trackName = resDto.trackName;
-      track.generation = resDto.generation;
       trackRepo.updateTrack.mockResolvedValue(track);
 
       const result = await service.updateTrack('trackId', dto);
