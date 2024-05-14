@@ -6,8 +6,9 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { BusinessException, ErrorDomain } from './BusinessException';
+import { appendFileSync, existsSync, mkdirSync } from 'fs';
+import { User } from 'src/modules/user/entities';
 
 export interface ApiError {
   id: string;
@@ -19,6 +20,13 @@ export interface ApiError {
 @Catch(Error)
 export class BusinessExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(BusinessExceptionFilter.name);
+  private readonly logDirectory = './logs';
+  private readonly errorLogPath = `${this.logDirectory}/error.log`;
+  constructor() {
+    if (!existsSync(this.logDirectory)) {
+      mkdirSync(this.logDirectory, { recursive: true });
+    }
+  }
 
   catch(exception: Error, host: ArgumentsHost) {
     let body: ApiError;
@@ -53,12 +61,20 @@ export class BusinessExceptionFilter implements ExceptionFilter {
     }
 
     const ctx = host.switchToHttp();
-    const request = ctx.getRequest<Request>();
-    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest();
+    const response = ctx.getResponse();
 
-    console.log(stack);
-    console.log(typeof stack);
+    const { ip, method, originalUrl } = request;
 
+    const userAgent = request.headers['user-agent'] || '';
+    const user = request.user as User;
+    const userId = user?.id || 'Anonymous';
+    const errorLogEntry = `${new Date().toISOString()} - ERROR - ${ip} - ${userId} - ${body.id} - ${method} ${originalUrl} - ${userAgent} - Error Message: ${body.message}\n`;
+    try {
+      appendFileSync(this.errorLogPath, errorLogEntry);
+    } catch (err) {
+      this.logger.error(`Failed to write to error log: ${err.message}`);
+    }
     this.logger.error(
       `exception: ${JSON.stringify({
         path: request.url,

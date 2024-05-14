@@ -30,4 +30,15 @@ export class UserRepository extends Repository<User> {
 
     return this.repo.save(mergedUser);
   }
+
+  async findUserByIdWithTracks(userId: string): Promise<User> | undefined {
+    return this.repo
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.tracks', 'tracks')
+      .where('(users.id = :userId) AND users.status = :status', {
+        userId,
+        status: UserStatus.VERIFIED_AND_REGISTERED,
+      })
+      .getOne();
+  }
 }
