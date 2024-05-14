@@ -13,12 +13,11 @@ export class AdminRepository {
     return this.userRepo.findOneBy({ id: userId });
   }
 
-  async mergeAfterVerification(admin: User): Promise<User> {
-    const mergedUser = this.userRepo.merge(admin, {
-      status: UserStatus.VERIFIED_AND_REGISTERED,
-    });
-
-    return this.userRepo.save(mergedUser);
+  async updateStatusAfterVerification(
+    userId: string,
+    newStatus: UserStatus,
+  ): Promise<void> {
+    await this.userRepo.update(userId, { status: newStatus });
   }
 
   async findAnyAdminByEmail(email: string): Promise<User> | undefined {
