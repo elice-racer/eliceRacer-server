@@ -4,11 +4,7 @@ import { UserRepository } from '../repositories';
 import { CreateUserDto } from '../dto';
 import { User, UserStatus } from '../entities';
 import { hashPassword } from 'src/common/utils/password-hash';
-import {
-  ConflictException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BusinessException } from 'src/exception';
 
 jest.unmock('./user.service');
 
@@ -54,7 +50,7 @@ describe('UserService', () => {
       const userId = 'uuid';
       jest.spyOn(service, 'findUserById').mockResolvedValue(undefined);
 
-      await expect(service.validate(userId)).rejects.toThrow(NotFoundException);
+      await expect(service.validate(userId)).rejects.toThrow(BusinessException);
     });
   });
 
@@ -66,18 +62,18 @@ describe('UserService', () => {
       jest.spyOn(service, 'findAnyUserByPhone').mockResolvedValue(user);
 
       await expect(service.handleSignUp(createUserDto)).rejects.toThrow(
-        ConflictException,
+        BusinessException,
       );
     });
 
-    it('번호 인증을 하지 않은 유저는 UnauthorizedException을 반환한다', async () => {
+    it('번호 인증을 하지 않은 유저는 BusinessException을 반환한다', async () => {
       const user = new User();
       user.status = 0;
       user.username = createUserDto.username;
       jest.spyOn(service, 'findAnyUserByPhone').mockResolvedValue(user);
 
       await expect(service.handleSignUp(createUserDto)).rejects.toThrow(
-        UnauthorizedException,
+        BusinessException,
       );
     });
     it('번호 인증 완료된 유저는 업데이트 한다', async () => {

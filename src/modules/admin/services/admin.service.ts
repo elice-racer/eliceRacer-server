@@ -1,10 +1,12 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import * as argon2 from 'argon2';
 import { generateToken } from 'src/common/utils/verification-token-genertator';
 import { MailService } from 'src/modules/mail/mail.service';
 import { VerificationService } from 'src/modules/auth/services/verification.service';
 import { AdminRepository } from '../repositories';
+import { UserStatus } from 'src/modules/user/entities';
+import { BusinessException } from 'src/exception';
 
 @Injectable()
 export class AdminService {
@@ -18,10 +20,12 @@ export class AdminService {
     if (!result) return result;
 
     this.verificationService.deleteVerificationCode(id);
-    //TODO merge방식으로할지 update방식으로 할지 고민해보기
-    const admin = await this.adminRepo.findAnyAdminById(id);
 
-    if (result) this.adminRepo.mergeAfterVerification(admin);
+    if (result)
+      this.adminRepo.updateStatusAfterVerification(
+        id,
+        UserStatus.VERIFIED_AND_REGISTERED,
+      );
     return result;
   }
 
@@ -47,7 +51,13 @@ export class AdminService {
   async createAdmin(dto: CreateAdminDto) {
     const user = await this.adminRepo.findAnyAdminByEmail(dto.email);
 
-    if (user) throw new ConflictException('이미 가입한 회원입니다');
+    if (user)
+      throw new BusinessException(
+        'admin',
+        `${dto.email} already exist`,
+        `${dto.email} already exist`,
+        HttpStatus.BAD_REQUEST,
+      );
 
     const hashedPassword = await argon2.hash(dto.password);
 

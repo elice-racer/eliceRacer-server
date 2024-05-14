@@ -1,6 +1,7 @@
 import {
   ExecutionContext,
-  ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -17,10 +18,9 @@ export class AdminGuard extends AuthGuard('jwt') {
     const user = request.user;
 
     if (user?.role === UserRole.ADMIN) {
-      // 역할 확인 조건을 문자열로 명확하게 비교
       return true;
     }
 
-    throw new ForbiddenException('접근 권한이 없습니다');
+    throw new HttpException('접근 권한이 없습니다', HttpStatus.FORBIDDEN);
   }
 }

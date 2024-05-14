@@ -1,11 +1,6 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { SmsService } from 'src/modules/sms/services/sms.service';
-import { User } from 'src/modules/user/entities';
+import { User, UserStatus } from 'src/modules/user/entities';
 import { generateVerificationCode } from 'src/common/utils';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -21,6 +16,7 @@ import { LoginResDto, VerifyCodeResDto } from '../dto';
 import { VerificationService } from './verification.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { AuthRepository } from '../repositories';
+import { BusinessException } from 'src/exception';
 
 @Injectable()
 export class AuthService {
@@ -48,17 +44,33 @@ export class AuthService {
     });
 
     if (!payloadRes || !payloadRes.sub) {
-      throw new UnauthorizedException('유효하지 않은 토큰입니다');
+      throw new BusinessException(
+        'auth',
+        `유효하지 않은 토큰`,
+        `유효하지 않은 토큰`,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     const isNotExpired = await this.refreshTokenService.getRefreshToken(
       payloadRes.jti,
     );
 
     if (!isNotExpired)
-      throw new UnauthorizedException('유효하지 않은 토큰입니다');
+      throw new BusinessException(
+        'auth',
+        `유효하지 않은 토큰`,
+        `유효하지 않은 토큰`,
+        HttpStatus.UNAUTHORIZED,
+      );
 
     const user = await this.authRepo.findUserById(payloadRes.sub);
-    if (!user) throw new UnauthorizedException('유효하지 않은 유저입니다');
+    if (!user)
+      throw new BusinessException(
+        'auth',
+        `유저를 찾을 수 없습니다`,
+        `유저를 찾을 수 없습니다`,
+        HttpStatus.BAD_REQUEST,
+      );
 
     const payload: TokenPayload = this.createTokenPayload(user.id);
 
@@ -101,7 +113,12 @@ export class AuthService {
     const user = await this.authRepo.findUserByEmailOrUsername(identifier);
 
     if (!user || !(await argon2.verify(user.password, password)))
-      throw new UnauthorizedException('유효하지 않은 유저입니다');
+      throw new BusinessException(
+        'auth',
+        `유저를 찾을 수 없습니다`,
+        `유저를 찾을 수 없습니다`,
+        HttpStatus.BAD_REQUEST,
+      );
 
     return user;
   }
@@ -115,7 +132,13 @@ export class AuthService {
       phoneNumber,
       inputCode,
     );
-    if (!result) throw new BadRequestException('유효하지 않은 번호입니다');
+    if (!result)
+      throw new BusinessException(
+        'auth',
+        `유효하지 않은 번호입니다`,
+        `유효하지 않은 번호입니다`,
+        HttpStatus.BAD_REQUEST,
+      );
     await this.verificationService.deleteVerificationCode(phoneNumber);
 
     const user = await this.authRepo.findAnyUserByPhoneWithTrack(phoneNumber);
@@ -131,7 +154,7 @@ export class AuthService {
     }
 
     //기존에 등록된 유저는 상태만 변경
-    await this.authRepo.mergeAfterVerification(user);
+    await this.authRepo.updateUserStatus(user.id, UserStatus.VERIFIED);
     return {
       email: user.email,
       realName: user.realName,
@@ -164,7 +187,13 @@ export class AuthService {
   async authencticatePhoneNumber(phoneNumber: string): Promise<string> {
     const user = await this.authRepo.findUserByPhoneNumber(phoneNumber);
 
-    if (user) throw new ConflictException('이미 사용하고 있는 번호 입니다.');
+    if (user)
+      throw new BusinessException(
+        'auth',
+        `이미 가입된 번호입니다`,
+        `이미 가입된 번호입니다`,
+        HttpStatus.CONFLICT,
+      );
 
     return 'OK';
   }
