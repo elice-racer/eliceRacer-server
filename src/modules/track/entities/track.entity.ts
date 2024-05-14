@@ -1,11 +1,8 @@
 import { BaseEntity } from 'src/common/entity';
-import { Column, Entity, Unique } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'tracks' })
-@Unique(['trackName', 'generation'])
 export class Track extends BaseEntity {
   @Column()
   trackName: string;
-  @Column()
-  generation: string;
 }
