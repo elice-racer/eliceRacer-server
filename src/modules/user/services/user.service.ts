@@ -1,13 +1,65 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User, UserStatus } from '../entities';
-import { CreateUserDto } from '../dto';
+import { CreateUserDto, updateReqDto } from '../dto';
 import { hashPassword } from 'src/common/utils/password-hash';
 import { BusinessException } from 'src/exception';
+import { TrackRespository } from 'src/modules/track/repositories';
+import { In } from 'typeorm';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepo: UserRepository) {}
+  constructor(
+    private readonly userRepo: UserRepository,
+    private readonly trackRepo: TrackRespository,
+  ) {}
+
+  async updateMypage(userId: string, dto: updateReqDto) {
+    const user = await this.userRepo.findUserByIdWithTracks(userId);
+    if (!user) {
+      throw new BusinessException(
+        'user',
+        `유저를 찾을 수 없습니다`,
+        `유저를 찾을 수 없습니다`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    console.log(dto);
+  }
+
+  async updateUserTracks(userId: string, trackNames: string[]): Promise<User> {
+    const user = await this.userRepo.findUserByIdWithTracks(userId);
+    if (!user) {
+      throw new BusinessException(
+        'user',
+        `유저를 찾을 수 없습니다`,
+        `유저를 찾을 수 없습니다`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    console.log(user, '!!!!!!!!');
+
+    const tracks = await this.trackRepo.find({
+      where: { trackName: In(trackNames) },
+    });
+
+    if (tracks.length !== trackNames.length) {
+      const foundTrackNames = tracks.map((track) => track.trackName);
+      const missingTrackNames = trackNames.filter(
+        (trackName) => !foundTrackNames.includes(trackName),
+      );
+      throw new BusinessException(
+        'user',
+        `트랙을 찾을 수 없습니다: ${missingTrackNames.join(', ')}`,
+        `트랙을 찾을 수 없습니다: ${missingTrackNames.join(', ')}`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    user.tracks = tracks;
+    return await this.userRepo.save(user);
+  }
 
   async validate(userId: string): Promise<User> | undefined {
     const user = await this.findUserById(userId);

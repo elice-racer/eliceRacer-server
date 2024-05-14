@@ -161,7 +161,6 @@ export class AuthService {
       tracks: user.tracks
         ? user.tracks.map((track) => ({
             trackName: track.trackName,
-            generation: track.generation,
           }))
         : [],
     };

@@ -30,9 +30,7 @@ export class MemberService {
           (key) => key.includes('핸드폰') || key.includes('휴대폰'),
         ) || '';
       const trackNameKey =
-        Object.keys(item).find((key) => key.includes('트랙이름')) || '';
-      const generationKey =
-        Object.keys(item).find((key) => key.includes('기수')) || '';
+        Object.keys(item).find((key) => key.includes('트랙')) || '';
 
       // 핸드폰 번호에서 하이픈 제거
       const phoneNumber = item[phoneKey].replace(/-/g, '');
@@ -42,7 +40,6 @@ export class MemberService {
         realName: item[nameKey],
         phoneNumber, // 하이픈이 제거된 핸드폰 번호
         trackName: item[trackNameKey],
-        generation: item[generationKey],
       };
     });
 
@@ -52,19 +49,19 @@ export class MemberService {
 
     try {
       for (const item of processedData) {
-        const { email, realName, trackName, generation, phoneNumber } = item;
+        const { email, realName, trackName, phoneNumber } = item;
 
         // 트랙 정보 확인
         const track = await this.trackRepo.findOne({
-          where: { trackName, generation },
+          where: { trackName },
         });
 
         // 트랙이 존재하지 않는 경우 에러 발생
         if (!track) {
           throw new BusinessException(
             'track',
-            `트랙 '${trackName}' (기수 ${generation})를 찾을 수 없습니다.`,
-            `트랙 '${trackName}' (기수 ${generation})를 찾을 수 없습니다. 먼저 트랙을 생성하세요.`,
+            `트랙 '${trackName})'을 찾을 수 없습니다.`,
+            `트랙 '${trackName})'을 찾을 수 없습니다. 먼저 트랙을 생성하세요.`,
             HttpStatus.NOT_FOUND,
           );
         }

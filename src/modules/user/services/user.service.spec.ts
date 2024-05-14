@@ -1,16 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { UserRepository } from '../repositories';
-import { CreateUserDto } from '../dto';
+import { CreateUserDto, updateReqDto } from '../dto';
 import { User, UserStatus } from '../entities';
 import { hashPassword } from 'src/common/utils/password-hash';
 import { BusinessException } from 'src/exception';
+import { TrackRespository } from 'src/modules/track/repositories';
+import { Track } from 'src/modules/track/entities';
 
 jest.unmock('./user.service');
 
 describe('UserService', () => {
   let service: UserService;
   let userRepo: jest.Mocked<UserRepository>;
+  let trackRepo: jest.Mocked<TrackRespository>;
 
   const createUserDto: CreateUserDto = {
     username: 'testId',
@@ -21,15 +24,70 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService, UserRepository],
+      providers: [UserService, UserRepository, TrackRespository],
     }).compile();
 
     service = module.get<UserService>(UserService);
     userRepo = module.get(UserRepository);
+    trackRepo = module.get(TrackRespository);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('updateMyPage', () => {
+    const dto: updateReqDto = {
+      realName: 'name',
+      position: 'backend',
+      github: 'gihub-address',
+    };
+    it('사용자가 존재하지 않으면 BusinessException을 반환한다', async () => {
+      jest.spyOn(service, 'findUserById').mockResolvedValue(undefined);
+
+      await expect(service.updateMypage('uuid', dto)).rejects.toThrow(
+        BusinessException,
+      );
+    });
+
+    // it('유저의 정보를 업데이트 한다', async () => {
+    //   const result = await service.updateMypage('uuid', dto);
+    // });
+  });
+
+  describe('updateUserTracks', () => {
+    it('사용자가 존재하지 않으면 BusinessException을 반환한다', async () => {
+      jest.spyOn(service, 'findUserById').mockResolvedValue(undefined);
+
+      await expect(service.updateUserTracks('1', ['Track1'])).rejects.toThrow(
+        BusinessException,
+      );
+    });
+
+    it('트랙이 존재하지 않으면 BusinessException을 반환한다', async () => {
+      const user = new User();
+      userRepo.findUserByIdWithTracks.mockResolvedValue(user);
+      trackRepo.find.mockResolvedValue([]);
+
+      await expect(service.updateUserTracks('1', ['Track1'])).rejects.toThrow(
+        BusinessException,
+      );
+    });
+
+    it('사용자의 트랙을 업데이트 한다', async () => {
+      const user = new User();
+      const track = new Track();
+      track.trackName = 'Track1';
+      user.tracks = [];
+
+      userRepo.findUserByIdWithTracks.mockResolvedValueOnce(user);
+      trackRepo.find.mockResolvedValueOnce([track]);
+      userRepo.save.mockResolvedValueOnce(user);
+
+      const result = await service.updateUserTracks('1', ['Track1']);
+      expect(result).toEqual(user);
+      expect(user.tracks).toEqual([track]);
+    });
   });
 
   describe('validate', () => {
