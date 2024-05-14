@@ -9,12 +9,12 @@ describe('TrackService', () => {
   let trackRepo: jest.Mocked<TrackRespository>;
   const dto: TrackDto = {
     trackName: 'Track',
-    generation: 1,
+    generation: '1',
   };
 
   const resDto: TrackResDto = {
     trackName: 'Track',
-    generation: 1,
+    generation: '1',
   };
 
   beforeEach(async () => {

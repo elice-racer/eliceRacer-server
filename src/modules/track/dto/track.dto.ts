@@ -1,4 +1,4 @@
 export type TrackDto = {
   trackName: string;
-  generation: number;
+  generation: string;
 };
