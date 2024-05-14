@@ -18,7 +18,6 @@ export class TrackRespository extends Repository<Track> {
     const track = new Track();
 
     track.trackName = dto.trackName;
-    track.generation = dto.generation;
 
     return this.repo.save(track);
   }
@@ -34,7 +33,6 @@ export class TrackRespository extends Repository<Track> {
         HttpStatus.NOT_FOUND,
       );
     track.trackName = dto.trackName;
-    track.generation = dto.generation;
 
     await this.repo.save(track);
 
