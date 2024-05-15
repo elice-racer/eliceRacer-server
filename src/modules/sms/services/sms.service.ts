@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import coolsms from 'coolsms-node-sdk';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -6,6 +6,7 @@ import {
   ENV_SMS_API_SECRET_KEY,
   ENV_SMS_FROM_NUMBER_KEY,
 } from 'src/common/const';
+import { BusinessException } from 'src/exception';
 
 @Injectable()
 export class SmsService {
@@ -17,18 +18,35 @@ export class SmsService {
     );
   }
 
-  async sendVerificationCode(to: string, verificationNumber: string) {
+  async sendVerificationCode(
+    to: string,
+    verificationNumber: string,
+  ): Promise<string> {
     const from = this.configService.get<string>(ENV_SMS_FROM_NUMBER_KEY);
     const text = `[elicerRacer] 인증번호는 [${verificationNumber}]입니다.`;
 
-    const response = await this.messageService.sendOne({
-      to,
-      from,
-      text,
-    });
+    try {
+      const response = await this.messageService.sendOne({
+        to,
+        from,
+        text,
+      });
 
-    if (response.statusCode !== '2000') return '에러'; //TODO exception
+      if (response.statusCode !== '2000') {
+        throw new BusinessException(
+          'sms',
+          '메일 전송 실패',
+          '메일 전송에 실패했습니다',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
 
-    return 'Success';
+      return 'Success';
+    } catch (error) {
+      throw new HttpException(
+        `SMS Sending Failed: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
