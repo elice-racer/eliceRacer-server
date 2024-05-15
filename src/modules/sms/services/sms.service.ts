@@ -35,8 +35,8 @@ export class SmsService {
       if (response.statusCode !== '2000') {
         throw new BusinessException(
           'sms',
-          '메일 전송 실패',
-          '메일 전송에 실패했습니다',
+          '문자 전송 실패',
+          '문자 전송에 실패했습니다',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
@@ -44,7 +44,7 @@ export class SmsService {
       return 'Success';
     } catch (error) {
       throw new HttpException(
-        `SMS Sending Failed: ${error.message}`,
+        `문자 전송 실패: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

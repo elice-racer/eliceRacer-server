@@ -20,8 +20,11 @@ export class AdminRepository {
     await this.userRepo.update(userId, { status: newStatus });
   }
 
-  async findAnyAdminByEmail(email: string): Promise<User> | undefined {
-    return this.userRepo.findOneBy({ email });
+  //이메일이랑 아이디 모두 포함
+  async findAnyUserByEmail(email: string): Promise<User> | undefined {
+    return this.userRepo.findOne({
+      where: [{ email: email }, { username: email }],
+    });
   }
 
   async createAdmin(

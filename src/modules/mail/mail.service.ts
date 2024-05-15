@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { User } from '../user/entities';
@@ -50,6 +50,14 @@ export class MailService {
     <p>버튼을 눌러 이메일 인증을 완료해주세요.</p>
     <a href=${baseUrl}> Click here</a>
     </div>`;
-    this.sendMail(user.email, subject, '', html);
+
+    try {
+      await this.sendMail(user.email, subject, '', html);
+    } catch (error) {
+      throw new HttpException(
+        `메일 전송 실패: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
