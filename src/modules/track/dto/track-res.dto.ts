@@ -1,3 +1,4 @@
-export type TrackResDto = {
+export class TrackResDto {
+  id: string;
   trackName: string;
-};
+}

@@ -1,3 +1,3 @@
-export type TrackUpadteDto = {
+export class TrackUpadteDto {
   trackName: string;
-};
+}
