@@ -2,6 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { genId } from 'src/common/utils/id-generator';
 
 export type ErrorDomain =
+  | 'validate'
   | 'generic'
   | 'auth'
   | 'user'
