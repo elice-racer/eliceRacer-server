@@ -74,6 +74,10 @@
         {
           "name": "SMS_FROM_NUMBER",
           "valueFrom": "<PARA_STORE_ARN>SMS_FROM_NUMBER"
+        },
+        {
+          "name": "BASE_URL",
+          "valueFrom": "<PARA_STORE_ARN>BASE_URL"
         }
       ],
       "cpu": 0,

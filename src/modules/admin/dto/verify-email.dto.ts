@@ -1,4 +1,4 @@
-export type VerifyEamilDto = {
+export class VerifyEamilDto {
   id: string;
   token: string;
-};
+}

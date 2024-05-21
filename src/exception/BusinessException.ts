@@ -7,7 +7,8 @@ export type ErrorDomain =
   | 'user'
   | 'admin'
   | 'track'
-  | 'member';
+  | 'member'
+  | 'sms';
 
 export class BusinessException extends Error {
   public readonly id: string;

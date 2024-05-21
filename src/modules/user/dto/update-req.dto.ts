@@ -1,5 +1,5 @@
-export type updateReqDto = {
+export class updateReqDto {
   realName: string;
   position: string;
   github: string;
-};
+}
