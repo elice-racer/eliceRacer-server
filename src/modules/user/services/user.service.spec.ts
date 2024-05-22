@@ -38,7 +38,23 @@ describe('UserService', () => {
   });
 
   describe('getAllUsers', () => {
-    it('', async () => {});
+    it('유저가 존재하지 않으면 BusinessException을 던진다', async () => {
+      const users = [];
+      userRepo.findAllUsers.mockResolvedValueOnce([users, 0]);
+
+      await expect(service.getAllUsers(1, 10)).rejects.toThrow(
+        BusinessException,
+      );
+    });
+
+    it('유저가 존재하면 이름 오름차순으로 유저를 반환한다', async () => {
+      const users: User[] = [{ username: 'user1' } as User];
+      userRepo.findAllUsers.mockResolvedValue([users, 10]);
+
+      const result = await service.getAllUsers(1, 10);
+
+      expect(result).toEqual(users);
+    });
   });
 
   describe('getAllUsersByTrack', () => {
@@ -48,7 +64,7 @@ describe('UserService', () => {
     };
     const page = 1;
     const pageSize = 10;
-    it('트랙이 없으면 BusinessException을 반환한다', async () => {
+    it('트랙이 없으면 BusinessException을 던진다', async () => {
       trackRepo.findOne.mockResolvedValue(undefined);
 
       await expect(
@@ -61,7 +77,7 @@ describe('UserService', () => {
       const user = [];
 
       trackRepo.findOne.mockResolvedValue(track);
-      userRepo.findUsersByTrackName.mockResolvedValueOnce([user, 0]);
+      userRepo.findAnyUsersByTrack.mockResolvedValueOnce([user, 0]);
 
       await expect(
         service.getAllUsersByTrack(dto, page, pageSize),
@@ -73,7 +89,7 @@ describe('UserService', () => {
       const track: Track = { ...dto } as Track;
 
       trackRepo.findOne.mockResolvedValue(track);
-      userRepo.findUsersByTrackName.mockResolvedValueOnce([users, 1]);
+      userRepo.findAnyUsersByTrack.mockResolvedValueOnce([users, 1]);
 
       const result = await service.getAllUsersByTrack(dto, page, pageSize);
 
@@ -88,7 +104,7 @@ describe('UserService', () => {
       github: 'gihub-address',
     };
 
-    it('사용자가 존재하지 않으면 BusinessException을 반환한다', async () => {
+    it('사용자가 존재하지 않으면 BusinessException을 던진다', async () => {
       userRepo.findUserByIdWithTracks.mockResolvedValueOnce(undefined);
 
       await expect(service.updateMypage('uuid', dto)).rejects.toThrow(
@@ -117,7 +133,7 @@ describe('UserService', () => {
       trackName: 'trackName',
       cardinalNo: '1',
     };
-    it('사용자가 존재하지 않으면 BusinessException을 반환한다', async () => {
+    it('사용자가 존재하지 않으면 BusinessException을 던진다', async () => {
       jest.spyOn(service, 'findUserById').mockResolvedValue(undefined);
 
       await expect(service.updateUserTracks(userId, trackDto)).rejects.toThrow(
@@ -125,7 +141,7 @@ describe('UserService', () => {
       );
     });
 
-    it('트랙이 존재하지 않으면 BusinessException을 반환한다', async () => {
+    it('트랙이 존재하지 않으면 BusinessException을 던진다', async () => {
       const user = new User();
       userRepo.findUserByIdWithTracks.mockResolvedValue(user);
       trackRepo.find.mockResolvedValue([]);
@@ -186,7 +202,7 @@ describe('UserService', () => {
       );
     });
 
-    it('번호 인증을 하지 않은 유저는 BusinessException을 반환한다', async () => {
+    it('번호 인증을 하지 않은 유저는 BusinessException을 던진다', async () => {
       const user = new User();
       user.status = 0;
       user.username = createUserDto.username;
