@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entity/base-entity';
 import { Track } from 'src/modules/track/entities/track.entity';
 
@@ -50,7 +50,6 @@ export class User extends BaseEntity {
   })
   status: UserStatus;
 
-  @ManyToMany(() => Track, (track) => track.users)
-  @JoinTable()
-  tracks: Track[] | null;
+  @ManyToOne(() => Track, (track) => track.users)
+  track: Track | null;
 }

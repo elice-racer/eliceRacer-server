@@ -57,7 +57,7 @@ export class AuthRepository {
   ): Promise<User> | undefined {
     return this.userRepo
       .createQueryBuilder('users')
-      .leftJoinAndSelect('users.tracks', 'tracks')
+      .leftJoinAndSelect('users.track', 'tracks')
       .where('users.phoneNumber = :phoneNumber', { phoneNumber })
       .getOne();
   }

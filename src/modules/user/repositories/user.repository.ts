@@ -3,6 +3,7 @@ import { User, UserStatus } from '../entities';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto';
+import { TrackDto } from 'src/modules/track/dto';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -34,7 +35,7 @@ export class UserRepository extends Repository<User> {
   async findUserByIdWithTracks(userId: string): Promise<User> | undefined {
     return this.repo
       .createQueryBuilder('users')
-      .leftJoinAndSelect('users.tracks', 'tracks')
+      .leftJoinAndSelect('users.track', 'tracks')
       .where('(users.id = :userId) AND users.status = :status', {
         userId,
         status: UserStatus.VERIFIED_AND_REGISTERED,
@@ -43,14 +44,16 @@ export class UserRepository extends Repository<User> {
   }
 
   async findUsersByTrackName(
-    trackName: string,
+    trackDto: TrackDto,
     page: number,
     pageSize: number,
   ): Promise<[User[], number]> {
+    const { trackName, cardinalNo } = trackDto;
     return this.repo
       .createQueryBuilder('users')
-      .leftJoinAndSelect('users.tracks', 'tracks')
+      .leftJoinAndSelect('users.track', 'tracks')
       .where('tracks.trackName = :trackName', { trackName })
+      .andWhere('tracks.cardinalNo = :cardinalNo', { cardinalNo })
       .orderBy('users.realName', 'ASC')
       .skip((page - 1) * pageSize)
       .take(pageSize)

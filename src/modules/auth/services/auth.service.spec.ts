@@ -243,7 +243,7 @@ describe('AuthService', () => {
       const verifyCodeResDto = {
         email: '',
         realName: '',
-        tracks: [],
+        track: null,
       };
 
       const phoneNumber = '01012345678';
@@ -263,16 +263,12 @@ describe('AuthService', () => {
     it('해당 번호로 회원가입 하지 않은 유저가 존재하면 유저 정보를 반환한다', async () => {
       const user = new User();
       const track = new Track();
-      user.tracks = [track];
+      user.track = track;
 
       const verifyCodeResDto: VerifyCodeResDto = {
         email: user.email,
         realName: user.realName,
-        tracks: user.tracks
-          ? user.tracks.map((track) => ({
-              trackName: track.trackName,
-            }))
-          : [],
+        track: user.track,
       };
 
       const phoneNumber = '01012345678';

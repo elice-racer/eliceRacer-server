@@ -5,7 +5,7 @@ import { CreateUserDto, updateReqDto } from '../dto';
 import { hashPassword } from 'src/common/utils/password-hash';
 import { BusinessException } from 'src/exception';
 import { TrackRespository } from 'src/modules/track/repositories';
-import { In } from 'typeorm';
+import { TrackDto } from 'src/modules/track/dto';
 
 @Injectable()
 export class UserService {
@@ -23,23 +23,30 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
+  async getAllUsers() {}
+
   //트랙별 모든 suer
   async getAllUsersByTrack(
-    trackName: string,
+    trackDto: TrackDto,
     page: number,
     pageSize: number,
   ): Promise<User[]> {
-    const track = await this.trackRepo.findOneBy({ trackName });
+    const { trackName, cardinalNo } = trackDto;
+
+    const track = await this.trackRepo.findOne({
+      where: { trackName, cardinalNo },
+    });
+
     if (!track)
       throw new BusinessException(
         `user`,
-        `해당 트랙(${trackName})이 존재하지 않습니다.`,
-        `해당 트랙(${trackName})이 존재하지 않습니다.`,
+        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
+        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
         HttpStatus.NOT_FOUND,
       );
 
     const [users, total] = await this.userRepo.findUsersByTrackName(
-      trackName,
+      trackDto,
       page,
       pageSize,
     );
@@ -73,7 +80,8 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
-  async updateUserTracks(userId: string, trackNames: string[]): Promise<User> {
+  async updateUserTracks(userId: string, trackDto: TrackDto) {
+    const { trackName, cardinalNo } = trackDto;
     const user = await this.userRepo.findUserByIdWithTracks(userId);
     if (!user) {
       throw new BusinessException(
@@ -83,25 +91,18 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
-
-    const tracks = await this.trackRepo.find({
-      where: { trackName: In(trackNames) },
+    const track = await this.trackRepo.findOne({
+      where: { trackName: trackDto.trackName, cardinalNo: trackDto.cardinalNo },
     });
-
-    if (tracks.length !== trackNames.length) {
-      const foundTrackNames = tracks.map((track) => track.trackName);
-      const missingTrackNames = trackNames.filter(
-        (trackName) => !foundTrackNames.includes(trackName),
-      );
+    if (!track)
       throw new BusinessException(
         'user',
-        `트랙을 찾을 수 없습니다: ${missingTrackNames.join(', ')}`,
-        `트랙을 찾을 수 없습니다: ${missingTrackNames.join(', ')}`,
+        `트랙을 찾을 수 없습니다: ${trackName}${cardinalNo}`,
+        `트랙을 찾을 수 없습니다: ${trackName}${cardinalNo}`,
         HttpStatus.NOT_FOUND,
       );
-    }
 
-    user.tracks = tracks;
+    user.track = track;
     return await this.userRepo.save(user);
   }
 
