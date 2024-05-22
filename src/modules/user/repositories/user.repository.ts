@@ -41,4 +41,19 @@ export class UserRepository extends Repository<User> {
       })
       .getOne();
   }
+
+  async findUsersByTrackName(
+    trackName: string,
+    page: number,
+    pageSize: number,
+  ): Promise<[User[], number]> {
+    return this.repo
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.tracks', 'tracks')
+      .where('tracks.trackName = :trackName', { trackName })
+      .orderBy('users.realName', 'ASC')
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
+  }
 }

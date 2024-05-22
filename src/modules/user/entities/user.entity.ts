@@ -50,7 +50,7 @@ export class User extends BaseEntity {
   })
   status: UserStatus;
 
-  @ManyToMany(() => Track)
+  @ManyToMany(() => Track, (track) => track.users)
   @JoinTable()
   tracks: Track[] | null;
 }
