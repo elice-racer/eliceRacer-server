@@ -30,7 +30,6 @@ export class AuthService {
   ) {}
 
   async logout(refreshToken: string) {
-    //TODO try catch
     const payloadRes: TokenPayloadRes = this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>(ENV_JWT_SECRET_KEY),
     });
@@ -111,11 +110,6 @@ export class AuthService {
   //로그인시 사용
   async validateUser(identifier: string, password: string): Promise<User> {
     const user = await this.authRepo.findUserByEmailOrUsername(identifier);
-    console.log('유저!!!!!!!!!!!!', user);
-    console.log(
-      '비밀번호 비교!!!!!!!!!!',
-      await argon2.verify(user.password, password),
-    );
     if (!user || !(await argon2.verify(user.password, password)))
       throw new BusinessException(
         'auth',
@@ -170,7 +164,7 @@ export class AuthService {
     };
   }
 
-  async handlePhoneVerification(phoneNumber: string): Promise<string> {
+  async handlePhoneVerification(phoneNumber: string): Promise<void> {
     // 1. 검증
     await this.authencticatePhoneNumber(phoneNumber);
     // 2. 인증번호 생성
@@ -183,11 +177,9 @@ export class AuthService {
     );
     // 4. 메세지 전송
     await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
-
-    return 'Success';
   }
 
-  async authencticatePhoneNumber(phoneNumber: string): Promise<string> {
+  async authencticatePhoneNumber(phoneNumber: string): Promise<void> {
     const user = await this.authRepo.findUserByPhoneNumber(phoneNumber);
 
     if (user)
@@ -197,8 +189,6 @@ export class AuthService {
         `이미 가입된 번호입니다`,
         HttpStatus.CONFLICT,
       );
-
-    return 'OK';
   }
 
   createTokenPayload(userId: string): TokenPayload {
