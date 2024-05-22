@@ -29,7 +29,7 @@ export class AdminService {
     return result;
   }
 
-  async signup(dto: CreateAdminDto) {
+  async signup(dto: CreateAdminDto): Promise<void> {
     const verificationToken = generateToken();
 
     const admin = await this.createAdmin(dto);
@@ -49,7 +49,7 @@ export class AdminService {
   }
 
   async createAdmin(dto: CreateAdminDto) {
-    const user = await this.adminRepo.findAnyAdminByEmail(dto.email);
+    const user = await this.adminRepo.findAnyUserByEmail(dto.email);
 
     if (user)
       throw new BusinessException(

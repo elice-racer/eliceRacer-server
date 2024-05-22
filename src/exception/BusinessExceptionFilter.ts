@@ -39,7 +39,7 @@ export class BusinessExceptionFilter implements ExceptionFilter {
       body = {
         id: exception.id,
         domain: exception.domain,
-        message: exception.message,
+        message: exception.apiMessage,
         timestamp: exception.timestamp,
       };
     } else if (exception instanceof HttpException) {
@@ -60,6 +60,7 @@ export class BusinessExceptionFilter implements ExceptionFilter {
       );
     }
 
+    // 에러 로깅
     const ctx = host.switchToHttp();
     const request = ctx.getRequest();
     const response = ctx.getResponse();
@@ -69,19 +70,9 @@ export class BusinessExceptionFilter implements ExceptionFilter {
     const userAgent = request.headers['user-agent'] || '';
     const user = request.user as User;
     const userId = user?.id || 'Anonymous';
-    const errorLogEntry = `${new Date().toISOString()} - ERROR - ${ip} - ${userId} - ${body.id} - ${method} ${originalUrl} - ${userAgent} - Error Message: ${body.message}\n`;
-    try {
-      appendFileSync(this.errorLogPath, errorLogEntry);
-    } catch (err) {
-      this.logger.error(`Failed to write to error log: ${err.message}`);
-    }
-    this.logger.error(
-      `exception: ${JSON.stringify({
-        path: request.url,
-        ...body,
-      })}`,
-      stack,
-    );
+    const logMessage = `${new Date().toISOString()} [ERROR] ${method} ${originalUrl} Agent: ${userAgent} - IP: ${ip} - User: ${userId} - Error ID: ${body.id} - Message: ${exception.message} - Status: ${status} \n`;
+    appendFileSync(this.errorLogPath, logMessage);
+    this.logger.error(logMessage, stack);
 
     response.status(status).json(body);
   }

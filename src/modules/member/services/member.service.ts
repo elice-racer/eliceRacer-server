@@ -31,6 +31,8 @@ export class MemberService {
         ) || '';
       const trackNameKey =
         Object.keys(item).find((key) => key.includes('트랙')) || '';
+      const cardinalNoKey =
+        Object.keys(item).find((key) => key.includes('기수')) || '';
 
       // 핸드폰 번호에서 하이픈 제거
       const phoneNumber = item[phoneKey].replace(/-/g, '');
@@ -40,6 +42,7 @@ export class MemberService {
         realName: item[nameKey],
         phoneNumber, // 하이픈이 제거된 핸드폰 번호
         trackName: item[trackNameKey],
+        cardinalNo: item[cardinalNoKey],
       };
     });
 
@@ -49,19 +52,19 @@ export class MemberService {
 
     try {
       for (const item of processedData) {
-        const { email, realName, trackName, phoneNumber } = item;
+        const { email, realName, trackName, phoneNumber, cardinalNo } = item;
 
         // 트랙 정보 확인
         const track = await this.trackRepo.findOne({
-          where: { trackName },
+          where: { trackName, cardinalNo },
         });
 
         // 트랙이 존재하지 않는 경우 에러 발생
         if (!track) {
           throw new BusinessException(
             'track',
-            `트랙 '${trackName})'을 찾을 수 없습니다.`,
-            `트랙 '${trackName})'을 찾을 수 없습니다. 먼저 트랙을 생성하세요.`,
+            `트랙 '(${trackName}${cardinalNo})'을 찾을 수 없습니다.`,
+            `트랙 '(${trackName}${cardinalNo})'을 찾을 수 없습니다. 먼저 트랙을 생성하세요.`,
             HttpStatus.NOT_FOUND,
           );
         }
@@ -70,7 +73,7 @@ export class MemberService {
         user.email = email;
         user.realName = realName;
         user.phoneNumber = phoneNumber;
-        user.tracks = [track];
+        user.track = track;
 
         // 유저 정보 저장
         await queryRunner.manager.save(User, user);

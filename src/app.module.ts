@@ -19,11 +19,13 @@ import { SmsModule } from './modules/sms/sms.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { LoggingInterceptor } from './interceptors';
 import { AdminModule } from './modules/admin/admin.module';
 import { TrackModule } from './modules/track/track.module';
 import { MemberModule } from './modules/member/member.module';
+import { ValidationPipe } from './pipes/validation.pipe';
+import { ProjectModule } from './modules/project/project.module';
 
 @Module({
   imports: [
@@ -66,6 +68,7 @@ import { MemberModule } from './modules/member/member.module';
     TrackModule,
     MemberModule,
     AdminModule,
+    ProjectModule,
   ],
   controllers: [AppController],
   providers: [
@@ -73,6 +76,10 @@ import { MemberModule } from './modules/member/member.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
     },
   ],
 })

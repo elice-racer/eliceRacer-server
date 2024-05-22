@@ -1,3 +1,4 @@
-export type TrackDto = {
+export class TrackDto {
   trackName: string;
-};
+  cardinalNo: string;
+}

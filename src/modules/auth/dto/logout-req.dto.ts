@@ -1,3 +1,3 @@
-export type LogoutReqDto = {
+export class LogoutReqDto {
   refreshToken: string;
-};
+}
