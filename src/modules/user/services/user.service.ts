@@ -23,7 +23,18 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
-  async getAllUsers() {}
+  async getAllUsers(page: number, pageSize: number) {
+    const [users, total] = await this.userRepo.findAllUsers(page, pageSize);
+    if (total === 0)
+      throw new BusinessException(
+        `user`,
+        `사용자가 존재하지 않습니다.`,
+        `사용자가 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return users;
+  }
 
   //트랙별 모든 suer
   async getAllUsersByTrack(
@@ -45,7 +56,7 @@ export class UserService {
         HttpStatus.NOT_FOUND,
       );
 
-    const [users, total] = await this.userRepo.findUsersByTrackName(
+    const [users, total] = await this.userRepo.findAnyUsersByTrack(
       trackDto,
       page,
       pageSize,

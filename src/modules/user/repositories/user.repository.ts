@@ -43,7 +43,7 @@ export class UserRepository extends Repository<User> {
       .getOne();
   }
 
-  async findUsersByTrackName(
+  async findAnyUsersByTrack(
     trackDto: TrackDto,
     page: number,
     pageSize: number,
@@ -54,6 +54,16 @@ export class UserRepository extends Repository<User> {
       .leftJoinAndSelect('users.track', 'tracks')
       .where('tracks.trackName = :trackName', { trackName })
       .andWhere('tracks.cardinalNo = :cardinalNo', { cardinalNo })
+      .orderBy('users.realName', 'ASC')
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
+  }
+
+  async findAllUsers(page: number, pageSize: number) {
+    return this.repo
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.track', 'tracks')
       .orderBy('users.realName', 'ASC')
       .skip((page - 1) * pageSize)
       .take(pageSize)
