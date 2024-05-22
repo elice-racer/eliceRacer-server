@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import { CreateAdminDto, VerifyEamilDto } from '../dto';
+import { ResponseInterceptor } from 'src/interceptors';
 
+@UseInterceptors(ResponseInterceptor)
 @Controller('admins')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
