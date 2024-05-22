@@ -14,7 +14,48 @@ export class UserService {
     private readonly trackRepo: TrackRespository,
   ) {}
 
-  async updateMypage(userId: string, dto: updateReqDto) {
+  async chang(username: string) {
+    const user = await this.userRepo.findOneBy({ username });
+
+    user.username = '';
+    user.status = UserStatus.UNVERIFIED;
+
+    return this.userRepo.save(user);
+  }
+
+  //트랙별 모든 suer
+  async getAllUsersByTrack(
+    trackName: string,
+    page: number,
+    pageSize: number,
+  ): Promise<User[]> {
+    const track = await this.trackRepo.findOneBy({ trackName });
+    if (!track)
+      throw new BusinessException(
+        `user`,
+        `해당 트랙(${trackName})이 존재하지 않습니다.`,
+        `해당 트랙(${trackName})이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    const [users, total] = await this.userRepo.findUsersByTrackName(
+      trackName,
+      page,
+      pageSize,
+    );
+
+    if (total === 0)
+      throw new BusinessException(
+        `user`,
+        `등록된 레이서가 존재하지 않습니다.`,
+        `등록된 레이서가 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return users;
+  }
+
+  async updateMypage(userId: string, dto: updateReqDto): Promise<User> {
     const user = await this.userRepo.findUserByIdWithTracks(userId);
     if (!user) {
       throw new BusinessException(
@@ -24,7 +65,12 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    console.log(dto);
+
+    user.realName = dto.realName;
+    user.github = dto.github;
+    user.position = dto.position;
+
+    return this.userRepo.save(user);
   }
 
   async updateUserTracks(userId: string, trackNames: string[]): Promise<User> {
@@ -37,8 +83,6 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
-
-    console.log(user, '!!!!!!!!');
 
     const tracks = await this.trackRepo.find({
       where: { trackName: In(trackNames) },

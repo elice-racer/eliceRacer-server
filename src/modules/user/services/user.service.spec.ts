@@ -36,23 +36,74 @@ describe('UserService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('getAllUsersByTrack', () => {
+    const trackName = 'track-name';
+    const page = 1;
+    const pageSize = 10;
+    it('트랙이 없으면 BusinessException을 반환한다', async () => {
+      trackRepo.findOneBy.mockResolvedValue(undefined);
+
+      await expect(
+        service.getAllUsersByTrack(trackName, page, pageSize),
+      ).rejects.toThrow(BusinessException);
+    });
+
+    it('트랙에 등록된 멤버가 없으면 등록된 레이서가 없다는 안내를 반환한다', async () => {
+      const track = new Track();
+      const user = [];
+      trackRepo.findOneBy.mockResolvedValue(track);
+
+      userRepo.findUsersByTrackName.mockResolvedValueOnce([user, 0]);
+
+      await expect(
+        service.getAllUsersByTrack(trackName, page, pageSize),
+      ).rejects.toThrow(BusinessException);
+    });
+    it('트랙이 존재하고 멤버가 존재하면 레이서들을 반환한다', async () => {
+      const users: User[] = [{ username: 'user1' } as User];
+      const track: Track = { trackName } as Track;
+
+      trackRepo.findOneBy.mockResolvedValue(track);
+      userRepo.findUsersByTrackName.mockResolvedValueOnce([users, 1]);
+
+      const result = await service.getAllUsersByTrack(
+        trackName,
+        page,
+        pageSize,
+      );
+
+      expect(result).toEqual(users);
+    });
+  });
+
   describe('updateMyPage', () => {
     const dto: updateReqDto = {
       realName: 'name',
       position: 'backend',
       github: 'gihub-address',
     };
+
     it('사용자가 존재하지 않으면 BusinessException을 반환한다', async () => {
-      jest.spyOn(service, 'findUserById').mockResolvedValue(undefined);
+      userRepo.findUserByIdWithTracks.mockResolvedValueOnce(undefined);
 
       await expect(service.updateMypage('uuid', dto)).rejects.toThrow(
         BusinessException,
       );
     });
 
-    // it('유저의 정보를 업데이트 한다', async () => {
-    //   const result = await service.updateMypage('uuid', dto);
-    // });
+    it('유저의 정보를 업데이트 한다', async () => {
+      const user = new User();
+      user.realName = dto.realName;
+      user.position = dto.position;
+      user.github = dto.github;
+
+      userRepo.findUserByIdWithTracks.mockResolvedValueOnce(user);
+      userRepo.save.mockResolvedValue(user);
+
+      const result = await service.updateMypage('uuid', dto);
+
+      expect(result).toEqual(user);
+    });
   });
 
   describe('updateUserTracks', () => {
