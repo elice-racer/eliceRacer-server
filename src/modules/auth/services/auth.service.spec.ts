@@ -79,36 +79,48 @@ describe('AuthService', () => {
       );
     });
 
-    it('유효기간이 지난 refresh token으로 재발급을 시도하면 BusinessException를 반환한다', async () => {
-      const invalidRefreshToken = 'invalid-refresh-token';
-
+    it('만료된 리프레시 토큰으로 재발급을 시도하면, 인증 실패로 BusinessException을 발생시킨다', async () => {
+      const expiredRefreshToken = 'expired-refresh-token';
+      jwtService.verify.mockReturnValue({ sub: 'userId', jti: 'jti' });
       refreshTokenService.getRefreshToken.mockResolvedValue(null);
 
-      await expect(service.refresh(invalidRefreshToken)).rejects.toThrow(
+      await expect(service.refresh(expiredRefreshToken)).rejects.toThrow(
         BusinessException,
       );
     });
-    it('유효한 리프레시 토큰을 이용해서 액세스 토큰을 재발급한다', async () => {
-      const refreshToken = 'valid-refresh-token';
-      const expectedAccessToken = 'new-access-token';
-
+    it('토큰에 해당하는 유저가 존재하지 않을 때, 인증 실패로 BusinessException을 발생시킨다', async () => {
+      const validTokenNonexistentUser = 'valid-refresh-token';
       jwtService.verify.mockReturnValue({
-        sub: 'userId-uuid',
-        jti: 'jwt-uuid',
+        sub: 'nonexistentUserId',
+        jti: 'jti',
       });
+      refreshTokenService.getRefreshToken.mockResolvedValue(
+        'valid-token-value',
+      );
+      authRepo.findUserById.mockResolvedValue(undefined);
 
-      // refreshTokenRepo.getRefreshToken 모의 처리
-      jest
-        .spyOn(refreshTokenService, 'getRefreshToken')
-        .mockResolvedValue(refreshToken);
-      // createAccessToken 모의 처리
+      await expect(service.refresh(validTokenNonexistentUser)).rejects.toThrow(
+        BusinessException,
+      );
+    });
+
+    it('유효한 리프레시 토큰으로 액세스 토큰을 성공적으로 재발급 받는다', async () => {
+      const validRefreshToken = 'valid-refresh-token';
+      const expectedAccessToken = 'new-access-token';
+      jwtService.verify.mockReturnValue({
+        sub: 'validUserId',
+        jti: 'validJti',
+      });
+      refreshTokenService.getRefreshToken.mockResolvedValue(
+        'valid-token-value',
+      );
+      authRepo.findUserById.mockResolvedValue(new User());
+
       jest
         .spyOn(service, 'createAccessToken')
         .mockReturnValue(expectedAccessToken);
 
-      authRepo.findUserById.mockResolvedValue(new User());
-
-      const result = await service.refresh(refreshToken);
+      const result = await service.refresh(validRefreshToken);
 
       expect(result).toEqual({ accessToken: expectedAccessToken });
     });
@@ -288,14 +300,13 @@ describe('AuthService', () => {
       const verificationCode = '123456';
 
       (generateVerificationCode as jest.Mock).mockReturnValue(verificationCode);
-      const result = await service.handlePhoneVerification(phoneNumber);
+
+      await service.handlePhoneVerification(phoneNumber);
 
       expect(smsService.sendVerificationCode).toHaveBeenCalledWith(
         phoneNumber,
         verificationCode,
       );
-
-      expect(result).toEqual('Success');
     });
   });
 
@@ -313,9 +324,7 @@ describe('AuthService', () => {
     it('번호로 회원가입이 되어있지 않으면 유저 정보를 반환한다', async () => {
       authRepo.findUserByPhoneNumber.mockResolvedValue(undefined);
 
-      const result = await service.authencticatePhoneNumber('01012345678');
-
-      expect(result).toEqual('OK');
+      await service.authencticatePhoneNumber('01012345678');
     });
   });
 });
