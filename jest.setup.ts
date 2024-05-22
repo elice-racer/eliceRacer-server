@@ -24,6 +24,7 @@ jest.mock('./src/modules/auth/repositories/refresh-token.repository');
 jest.mock('./src/modules/track/repositories/track.repository');
 jest.mock('./src/modules/auth/repositories/auth.repository');
 jest.mock('./src/modules/admin/repositories/admin.repository');
+jest.mock('./src/modules/project/repositories/project.repository');
 
 //utils
 jest.mock('./src/common/utils/verification-number-generator');

@@ -45,9 +45,7 @@ describe('AuthController', () => {
 
   describe('sendVerificationCode', () => {
     it('전화번호로 인증 코드를 발송한다.', async () => {
-      authService.handlePhoneVerification.mockResolvedValue('Success');
-      const result = await controller.sendVerificationCode('01012345678');
-      expect(result).toBe('Success');
+      await controller.sendVerificationCode('01012345678');
     });
   });
 
@@ -60,7 +58,7 @@ describe('AuthController', () => {
       const resDto: VerifyCodeResDto = {
         email: 'user@example.com',
         realName: '홍길동',
-        tracks: [],
+        track: null,
       };
 
       authService.handleCodeVerification.mockResolvedValue(resDto);

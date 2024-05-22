@@ -6,9 +6,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { TrackService } from '../services/track.service';
-import { TrackDto } from '../dto';
+import { TrackDto, TrackResDto } from '../dto';
 import { AdminGuard } from 'src/common/guards';
-import { ResponseInterceptor } from 'src/interceptors';
+import { ResponseInterceptor, Serialize } from 'src/interceptors';
 
 @UseInterceptors(ResponseInterceptor)
 @Controller('tracks')
@@ -17,6 +17,7 @@ export class TrackController {
 
   @Post()
   @UseGuards(AdminGuard)
+  @Serialize(TrackResDto)
   async createTrack(@Body() dto: TrackDto) {
     return await this.trackService.createTrack(dto);
   }
