@@ -9,12 +9,14 @@ describe('TrackService', () => {
   let service: TrackService;
   let trackRepo: jest.Mocked<TrackRespository>;
   const dto: TrackDto = {
-    trackName: 'Track1',
+    trackName: 'Track',
+    cardinalNo: '1',
   };
 
   const resDto: TrackResDto = {
     id: 'uuid',
-    trackName: 'Track1',
+    trackName: 'Track',
+    cardinalNo: '1',
   };
 
   beforeEach(async () => {
@@ -35,6 +37,7 @@ describe('TrackService', () => {
       const track = new Track();
       track.id = 'uuid';
       track.trackName = resDto.trackName;
+      track.cardinalNo = dto.cardinalNo;
 
       trackRepo.createTrack.mockResolvedValue(track);
       const result = await service.createTrack(dto);
@@ -51,10 +54,12 @@ describe('TrackService', () => {
         BusinessException,
       );
     });
+
     it('track을 업데이트 한다', async () => {
       const track = new Track();
       track.id = 'uuid';
       track.trackName = dto.trackName;
+      track.cardinalNo = dto.cardinalNo;
 
       trackRepo.findOneBy.mockResolvedValue(track);
       trackRepo.save.mockResolvedValue(track);

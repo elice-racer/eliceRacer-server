@@ -16,6 +16,7 @@ export class TrackRespository extends Repository<Track> {
     const track = new Track();
 
     track.trackName = dto.trackName;
+    track.cardinalNo = dto.cardinalNo;
 
     return this.repo.save(track);
   }

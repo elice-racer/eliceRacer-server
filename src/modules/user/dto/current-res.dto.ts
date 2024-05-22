@@ -27,5 +27,5 @@ export class CurrentResDto {
   github: string;
 
   @Expose()
-  tracks: TrackDto[];
+  track: TrackDto;
 }

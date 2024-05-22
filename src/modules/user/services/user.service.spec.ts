@@ -7,6 +7,7 @@ import { hashPassword } from 'src/common/utils/password-hash';
 import { BusinessException } from 'src/exception';
 import { TrackRespository } from 'src/modules/track/repositories';
 import { Track } from 'src/modules/track/entities';
+import { TrackDto } from 'src/modules/track/dto';
 
 jest.unmock('./user.service');
 
@@ -36,41 +37,45 @@ describe('UserService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('getAllUsers', () => {
+    it('', async () => {});
+  });
+
   describe('getAllUsersByTrack', () => {
-    const trackName = 'track-name';
+    const dto: TrackDto = {
+      trackName: 'trackName',
+      cardinalNo: '1',
+    };
     const page = 1;
     const pageSize = 10;
     it('트랙이 없으면 BusinessException을 반환한다', async () => {
-      trackRepo.findOneBy.mockResolvedValue(undefined);
+      trackRepo.findOne.mockResolvedValue(undefined);
 
       await expect(
-        service.getAllUsersByTrack(trackName, page, pageSize),
+        service.getAllUsersByTrack(dto, page, pageSize),
       ).rejects.toThrow(BusinessException);
     });
 
     it('트랙에 등록된 멤버가 없으면 등록된 레이서가 없다는 안내를 반환한다', async () => {
       const track = new Track();
       const user = [];
-      trackRepo.findOneBy.mockResolvedValue(track);
 
+      trackRepo.findOne.mockResolvedValue(track);
       userRepo.findUsersByTrackName.mockResolvedValueOnce([user, 0]);
 
       await expect(
-        service.getAllUsersByTrack(trackName, page, pageSize),
+        service.getAllUsersByTrack(dto, page, pageSize),
       ).rejects.toThrow(BusinessException);
     });
+
     it('트랙이 존재하고 멤버가 존재하면 레이서들을 반환한다', async () => {
       const users: User[] = [{ username: 'user1' } as User];
-      const track: Track = { trackName } as Track;
+      const track: Track = { ...dto } as Track;
 
-      trackRepo.findOneBy.mockResolvedValue(track);
+      trackRepo.findOne.mockResolvedValue(track);
       userRepo.findUsersByTrackName.mockResolvedValueOnce([users, 1]);
 
-      const result = await service.getAllUsersByTrack(
-        trackName,
-        page,
-        pageSize,
-      );
+      const result = await service.getAllUsersByTrack(dto, page, pageSize);
 
       expect(result).toEqual(users);
     });
@@ -107,10 +112,15 @@ describe('UserService', () => {
   });
 
   describe('updateUserTracks', () => {
+    const userId = 'uuid';
+    const trackDto: TrackDto = {
+      trackName: 'trackName',
+      cardinalNo: '1',
+    };
     it('사용자가 존재하지 않으면 BusinessException을 반환한다', async () => {
       jest.spyOn(service, 'findUserById').mockResolvedValue(undefined);
 
-      await expect(service.updateUserTracks('1', ['Track1'])).rejects.toThrow(
+      await expect(service.updateUserTracks(userId, trackDto)).rejects.toThrow(
         BusinessException,
       );
     });
@@ -120,7 +130,7 @@ describe('UserService', () => {
       userRepo.findUserByIdWithTracks.mockResolvedValue(user);
       trackRepo.find.mockResolvedValue([]);
 
-      await expect(service.updateUserTracks('1', ['Track1'])).rejects.toThrow(
+      await expect(service.updateUserTracks(userId, trackDto)).rejects.toThrow(
         BusinessException,
       );
     });
@@ -128,16 +138,17 @@ describe('UserService', () => {
     it('사용자의 트랙을 업데이트 한다', async () => {
       const user = new User();
       const track = new Track();
-      track.trackName = 'Track1';
-      user.tracks = [];
+      track.trackName = 'Track';
+      track.cardinalNo = '1';
+      user.track = null;
 
       userRepo.findUserByIdWithTracks.mockResolvedValueOnce(user);
-      trackRepo.find.mockResolvedValueOnce([track]);
+      trackRepo.findOne.mockResolvedValueOnce(track);
       userRepo.save.mockResolvedValueOnce(user);
 
-      const result = await service.updateUserTracks('1', ['Track1']);
+      const result = await service.updateUserTracks(userId, trackDto);
       expect(result).toEqual(user);
-      expect(user.tracks).toEqual([track]);
+      expect(user.track).toEqual(track);
     });
   });
 
