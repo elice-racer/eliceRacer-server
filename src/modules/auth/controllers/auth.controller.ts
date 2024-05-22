@@ -1,4 +1,10 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { VerifyCodeReqDto } from '../dto/verify-code-req.dto';
 import {
@@ -10,7 +16,9 @@ import {
 } from '../dto';
 import { LoginReqDto } from '../dto/login-req.dto';
 import { JwtAuthGuard } from 'src/common/guards';
+import { ResponseInterceptor } from 'src/interceptors';
 
+@UseInterceptors(ResponseInterceptor)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -39,14 +47,13 @@ export class AuthController {
   }
 
   @Post('/refresh')
-  @UseGuards(JwtAuthGuard)
   async refresh(@Body() refreshReqDto: RefreshReqDto): Promise<RefreshResDto> {
     return await this.authService.refresh(refreshReqDto.refreshToken);
   }
 
   @Post('/logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@Body() logoutReqDto: LogoutReqDto) {
-    return await this.authService.logout(logoutReqDto.refreshToken);
+  async logout(@Body() logoutReqDto: LogoutReqDto): Promise<void> {
+    await this.authService.logout(logoutReqDto.refreshToken);
   }
 }
