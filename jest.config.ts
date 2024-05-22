@@ -11,8 +11,8 @@ const config: InitialOptions = {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
-  collectCoverage: true,
-  coverageReporters: ['html', 'text'],
+  // collectCoverage: true,
+  // coverageReporters: ['html', 'text'],
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',

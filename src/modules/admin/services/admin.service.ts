@@ -29,7 +29,7 @@ export class AdminService {
     return result;
   }
 
-  async signup(dto: CreateAdminDto): Promise<string> {
+  async signup(dto: CreateAdminDto): Promise<void> {
     const verificationToken = generateToken();
 
     const admin = await this.createAdmin(dto);
@@ -46,8 +46,6 @@ export class AdminService {
         'admins',
       ),
     ]);
-
-    return 'Success';
   }
 
   async createAdmin(dto: CreateAdminDto) {

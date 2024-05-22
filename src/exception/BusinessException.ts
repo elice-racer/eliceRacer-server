@@ -9,7 +9,8 @@ export type ErrorDomain =
   | 'admin'
   | 'track'
   | 'member'
-  | 'sms';
+  | 'sms'
+  | 'project';
 
 export class BusinessException extends Error {
   public readonly id: string;
