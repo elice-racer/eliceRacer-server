@@ -29,7 +29,7 @@ export class AuthService {
     private readonly authRepo: AuthRepository,
   ) {}
 
-  async logout(refreshToken: string) {
+  async logout(refreshToken: string): Promise<void> {
     const payloadRes: TokenPayloadRes = this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>(ENV_JWT_SECRET_KEY),
     });
@@ -147,7 +147,7 @@ export class AuthService {
       return {
         email: '',
         realName: '',
-        tracks: [],
+        track: null,
       };
     }
 
@@ -156,11 +156,7 @@ export class AuthService {
     return {
       email: user.email,
       realName: user.realName,
-      tracks: user.tracks
-        ? user.tracks.map((track) => ({
-            trackName: track.trackName,
-          }))
-        : [],
+      track: user.track ? user.track : null,
     };
   }
 
