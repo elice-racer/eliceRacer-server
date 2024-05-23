@@ -26,10 +26,12 @@ export class AuthRepository {
       .getOne();
   }
 
-  async registerPhone(phoneNumber: string) {
+  async registerUser(phoneNumber: string, realName: string) {
     const user = new User();
     user.phoneNumber = phoneNumber;
+    user.realName = realName;
     user.status = UserStatus.VERIFIED;
+    user.track = null;
 
     return this.userRepo.save(user);
   }

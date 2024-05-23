@@ -124,6 +124,7 @@ export class AuthService {
   // 인증번호 검증
   async handleCodeVerification(
     phoneNumber: string,
+    realName: string,
     inputCode: string,
   ): Promise<VerifyCodeResDto> {
     const result = await this.verificationService.verifyCode(
@@ -143,11 +144,15 @@ export class AuthService {
 
     // 등록되어있지 않은 유저는 번호 등록
     if (!user) {
-      await this.authRepo.registerPhone(phoneNumber);
+      const registeredUser = await this.authRepo.registerUser(
+        phoneNumber,
+        realName,
+      );
       return {
-        email: '',
-        realName: '',
-        track: null,
+        email: registeredUser.email,
+        realName: registeredUser.realName,
+        role: registeredUser.role,
+        track: registeredUser.track,
       };
     }
 
@@ -156,6 +161,7 @@ export class AuthService {
     return {
       email: user.email,
       realName: user.realName,
+      role: user.role,
       track: user.track ? user.track : null,
     };
   }

@@ -15,19 +15,19 @@ export enum UserStatus {
 }
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   username: string;
 
   @Column({ nullable: true })
   password: string;
 
-  @Column({ nullable: true })
+  @Column()
   realName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   phoneNumber: string;
 
   @Column({ nullable: true })

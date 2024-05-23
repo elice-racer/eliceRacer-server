@@ -232,34 +232,46 @@ describe('AuthService', () => {
 
   describe('handleCodeVerification', () => {
     it('유효하지 않은 번호로 인증을 시도하면 BadRequestException 반환한다', async () => {
+      const phoneNumber = '01012345678';
+      const invalidInputCode = '123456';
+      const realName = 'user';
       verificationService.verifyCode.mockResolvedValue(false);
 
       await expect(
-        service.handleCodeVerification('01012345678', '123456'),
+        service.handleCodeVerification(phoneNumber, realName, invalidInputCode),
       ).rejects.toThrow(BusinessException);
     });
 
-    it('해당 번호로 회원가입 한 유저가 존재하지 않으면 비어있는 유저 정보를 반환한다', async () => {
-      const verifyCodeResDto = {
-        email: '',
-        realName: '',
-        track: null,
-      };
-
+    it('해당 번호로 회원가입 한 유저가 존재하지 않으면 새로 생성한 유저의 정보를 반환한다', async () => {
       const phoneNumber = '01012345678';
       const inputCode = '123456';
+      const realName = 'user';
+
+      const user = new User();
+      user.email = 'test@example.com';
+      user.realName = realName;
+      user.phoneNumber = phoneNumber;
+      user.track = new Track();
+
+      const verifyCodeResDto: VerifyCodeResDto = {
+        email: user.email,
+        realName: user.realName,
+        role: user.role,
+        track: user.track,
+      };
 
       verificationService.verifyCode.mockResolvedValue(true);
       authRepo.findAnyUserByPhoneWithTrack.mockResolvedValue(undefined);
+      authRepo.registerUser.mockResolvedValue(user);
 
       const result = await service.handleCodeVerification(
         phoneNumber,
+        realName,
         inputCode,
       );
 
       expect(result).toEqual(verifyCodeResDto);
     });
-
     it('해당 번호로 회원가입 하지 않은 유저가 존재하면 유저 정보를 반환한다', async () => {
       const user = new User();
       const track = new Track();
@@ -268,17 +280,20 @@ describe('AuthService', () => {
       const verifyCodeResDto: VerifyCodeResDto = {
         email: user.email,
         realName: user.realName,
+        role: user.role,
         track: user.track,
       };
 
       const phoneNumber = '01012345678';
       const inputCode = '123456';
+      const realName = 'user';
 
       verificationService.verifyCode.mockResolvedValue(true);
       authRepo.findAnyUserByPhoneWithTrack.mockResolvedValue(user);
 
       const result = await service.handleCodeVerification(
         phoneNumber,
+        realName,
         inputCode,
       );
 
