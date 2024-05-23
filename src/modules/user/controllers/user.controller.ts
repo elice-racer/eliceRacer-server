@@ -11,7 +11,7 @@ import {
 import { UserService } from '../services/user.service';
 import { CreateUserDto, CurrentResDto, updateReqDto } from '../dto';
 import { CurrentUser } from 'src/common/decorators';
-import { User } from '../entities';
+import { User, UserRole } from '../entities';
 import { AdminGuard, JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor } from 'src/interceptors';
 import { Serialize } from 'src/interceptors';
@@ -22,10 +22,20 @@ import { TrackDto } from 'src/modules/track/dto';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Patch('/role/:id')
+  @UseGuards(AdminGuard)
+  async updateUserRole(
+    @Param('id') userId: string,
+    @Body('role') role: UserRole,
+  ) {
+    return this.userService.updateUserRole(userId, role);
+  }
   @Patch('/chang')
   async chang(@Body('username') username: string) {
     return await this.userService.chang(username);
   }
+
   @Get('/tracks/all')
   @UseGuards(JwtAuthGuard)
   @Serialize(OutputUserDto)

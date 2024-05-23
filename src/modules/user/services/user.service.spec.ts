@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { UserRepository } from '../repositories';
 import { CreateUserDto, updateReqDto } from '../dto';
-import { User, UserStatus } from '../entities';
+import { User, UserRole, UserStatus } from '../entities';
 import { hashPassword } from 'src/common/utils/password-hash';
 import { BusinessException } from 'src/exception';
 import { TrackRespository } from 'src/modules/track/repositories';
@@ -36,7 +36,29 @@ describe('UserService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+  describe('updateUserRole', () => {
+    it('유저가 존재하지 않으면 BusinessException을 던진다', async () => {
+      const role: UserRole = 'COACH' as UserRole;
+      userRepo.findOneBy.mockResolvedValueOnce(undefined);
 
+      await expect(service.updateUserRole('uuid', role)).rejects.toThrow(
+        BusinessException,
+      );
+    });
+
+    it('유저가 존재하면 이름 유저의 역할을 변경한다', async () => {
+      const user = new User();
+      const role: UserRole = 'COACH' as UserRole;
+
+      userRepo.findOneBy.mockResolvedValue(user);
+      user.role = role;
+      userRepo.save.mockResolvedValue(user);
+
+      const result = await service.updateUserRole('uuid', role);
+
+      expect(result).toEqual(user);
+    });
+  });
   describe('getAllUsers', () => {
     it('유저가 존재하지 않으면 BusinessException을 던진다', async () => {
       const users = [];
