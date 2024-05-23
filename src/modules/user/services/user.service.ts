@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories';
-import { User, UserStatus } from '../entities';
+import { User, UserRole, UserStatus } from '../entities';
 import { CreateUserDto, updateReqDto } from '../dto';
 import { hashPassword } from 'src/common/utils/password-hash';
 import { BusinessException } from 'src/exception';
@@ -17,12 +17,27 @@ export class UserService {
   async chang(username: string) {
     const user = await this.userRepo.findOneBy({ username });
 
-    user.username = '';
+    user.username = null;
+    user.password = null;
     user.status = UserStatus.UNVERIFIED;
 
     return this.userRepo.save(user);
   }
 
+  async updateUserRole(userId: string, role: UserRole) {
+    const user = await this.userRepo.findOneBy({ id: userId });
+    if (!user)
+      throw new BusinessException(
+        `user`,
+        `사용자가 존재하지 않습니다.`,
+        `사용자가 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    user.role = role;
+
+    return this.userRepo.save(user);
+  }
   async getAllUsers(page: number, pageSize: number) {
     const [users, total] = await this.userRepo.findAllUsers(page, pageSize);
     if (total === 0)
@@ -114,7 +129,7 @@ export class UserService {
       );
 
     user.track = track;
-    return await this.userRepo.save(user);
+    return this.userRepo.save(user);
   }
 
   async validate(userId: string): Promise<User> | undefined {
