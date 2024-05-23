@@ -22,7 +22,10 @@ import { TrackDto } from 'src/modules/track/dto';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
+  @Patch('/chang')
+  async chang(@Body('username') username: string) {
+    return await this.userService.chang(username);
+  }
   @Get('/tracks/all')
   @UseGuards(JwtAuthGuard)
   @Serialize(OutputUserDto)
@@ -70,20 +73,14 @@ export class UserController {
     await this.userService.handleSignUp(createUserDto);
   }
 
-  @Patch('/:id')
-  @UseGuards(JwtAuthGuard)
-  async updateMypage(@Body() dto: updateReqDto, @CurrentUser() user: User) {
-    return await this.userService.updateMypage(user.id, dto);
-  }
-
   @Patch('/tracks/:id')
   @UseGuards(AdminGuard)
   async updateUserTrack(@Param('id') id: string, @Body() trackDto: TrackDto) {
     return await this.userService.updateUserTracks(id, trackDto);
   }
-
-  @Patch('/chang')
-  async chang(@Body('username') username: string) {
-    return await this.userService.chang(username);
+  @Patch('/:id')
+  @UseGuards(JwtAuthGuard)
+  async updateMypage(@Body() dto: updateReqDto, @CurrentUser() user: User) {
+    return await this.userService.updateMypage(user.id, dto);
   }
 }
