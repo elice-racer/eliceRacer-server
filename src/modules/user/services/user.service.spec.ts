@@ -5,7 +5,7 @@ import { CreateUserDto, updateReqDto } from '../dto';
 import { User, UserRole, UserStatus } from '../entities';
 import { hashPassword } from 'src/common/utils/password-hash';
 import { BusinessException } from 'src/exception';
-import { TrackRespository } from 'src/modules/track/repositories';
+import { TrackRepository } from 'src/modules/track/repositories';
 import { Track } from 'src/modules/track/entities';
 import { TrackDto } from 'src/modules/track/dto';
 
@@ -14,7 +14,7 @@ jest.unmock('./user.service');
 describe('UserService', () => {
   let service: UserService;
   let userRepo: jest.Mocked<UserRepository>;
-  let trackRepo: jest.Mocked<TrackRespository>;
+  let trackRepo: jest.Mocked<TrackRepository>;
 
   const createUserDto: CreateUserDto = {
     username: 'testId',
@@ -25,12 +25,12 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService, UserRepository, TrackRespository],
+      providers: [UserService, UserRepository, TrackRepository],
     }).compile();
 
     service = module.get<UserService>(UserService);
     userRepo = module.get(UserRepository);
-    trackRepo = module.get(TrackRespository);
+    trackRepo = module.get(TrackRepository);
   });
 
   it('should be defined', () => {
@@ -173,12 +173,27 @@ describe('UserService', () => {
       );
     });
 
-    it('사용자의 트랙을 업데이트 한다', async () => {
+    it('사용자가 레이서가 아니라면 BusinessException을 던진다', async () => {
+      const user = new User();
+      const track = new Track();
+      user.role = UserRole.COACH;
+
+      userRepo.findUserByIdWithTracks.mockResolvedValueOnce(user);
+      trackRepo.findOne.mockResolvedValueOnce(track);
+      userRepo.save.mockResolvedValueOnce(user);
+
+      await expect(service.updateUserTracks(userId, trackDto)).rejects.toThrow(
+        BusinessException,
+      );
+    });
+
+    it('사용자가 레이서라면 트랙을 업데이트 한다', async () => {
       const user = new User();
       const track = new Track();
       track.trackName = 'Track';
       track.cardinalNo = '1';
       user.track = null;
+      user.role = UserRole.RACER;
 
       userRepo.findUserByIdWithTracks.mockResolvedValueOnce(user);
       trackRepo.findOne.mockResolvedValueOnce(track);

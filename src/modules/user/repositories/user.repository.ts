@@ -36,9 +36,8 @@ export class UserRepository extends Repository<User> {
     return this.repo
       .createQueryBuilder('users')
       .leftJoinAndSelect('users.track', 'tracks')
-      .where('(users.id = :userId) AND users.status = :status', {
+      .where('users.id = :userId', {
         userId,
-        status: UserStatus.VERIFIED_AND_REGISTERED,
       })
       .getOne();
   }
