@@ -1,14 +1,14 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ProjectRepository } from '../repositories/project.repository';
 import { CreateProjectDto } from '../dto';
-import { TrackRespository } from 'src/modules/track/repositories';
+import { TrackRepository } from 'src/modules/track/repositories';
 import { BusinessException } from 'src/exception';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private readonly ProejctRepo: ProjectRepository,
-    private readonly tarckRepo: TrackRespository,
+    private readonly tarckRepo: TrackRepository,
   ) {}
 
   async createProject(dto: CreateProjectDto) {
