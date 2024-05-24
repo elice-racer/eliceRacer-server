@@ -5,9 +5,11 @@ import { UserModule } from '../user/user.module';
 import { MailModule } from '../mail/mail.module';
 import { AuthModule } from '../auth/auth.module';
 import { AdminRepository } from './repositories';
+import { TrackModule } from '../track/track.module';
+import { MemberModule } from '../member/member.module';
 
 @Module({
-  imports: [AuthModule, UserModule, MailModule],
+  imports: [AuthModule, UserModule, MailModule, TrackModule, MemberModule],
   controllers: [AdminController],
   providers: [AdminService, AdminRepository],
 })
