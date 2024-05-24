@@ -49,7 +49,7 @@ export class AdminService {
   }
 
   async createAdmin(dto: CreateAdminDto) {
-    const user = await this.adminRepo.findAnyUserByEmail(dto.email);
+    const user = await this.adminRepo.findUserByEmailOrUsername(dto.email);
 
     if (user)
       throw new BusinessException(

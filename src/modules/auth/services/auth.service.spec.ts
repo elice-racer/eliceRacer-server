@@ -97,7 +97,7 @@ describe('AuthService', () => {
       refreshTokenService.getRefreshToken.mockResolvedValue(
         'valid-token-value',
       );
-      authRepo.findUserById.mockResolvedValue(undefined);
+      authRepo.findRegisteredUserById.mockResolvedValue(undefined);
 
       await expect(service.refresh(validTokenNonexistentUser)).rejects.toThrow(
         BusinessException,
@@ -114,7 +114,7 @@ describe('AuthService', () => {
       refreshTokenService.getRefreshToken.mockResolvedValue(
         'valid-token-value',
       );
-      authRepo.findUserById.mockResolvedValue(new User());
+      authRepo.findRegisteredUserById.mockResolvedValue(new User());
 
       jest
         .spyOn(service, 'createAccessToken')
@@ -139,7 +139,7 @@ describe('AuthService', () => {
       const expectedAccessToken = 'access-token';
       const expectedRefreshToken = 'refresh-token';
 
-      authRepo.findUserByEmailOrUsername.mockResolvedValue(user);
+      authRepo.findRegisteredUserByEmailOrUsername.mockResolvedValue(user);
       jest.spyOn(argon2, 'verify').mockResolvedValue(true);
       jest.spyOn(service, 'validateUser').mockResolvedValue(user);
 
@@ -202,7 +202,7 @@ describe('AuthService', () => {
       user.password = hashedPassword;
       user.status = UserStatus.VERIFIED_AND_REGISTERED;
 
-      authRepo.findUserByEmailOrUsername.mockResolvedValue(user);
+      authRepo.findRegisteredUserByEmailOrUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(true);
 
       const result = await service.validateUser(email, password);
@@ -221,7 +221,7 @@ describe('AuthService', () => {
       user.email = email;
       user.password = hashedPassword;
       user.status = UserStatus.VERIFIED_AND_REGISTERED;
-      authRepo.findUserByEmailOrUsername.mockResolvedValue(user);
+      authRepo.findRegisteredUserByEmailOrUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(false);
 
       await expect(service.validateUser(email, password)).rejects.toThrow(
@@ -325,7 +325,7 @@ describe('AuthService', () => {
     it('회원가입이 되어있으면 BusinessException 반환한다', async () => {
       const user = new User();
 
-      authRepo.findUserByPhoneNumber.mockResolvedValue(user);
+      authRepo.findRegisteredUserByPhoneNumber.mockResolvedValue(user);
 
       await expect(
         service.authencticatePhoneNumber('01012345678'),
@@ -333,7 +333,7 @@ describe('AuthService', () => {
     });
 
     it('번호로 회원가입이 되어있지 않으면 유저 정보를 반환한다', async () => {
-      authRepo.findUserByPhoneNumber.mockResolvedValue(undefined);
+      authRepo.findRegisteredUserByPhoneNumber.mockResolvedValue(undefined);
 
       await service.authencticatePhoneNumber('01012345678');
     });

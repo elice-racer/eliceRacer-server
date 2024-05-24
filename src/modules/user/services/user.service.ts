@@ -71,7 +71,7 @@ export class UserService {
         HttpStatus.NOT_FOUND,
       );
 
-    const [users, total] = await this.userRepo.findAnyUsersByTrack(
+    const [users, total] = await this.userRepo.findUsersByTrack(
       trackDto,
       page,
       pageSize,

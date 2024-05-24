@@ -62,7 +62,7 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
 
-    const user = await this.authRepo.findUserById(payloadRes.sub);
+    const user = await this.authRepo.findRegisteredUserById(payloadRes.sub);
     if (!user)
       throw new BusinessException(
         'auth',
@@ -109,7 +109,8 @@ export class AuthService {
 
   //로그인시 사용
   async validateUser(identifier: string, password: string): Promise<User> {
-    const user = await this.authRepo.findUserByEmailOrUsername(identifier);
+    const user =
+      await this.authRepo.findRegisteredUserByEmailOrUsername(identifier);
     if (!user || !(await argon2.verify(user.password, password)))
       throw new BusinessException(
         'auth',
@@ -182,7 +183,8 @@ export class AuthService {
   }
 
   async authencticatePhoneNumber(phoneNumber: string): Promise<void> {
-    const user = await this.authRepo.findUserByPhoneNumber(phoneNumber);
+    const user =
+      await this.authRepo.findRegisteredUserByPhoneNumber(phoneNumber);
 
     if (user)
       throw new BusinessException(

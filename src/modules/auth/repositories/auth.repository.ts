@@ -8,13 +8,13 @@ export class AuthRepository {
     private userRepo: UserRepository,
   ) {}
 
-  async findUserById(userId: string): Promise<User> | undefined {
+  async findRegisteredUserById(userId: string): Promise<User> | undefined {
     return this.userRepo.findOne({
       where: { id: userId, status: UserStatus.VERIFIED_AND_REGISTERED },
     });
   }
 
-  async findUserByEmailOrUsername(
+  async findRegisteredUserByEmailOrUsername(
     identifier: string,
   ): Promise<User> | undefined {
     return this.userRepo
@@ -39,15 +39,10 @@ export class AuthRepository {
   async updateUserStatus(userId: string, newStatus: UserStatus): Promise<void> {
     await this.userRepo.update(userId, { status: newStatus });
   }
-  async mergeAfterVerification(user: User): Promise<User> {
-    const mergedUser = this.userRepo.merge(user, {
-      status: UserStatus.VERIFIED,
-    });
 
-    return this.userRepo.save(mergedUser);
-  }
-
-  async findUserByPhoneNumber(phoneNumber: string): Promise<User> | undefined {
+  async findRegisteredUserByPhoneNumber(
+    phoneNumber: string,
+  ): Promise<User> | undefined {
     return this.userRepo.findOne({
       where: { phoneNumber, status: UserStatus.VERIFIED_AND_REGISTERED },
     });

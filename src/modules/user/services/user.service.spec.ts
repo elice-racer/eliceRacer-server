@@ -99,7 +99,7 @@ describe('UserService', () => {
       const user = [];
 
       trackRepo.findOne.mockResolvedValue(track);
-      userRepo.findAnyUsersByTrack.mockResolvedValueOnce([user, 0]);
+      userRepo.findUsersByTrack.mockResolvedValueOnce([user, 0]);
 
       await expect(
         service.getAllUsersByTrack(dto, page, pageSize),
@@ -111,7 +111,7 @@ describe('UserService', () => {
       const track: Track = { ...dto } as Track;
 
       trackRepo.findOne.mockResolvedValue(track);
-      userRepo.findAnyUsersByTrack.mockResolvedValueOnce([users, 1]);
+      userRepo.findUsersByTrack.mockResolvedValueOnce([users, 1]);
 
       const result = await service.getAllUsersByTrack(dto, page, pageSize);
 

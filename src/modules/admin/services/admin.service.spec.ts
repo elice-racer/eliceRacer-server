@@ -92,7 +92,7 @@ describe('AdminService', () => {
         realName: 'Test User',
       };
 
-      adminRepo.findAnyUserByEmail.mockResolvedValue(new User());
+      adminRepo.findUserByEmailOrUsername.mockResolvedValue(new User());
 
       await expect(service.createAdmin(duplicateUserDto)).rejects.toThrow(
         BusinessException,
@@ -111,7 +111,7 @@ describe('AdminService', () => {
       newUser.role = UserRole.ADMIN;
       newUser.status = 0;
 
-      adminRepo.findAnyUserByEmail.mockResolvedValue(null);
+      adminRepo.findUserByEmailOrUsername.mockResolvedValue(null);
       (argon2.hash as jest.Mock).mockResolvedValue('hashedPassword');
 
       adminRepo.createAdmin.mockResolvedValue(newUser);

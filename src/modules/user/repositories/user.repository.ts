@@ -16,6 +16,11 @@ export class UserRepository extends Repository<User> {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
+  /**
+   * 앞에 아무런 수식어가 없는 User = 회원가입 안 한 유저도 포함
+   * registeredUser = 회원가입 한 유저만
+   */
+
   // 유저 코치 회원가입시 사용
   async mergeUser(
     user: User,
@@ -42,7 +47,7 @@ export class UserRepository extends Repository<User> {
       .getOne();
   }
 
-  async findAnyUsersByTrack(
+  async findUsersByTrack(
     trackDto: TrackDto,
     page: number,
     pageSize: number,
