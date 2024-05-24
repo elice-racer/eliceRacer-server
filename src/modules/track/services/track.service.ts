@@ -1,11 +1,11 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { TrackRespository } from '../repositories';
+import { TrackRepository } from '../repositories';
 import { TrackDto, TrackResDto } from '../dto';
 import { BusinessException } from 'src/exception';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly trackRepo: TrackRespository) {}
+  constructor(private readonly trackRepo: TrackRepository) {}
 
   async createTrack(dto: TrackDto): Promise<TrackResDto> {
     return await this.trackRepo.createTrack(dto);

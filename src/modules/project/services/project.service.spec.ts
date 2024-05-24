@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectService } from './project.service';
 import { ProjectRepository } from '../repositories/project.repository';
 import { CreateProjectDto } from '../dto';
-import { TrackRespository } from 'src/modules/track/repositories';
+import { TrackRepository } from 'src/modules/track/repositories';
 import { BusinessException } from 'src/exception';
 import { Project } from '../entities';
 import { Track } from 'src/modules/track/entities';
@@ -10,16 +10,16 @@ import { Track } from 'src/modules/track/entities';
 describe('ProjectService', () => {
   let service: ProjectService;
   let projectRepo: jest.Mocked<ProjectRepository>;
-  let trackRepo: jest.Mocked<TrackRespository>;
+  let trackRepo: jest.Mocked<TrackRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProjectService, ProjectRepository, TrackRespository],
+      providers: [ProjectService, ProjectRepository, TrackRepository],
     }).compile();
 
     service = module.get<ProjectService>(ProjectService);
     projectRepo = module.get(ProjectRepository);
-    trackRepo = module.get(TrackRespository);
+    trackRepo = module.get(TrackRepository);
   });
 
   it('should be defined', () => {
