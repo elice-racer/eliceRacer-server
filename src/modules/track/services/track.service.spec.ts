@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TrackService } from './track.service';
 import { TrackDto, TrackResDto } from '../dto';
-import { TrackRepository } from '../repositories/track.repository';
+import { TrackRespository } from '../repositories/track.repository';
 import { Track } from '../entities';
 import { BusinessException } from 'src/exception';
 
 describe('TrackService', () => {
   let service: TrackService;
-  let trackRepo: jest.Mocked<TrackRepository>;
+  let trackRepo: jest.Mocked<TrackRespository>;
   const dto: TrackDto = {
     trackName: 'Track',
     cardinalNo: '1',
@@ -21,11 +21,11 @@ describe('TrackService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TrackService, TrackRepository],
+      providers: [TrackService, TrackRespository],
     }).compile();
 
     service = module.get<TrackService>(TrackService);
-    trackRepo = module.get(TrackRepository);
+    trackRepo = module.get(TrackRespository);
   });
 
   it('should be defined', () => {

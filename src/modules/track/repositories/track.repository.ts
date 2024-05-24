@@ -3,7 +3,7 @@ import { Track } from '../entities';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { TrackDto } from '../dto';
 
-export class TrackRepository extends Repository<Track> {
+export class TrackRespository extends Repository<Track> {
   constructor(
     @InjectRepository(Track) private readonly repo: Repository<Track>,
     @InjectEntityManager()
