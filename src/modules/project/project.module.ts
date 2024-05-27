@@ -10,5 +10,6 @@ import { ProjectRepository } from './repositories/project.repository';
   imports: [TypeOrmModule.forFeature([Project]), TrackModule],
   controllers: [ProjectController],
   providers: [ProjectService, ProjectRepository],
+  exports: [ProjectRepository],
 })
 export class ProjectModule {}
