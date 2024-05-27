@@ -1,4 +1,5 @@
 import { Expose } from 'class-transformer';
+import { TrackResDto } from 'src/modules/track/dto';
 
 export class OutputUserDto {
   @Expose()
@@ -27,4 +28,7 @@ export class OutputUserDto {
 
   @Expose()
   status: number;
+
+  @Expose()
+  track: TrackResDto;
 }
