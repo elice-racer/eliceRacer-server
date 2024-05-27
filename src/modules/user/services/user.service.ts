@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User, UserRole, UserStatus } from '../entities';
 import { CreateUserDto, updateReqDto } from '../dto';
-import { hashPassword } from 'src/common/utils/password-hash';
+import { hashPassword } from 'src/common/utils';
 import { BusinessException } from 'src/exception';
 import { TrackRepository } from 'src/modules/track/repositories';
 import { TrackDto } from 'src/modules/track/dto';

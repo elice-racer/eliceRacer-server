@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { genId } from 'src/common/utils/id-generator';
+import { genId } from 'src/common/utils';
 
 export type ErrorDomain =
   | 'validate'

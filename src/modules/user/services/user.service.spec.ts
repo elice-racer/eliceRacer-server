@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { UserRepository } from '../repositories';
 import { CreateUserDto, updateReqDto } from '../dto';
 import { User, UserRole, UserStatus } from '../entities';
-import { hashPassword } from 'src/common/utils/password-hash';
+import { hashPassword } from 'src/common/utils';
 import { BusinessException } from 'src/exception';
 import { TrackRepository } from 'src/modules/track/repositories';
 import { Track } from 'src/modules/track/entities';
