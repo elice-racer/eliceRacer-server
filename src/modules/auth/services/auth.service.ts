@@ -16,7 +16,7 @@ import { VerificationService } from './verification.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { AuthRepository } from '../repositories';
 import { BusinessException } from 'src/exception';
-import { genId } from 'src/common/utils/id-generator';
+import { genId } from 'src/common/utils';
 
 @Injectable()
 export class AuthService {
