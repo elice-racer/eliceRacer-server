@@ -5,10 +5,12 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity({ name: 'tracks' })
 export class Track extends BaseEntity {
-  @Column()
+  @Column({
+    name: 'track_name',
+  })
   trackName: string;
 
-  @Column()
+  @Column({ name: 'cardinal_no' })
   cardinalNo: string;
 
   @OneToMany(() => User, (user) => user.track, { onDelete: 'RESTRICT' })
