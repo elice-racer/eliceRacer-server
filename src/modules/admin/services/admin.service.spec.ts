@@ -3,11 +3,15 @@ import { AdminService } from './admin.service';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import { User, UserRole, UserStatus } from 'src/modules/user/entities';
 import * as argon2 from 'argon2';
-import { generateToken } from 'src/common/utils/verification-token-genertator';
+import { generateToken } from 'src/common/utils/';
 import { MailService } from 'src/modules/mail/mail.service';
 import { VerificationService } from 'src/modules/auth/services/verification.service';
 import { AdminRepository } from '../repositories';
 import { BusinessException } from 'src/exception';
+import { ProjectRepository } from 'src/modules/project/repositories/project.repository';
+import { TeamRepository } from 'src/modules/team/repositories/team.repository';
+import { UserRepository } from 'src/modules/user/repositories';
+import { EntityManager } from 'typeorm';
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -22,6 +26,10 @@ describe('AdminService', () => {
         MailService,
         VerificationService,
         AdminRepository,
+        ProjectRepository,
+        TeamRepository,
+        UserRepository,
+        EntityManager,
       ],
     }).compile();
 

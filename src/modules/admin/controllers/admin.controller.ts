@@ -66,9 +66,9 @@ export class AdminController {
   }
 
   //user 트랙 수정.
-  @Patch('/tracks/:id')
+  @Patch('/users/tracks/:id')
   @Serialize(OutputUserDto)
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   async updateUserTrack(@Param('id') id: string, @Body() trackDto: TrackDto) {
     return await this.userService.updateUserTracks(id, trackDto);
   }
@@ -76,13 +76,13 @@ export class AdminController {
   //member
   //racer 등록
   @Post('/members/racers')
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importUsers(@UploadedFile() file: Express.Multer.File) {
     return this.memberService.importUsersFromExcel(file);
   }
 
-  //coach 등록
+  // coach 등록
   @Post('/members/coaches')
   @UseInterceptors(FileInterceptor('file'))
   async importCoaches(@UploadedFile() file: Express.Multer.File) {
@@ -90,4 +90,9 @@ export class AdminController {
   }
 
   //project 등록 및 팀 빌딩 생성
+  @Post('/teams')
+  @UseInterceptors(FileInterceptor('file'))
+  async createTeamAndProject(@UploadedFile() file: Express.Multer.File) {
+    return this.adminService.createTeamAndProject(file);
+  }
 }
