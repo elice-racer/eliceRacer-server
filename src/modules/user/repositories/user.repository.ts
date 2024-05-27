@@ -56,8 +56,8 @@ export class UserRepository extends Repository<User> {
     return this.repo
       .createQueryBuilder('users')
       .leftJoinAndSelect('users.track', 'tracks')
-      .where('tracks.trackName = :trackName', { trackName })
-      .andWhere('tracks.cardinalNo = :cardinalNo', { cardinalNo })
+      .where('tracks.track_name = :trackName', { trackName })
+      .andWhere('tracks.cardinal_no = :cardinalNo', { cardinalNo })
       .orderBy('users.realName', 'ASC')
       .skip((page - 1) * pageSize)
       .take(pageSize)
@@ -68,7 +68,7 @@ export class UserRepository extends Repository<User> {
     return this.repo
       .createQueryBuilder('users')
       .leftJoinAndSelect('users.track', 'tracks')
-      .orderBy('users.realName', 'ASC')
+      .orderBy('users.real_name', 'ASC')
       .skip((page - 1) * pageSize)
       .take(pageSize)
       .getManyAndCount();
