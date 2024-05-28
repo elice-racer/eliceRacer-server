@@ -2,19 +2,25 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { CreateUserDto, CurrentResDto, updateReqDto } from '../dto';
+import {
+  CreateUserDto,
+  CurrentResDto,
+  DetailUserResDto,
+  updateReqDto,
+} from '../dto';
 import { CurrentUser } from 'src/common/decorators';
 import { User } from '../entities';
 import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor } from 'src/interceptors';
 import { Serialize } from 'src/interceptors';
-import { OutputUserDto } from '../dto/output-user.dto';
+import { OutputUserDto } from '../dto';
 import { TrackDto } from 'src/modules/track/dto';
 
 @UseInterceptors(ResponseInterceptor)
@@ -78,5 +84,12 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async updateMypage(@Body() dto: updateReqDto, @CurrentUser() user: User) {
     return await this.userService.updateMypage(user.id, dto);
+  }
+
+  @Get('/:id')
+  @UseGuards(JwtAuthGuard)
+  @Serialize(DetailUserResDto)
+  async getUser(@Param('id') id: string) {
+    return await this.userService.getUser(id);
   }
 }

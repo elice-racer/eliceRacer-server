@@ -24,6 +24,18 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
+  async getUser(userId: string): Promise<User> | undefined {
+    const userWithDetail = await this.userRepo.findUserByIdWithDetail(userId);
+
+    if (!userWithDetail)
+      throw new BusinessException(
+        `user`,
+        `사용자가 존재하지 않습니다.`,
+        `사용자가 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+    return userWithDetail;
+  }
   async updateUserRole(userId: string, role: UserRole) {
     const user = await this.userRepo.findOneBy({ id: userId });
     if (!user)
@@ -38,6 +50,8 @@ export class UserService {
 
     return this.userRepo.save(user);
   }
+
+  //TODO user, page
   async getAllUsers(page: number, pageSize: number) {
     const [users, total] = await this.userRepo.findAllUsers(page, pageSize);
     if (total === 0)

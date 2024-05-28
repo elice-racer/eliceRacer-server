@@ -73,4 +73,15 @@ export class UserRepository extends Repository<User> {
       .take(pageSize)
       .getManyAndCount();
   }
+
+  async findUserByIdWithDetail(userId: string): Promise<User> | undefined {
+    return this.repo
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.track', 'tracks')
+      .leftJoinAndSelect('users.teams', 'teams')
+      .leftJoinAndSelect('teams.project', 'projects')
+      .addSelect(['projects.id', 'projects.project_name'])
+      .where('users.id = :userId', { userId })
+      .getOne();
+  }
 }
