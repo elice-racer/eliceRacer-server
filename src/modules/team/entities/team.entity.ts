@@ -10,6 +10,12 @@ export class Team extends BaseEntity {
   })
   teamNumber: string;
 
+  @Column({ name: 'team_name', nullable: true })
+  teamName: string;
+
+  @Column()
+  notion: string;
+
   @ManyToOne(() => Project, (project) => project.teams)
   project: Project;
 

@@ -33,6 +33,9 @@ export class User extends BaseEntity {
   phoneNumber: string;
 
   @Column({ nullable: true })
+  comment: string;
+
+  @Column({ nullable: true })
   position: string;
 
   @Column({ nullable: true })

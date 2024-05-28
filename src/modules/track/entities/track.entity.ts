@@ -1,8 +1,9 @@
 import { BaseEntity } from 'src/common/entity';
 import { Project } from 'src/modules/project/entities';
 import { User } from 'src/modules/user/entities';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, Unique } from 'typeorm';
 
+@Unique(['trackName', 'cardinalNo'])
 @Entity({ name: 'tracks' })
 export class Track extends BaseEntity {
   @Column({
