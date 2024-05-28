@@ -5,7 +5,7 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity({ name: 'projects' })
 export class Project extends BaseEntity {
-  @Column()
+  @Column({ name: 'project_name' })
   projectName: string;
 
   @Column()
