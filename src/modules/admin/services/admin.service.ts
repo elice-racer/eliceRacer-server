@@ -87,6 +87,7 @@ export class AdminService {
       { key: 'teamNumber', terms: ['팀'] },
       { key: 'realName', terms: ['이름'] },
       { key: 'phoneNumberKey', terms: ['핸드폰', '휴대폰'] },
+      { key: 'notion', terms: ['노션'] },
     ];
 
     const validData = validateData(data, fields);
@@ -116,7 +117,7 @@ export class AdminService {
       const teamCache = new Map();
 
       for (const item of validCoachesData) {
-        const { teamNumber, phoneNumberKey, coaches } = item;
+        const { teamNumber, phoneNumberKey, coaches, notion } = item;
         const phoneNumber = phoneNumberKey.replace(/-/g, '');
 
         let team = teamCache.get(teamNumber);
@@ -130,6 +131,7 @@ export class AdminService {
             team = queryRunner.manager.create(Team, {
               teamNumber: teamNumber,
               project,
+              notion,
               users: [],
             });
             await queryRunner.manager.save(team);
@@ -149,14 +151,14 @@ export class AdminService {
         }
 
         if (coaches && coaches.length > 0) {
-          const coaches = await queryRunner.manager.find(User, {
+          const coachesArr = await queryRunner.manager.find(User, {
             where: {
               role: UserRole.COACH,
-              realName: In(item.coaches),
+              realName: In(coaches),
             },
           });
 
-          for (const coach of coaches) {
+          for (const coach of coachesArr) {
             if (!team.users.includes(coach)) {
               team.users.push(coach);
             }
