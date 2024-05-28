@@ -2,16 +2,16 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User, UserRole, UserStatus } from '../entities';
 import { CreateUserDto, updateReqDto } from '../dto';
-import { hashPassword } from 'src/common/utils/password-hash';
+import { hashPassword } from 'src/common/utils';
 import { BusinessException } from 'src/exception';
-import { TrackRespository } from 'src/modules/track/repositories';
+import { TrackRepository } from 'src/modules/track/repositories';
 import { TrackDto } from 'src/modules/track/dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepo: UserRepository,
-    private readonly trackRepo: TrackRespository,
+    private readonly trackRepo: TrackRepository,
   ) {}
 
   async chang(username: string) {
@@ -71,7 +71,7 @@ export class UserService {
         HttpStatus.NOT_FOUND,
       );
 
-    const [users, total] = await this.userRepo.findAnyUsersByTrack(
+    const [users, total] = await this.userRepo.findUsersByTrack(
       trackDto,
       page,
       pageSize,
@@ -111,7 +111,7 @@ export class UserService {
     const user = await this.userRepo.findUserByIdWithTracks(userId);
     if (!user) {
       throw new BusinessException(
-        'user',
+        'admin',
         `유저를 찾을 수 없습니다`,
         `유저를 찾을 수 없습니다`,
         HttpStatus.BAD_REQUEST,
@@ -120,11 +120,19 @@ export class UserService {
     const track = await this.trackRepo.findOne({
       where: { trackName: trackDto.trackName, cardinalNo: trackDto.cardinalNo },
     });
+
+    if (user.role !== UserRole.RACER)
+      throw new BusinessException(
+        'admin',
+        `${user.role}는 트랙을 변경할 수 없습니다.`,
+        `${user.role}는 트랙을 변경할 수 없습니다.`,
+        HttpStatus.FORBIDDEN,
+      );
     if (!track)
       throw new BusinessException(
-        'user',
+        'admin',
         `트랙을 찾을 수 없습니다: ${trackName}${cardinalNo}`,
-        `트랙을 찾을 수 없습니다: ${trackName}${cardinalNo}`,
+        `트랙을 찾을 수 없습니다: ${trackName}${cardinalNo} 트랙을 먼저 등록해주세요`,
         HttpStatus.NOT_FOUND,
       );
 

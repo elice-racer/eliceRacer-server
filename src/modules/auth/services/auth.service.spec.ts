@@ -97,7 +97,7 @@ describe('AuthService', () => {
       refreshTokenService.getRefreshToken.mockResolvedValue(
         'valid-token-value',
       );
-      authRepo.findUserById.mockResolvedValue(undefined);
+      authRepo.findRegisteredUserById.mockResolvedValue(undefined);
 
       await expect(service.refresh(validTokenNonexistentUser)).rejects.toThrow(
         BusinessException,
@@ -114,7 +114,7 @@ describe('AuthService', () => {
       refreshTokenService.getRefreshToken.mockResolvedValue(
         'valid-token-value',
       );
-      authRepo.findUserById.mockResolvedValue(new User());
+      authRepo.findRegisteredUserById.mockResolvedValue(new User());
 
       jest
         .spyOn(service, 'createAccessToken')
@@ -139,7 +139,7 @@ describe('AuthService', () => {
       const expectedAccessToken = 'access-token';
       const expectedRefreshToken = 'refresh-token';
 
-      authRepo.findUserByEmailOrUsername.mockResolvedValue(user);
+      authRepo.findRegisteredUserByEmailOrUsername.mockResolvedValue(user);
       jest.spyOn(argon2, 'verify').mockResolvedValue(true);
       jest.spyOn(service, 'validateUser').mockResolvedValue(user);
 
@@ -202,7 +202,7 @@ describe('AuthService', () => {
       user.password = hashedPassword;
       user.status = UserStatus.VERIFIED_AND_REGISTERED;
 
-      authRepo.findUserByEmailOrUsername.mockResolvedValue(user);
+      authRepo.findRegisteredUserByEmailOrUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(true);
 
       const result = await service.validateUser(email, password);
@@ -221,7 +221,7 @@ describe('AuthService', () => {
       user.email = email;
       user.password = hashedPassword;
       user.status = UserStatus.VERIFIED_AND_REGISTERED;
-      authRepo.findUserByEmailOrUsername.mockResolvedValue(user);
+      authRepo.findRegisteredUserByEmailOrUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(false);
 
       await expect(service.validateUser(email, password)).rejects.toThrow(
@@ -232,34 +232,46 @@ describe('AuthService', () => {
 
   describe('handleCodeVerification', () => {
     it('유효하지 않은 번호로 인증을 시도하면 BadRequestException 반환한다', async () => {
+      const phoneNumber = '01012345678';
+      const invalidInputCode = '123456';
+      const realName = 'user';
       verificationService.verifyCode.mockResolvedValue(false);
 
       await expect(
-        service.handleCodeVerification('01012345678', '123456'),
+        service.handleCodeVerification(phoneNumber, realName, invalidInputCode),
       ).rejects.toThrow(BusinessException);
     });
 
-    it('해당 번호로 회원가입 한 유저가 존재하지 않으면 비어있는 유저 정보를 반환한다', async () => {
-      const verifyCodeResDto = {
-        email: '',
-        realName: '',
-        track: null,
-      };
-
+    it('해당 번호로 회원가입 한 유저가 존재하지 않으면 새로 생성한 유저의 정보를 반환한다', async () => {
       const phoneNumber = '01012345678';
       const inputCode = '123456';
+      const realName = 'user';
+
+      const user = new User();
+      user.email = 'test@example.com';
+      user.realName = realName;
+      user.phoneNumber = phoneNumber;
+      user.track = new Track();
+
+      const verifyCodeResDto: VerifyCodeResDto = {
+        email: user.email,
+        realName: user.realName,
+        role: user.role,
+        track: user.track,
+      };
 
       verificationService.verifyCode.mockResolvedValue(true);
       authRepo.findAnyUserByPhoneWithTrack.mockResolvedValue(undefined);
+      authRepo.registerUser.mockResolvedValue(user);
 
       const result = await service.handleCodeVerification(
         phoneNumber,
+        realName,
         inputCode,
       );
 
       expect(result).toEqual(verifyCodeResDto);
     });
-
     it('해당 번호로 회원가입 하지 않은 유저가 존재하면 유저 정보를 반환한다', async () => {
       const user = new User();
       const track = new Track();
@@ -268,17 +280,20 @@ describe('AuthService', () => {
       const verifyCodeResDto: VerifyCodeResDto = {
         email: user.email,
         realName: user.realName,
+        role: user.role,
         track: user.track,
       };
 
       const phoneNumber = '01012345678';
       const inputCode = '123456';
+      const realName = 'user';
 
       verificationService.verifyCode.mockResolvedValue(true);
       authRepo.findAnyUserByPhoneWithTrack.mockResolvedValue(user);
 
       const result = await service.handleCodeVerification(
         phoneNumber,
+        realName,
         inputCode,
       );
 
@@ -310,7 +325,7 @@ describe('AuthService', () => {
     it('회원가입이 되어있으면 BusinessException 반환한다', async () => {
       const user = new User();
 
-      authRepo.findUserByPhoneNumber.mockResolvedValue(user);
+      authRepo.findRegisteredUserByPhoneNumber.mockResolvedValue(user);
 
       await expect(
         service.authencticatePhoneNumber('01012345678'),
@@ -318,7 +333,7 @@ describe('AuthService', () => {
     });
 
     it('번호로 회원가입이 되어있지 않으면 유저 정보를 반환한다', async () => {
-      authRepo.findUserByPhoneNumber.mockResolvedValue(undefined);
+      authRepo.findRegisteredUserByPhoneNumber.mockResolvedValue(undefined);
 
       await service.authencticatePhoneNumber('01012345678');
     });

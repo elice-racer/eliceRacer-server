@@ -1,11 +1,11 @@
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Project } from '../entities';
 import { EntityManager, Repository } from 'typeorm';
+import { Team } from '../entities/team.entity';
 
-export class ProjectRepository extends Repository<Project> {
+export class TeamRepository extends Repository<Team> {
   constructor(
-    @InjectRepository(Project)
-    private readonly repo: Repository<Project>,
+    @InjectRepository(Team)
+    private readonly repo: Repository<Team>,
     @InjectEntityManager()
     private readonly entityManager: EntityManager,
   ) {

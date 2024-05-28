@@ -26,6 +26,7 @@ import { TrackModule } from './modules/track/track.module';
 import { MemberModule } from './modules/member/member.module';
 import { ValidationPipe } from './pipes/validation.pipe';
 import { ProjectModule } from './modules/project/project.module';
+import { TeamModule } from './modules/team/team.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { ProjectModule } from './modules/project/project.module';
     MemberModule,
     AdminModule,
     ProjectModule,
+    TeamModule,
   ],
   controllers: [AppController],
   providers: [

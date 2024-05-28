@@ -16,7 +16,7 @@ import { VerificationService } from './verification.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { AuthRepository } from '../repositories';
 import { BusinessException } from 'src/exception';
-import { genId } from 'src/common/utils/id-generator';
+import { genId } from 'src/common/utils';
 
 @Injectable()
 export class AuthService {
@@ -62,7 +62,7 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
 
-    const user = await this.authRepo.findUserById(payloadRes.sub);
+    const user = await this.authRepo.findRegisteredUserById(payloadRes.sub);
     if (!user)
       throw new BusinessException(
         'auth',
@@ -87,7 +87,7 @@ export class AuthService {
     await this.refreshTokenService.setRefreshToken(
       payload.jti,
       refreshToken,
-      60 * 60 * 24 * 3, //3일
+      1000 * 60 * 24 * 3, //3일
     );
 
     return { accessToken, refreshToken };
@@ -109,7 +109,8 @@ export class AuthService {
 
   //로그인시 사용
   async validateUser(identifier: string, password: string): Promise<User> {
-    const user = await this.authRepo.findUserByEmailOrUsername(identifier);
+    const user =
+      await this.authRepo.findRegisteredUserByEmailOrUsername(identifier);
     if (!user || !(await argon2.verify(user.password, password)))
       throw new BusinessException(
         'auth',
@@ -124,6 +125,7 @@ export class AuthService {
   // 인증번호 검증
   async handleCodeVerification(
     phoneNumber: string,
+    realName: string,
     inputCode: string,
   ): Promise<VerifyCodeResDto> {
     const result = await this.verificationService.verifyCode(
@@ -143,11 +145,15 @@ export class AuthService {
 
     // 등록되어있지 않은 유저는 번호 등록
     if (!user) {
-      await this.authRepo.registerPhone(phoneNumber);
+      const registeredUser = await this.authRepo.registerUser(
+        phoneNumber,
+        realName,
+      );
       return {
-        email: '',
-        realName: '',
-        track: null,
+        email: registeredUser.email,
+        realName: registeredUser.realName,
+        role: registeredUser.role,
+        track: registeredUser.track,
       };
     }
 
@@ -156,6 +162,7 @@ export class AuthService {
     return {
       email: user.email,
       realName: user.realName,
+      role: user.role,
       track: user.track ? user.track : null,
     };
   }
@@ -176,7 +183,8 @@ export class AuthService {
   }
 
   async authencticatePhoneNumber(phoneNumber: string): Promise<void> {
-    const user = await this.authRepo.findUserByPhoneNumber(phoneNumber);
+    const user =
+      await this.authRepo.findRegisteredUserByPhoneNumber(phoneNumber);
 
     if (user)
       throw new BusinessException(

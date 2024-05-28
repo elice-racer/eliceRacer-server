@@ -9,10 +9,6 @@ export class AdminRepository {
     private userRepo: UserRepository,
   ) {}
 
-  async findAnyAdminById(userId: string): Promise<User> | undefined {
-    return this.userRepo.findOneBy({ id: userId });
-  }
-
   async updateStatusAfterVerification(
     userId: string,
     newStatus: UserStatus,
@@ -21,7 +17,7 @@ export class AdminRepository {
   }
 
   //이메일이랑 아이디 모두 포함
-  async findAnyUserByEmail(email: string): Promise<User> | undefined {
+  async findUserByEmailOrUsername(email: string): Promise<User> | undefined {
     return this.userRepo.findOne({
       where: [{ email: email }, { username: email }],
     });

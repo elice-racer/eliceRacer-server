@@ -16,7 +16,7 @@ import {
 } from '../dto';
 import { LoginReqDto } from '../dto/login-req.dto';
 import { JwtAuthGuard } from 'src/common/guards';
-import { ResponseInterceptor } from 'src/interceptors';
+import { ResponseInterceptor, Serialize } from 'src/interceptors';
 
 @UseInterceptors(ResponseInterceptor)
 @Controller('auth')
@@ -29,12 +29,14 @@ export class AuthController {
   }
 
   @Post('/verify-code')
+  @Serialize(VerifyCodeResDto)
   async verifyAuthCode(
-    @Body() verifyCodeReqDto: VerifyCodeReqDto,
+    @Body() dto: VerifyCodeReqDto,
   ): Promise<VerifyCodeResDto> {
     return await this.authService.handleCodeVerification(
-      verifyCodeReqDto.phoneNumber,
-      verifyCodeReqDto.authCode,
+      dto.phoneNumber,
+      dto.realName,
+      dto.authCode,
     );
   }
 

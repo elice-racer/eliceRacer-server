@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Patch,
   Query,
   UseGuards,
@@ -11,8 +10,8 @@ import {
 import { UserService } from '../services/user.service';
 import { CreateUserDto, CurrentResDto, updateReqDto } from '../dto';
 import { CurrentUser } from 'src/common/decorators';
-import { User, UserRole } from '../entities';
-import { AdminGuard, JwtAuthGuard } from 'src/common/guards';
+import { User } from '../entities';
+import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor } from 'src/interceptors';
 import { Serialize } from 'src/interceptors';
 import { OutputUserDto } from '../dto/output-user.dto';
@@ -23,14 +22,6 @@ import { TrackDto } from 'src/modules/track/dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Patch('/role/:id')
-  @UseGuards(AdminGuard)
-  async updateUserRole(
-    @Param('id') userId: string,
-    @Body('role') role: UserRole,
-  ) {
-    return this.userService.updateUserRole(userId, role);
-  }
   @Patch('/chang')
   async chang(@Body('username') username: string) {
     return await this.userService.chang(username);
@@ -83,12 +74,7 @@ export class UserController {
     await this.userService.handleSignUp(createUserDto);
   }
 
-  @Patch('/tracks/:id')
-  @UseGuards(AdminGuard)
-  async updateUserTrack(@Param('id') id: string, @Body() trackDto: TrackDto) {
-    return await this.userService.updateUserTracks(id, trackDto);
-  }
-  @Patch('/:id')
+  @Patch('/mypage')
   @UseGuards(JwtAuthGuard)
   async updateMypage(@Body() dto: updateReqDto, @CurrentUser() user: User) {
     return await this.userService.updateMypage(user.id, dto);

@@ -16,6 +16,7 @@ import {
 import { VerificationService } from '../services/verification.service';
 import { RefreshTokenService } from '../services/refresh-token.service';
 import { AuthRepository } from '../repositories';
+import { UserRole } from 'src/modules/user/entities';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -53,10 +54,12 @@ describe('AuthController', () => {
     it('인증 번호가 맞는지 검증한다', async () => {
       const reqDto: VerifyCodeReqDto = {
         phoneNumber: '01012345678',
+        realName: 'name',
         authCode: '123456',
       };
       const resDto: VerifyCodeResDto = {
         email: 'user@example.com',
+        role: 'RACER' as UserRole,
         realName: '홍길동',
         track: null,
       };
@@ -67,6 +70,7 @@ describe('AuthController', () => {
 
       expect(authService.handleCodeVerification).toHaveBeenCalledWith(
         reqDto.phoneNumber,
+        reqDto.realName,
         reqDto.authCode,
       );
       expect(result).toEqual(resDto);

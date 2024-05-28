@@ -1,91 +1,151 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { BusinessException } from 'src/exception/BusinessException';
-import { TrackRespository } from 'src/modules/track/repositories';
+import { Injectable } from '@nestjs/common';
+import { parseExcel } from 'src/common/utils';
+import { validateData } from 'src/common/utils/data-validator';
+import { TrackRepository } from 'src/modules/track/repositories';
 import { User } from 'src/modules/user/entities';
 import { UserRepository } from 'src/modules/user/repositories';
-import * as XLSX from 'xlsx';
 
 @Injectable()
 export class MemberService {
   constructor(
     private readonly userRepo: UserRepository,
-    private readonly trackRepo: TrackRespository,
+    private readonly trackRepo: TrackRepository,
   ) {}
 
   async importUsersFromExcel(file: Express.Multer.File): Promise<any> {
-    const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(sheet) as Array<
-      Record<string, string>
-    >;
+    const data = parseExcel(file);
 
-    const processedData = data.map((item: Record<string, string>) => {
-      const emailKey =
-        Object.keys(item).find((key) => key.includes('이메일')) || '';
-      const nameKey =
-        Object.keys(item).find((key) => key.includes('이름')) || '';
-      const phoneKey =
-        Object.keys(item).find(
-          (key) => key.includes('핸드폰') || key.includes('휴대폰'),
-        ) || '';
-      const trackNameKey =
-        Object.keys(item).find((key) => key.includes('트랙')) || '';
-      const cardinalNoKey =
-        Object.keys(item).find((key) => key.includes('기수')) || '';
+    const fields = [
+      { key: 'email', terms: ['이메일'] },
+      { key: 'realName', terms: ['이름'] },
+      { key: 'phoneNumberKey', terms: ['핸드폰', '휴대폰'] },
+      { key: 'trackName', terms: ['트랙'] },
+      { key: 'cardinalNo', terms: ['기수'] },
+    ];
+    const validData = validateData(data, fields);
 
-      // 핸드폰 번호에서 하이픈 제거
-      const phoneNumber = item[phoneKey].replace(/-/g, '');
-
-      return {
-        email: item[emailKey],
-        realName: item[nameKey],
-        phoneNumber, // 하이픈이 제거된 핸드폰 번호
-        trackName: item[trackNameKey],
-        cardinalNo: item[cardinalNoKey],
-      };
-    });
-
-    // 데이터베이스 트랜잭션 시작
     const queryRunner = this.userRepo.manager.connection.createQueryRunner();
     await queryRunner.startTransaction();
 
+    const trackCache = new Map<string, any>();
+
+    // 전화번호 중복 검사를 위한 캐시
+    const phoneNumberCache = new Set<string>();
+
+    // 데이터베이스에서 기존의 핸드폰 번호 캐시에 로드
+    const existingPhoneNumbers = await this.userRepo.manager.find(User, {
+      select: ['phoneNumber'], // 전화번호만 선택
+    });
+    existingPhoneNumbers.forEach((user) =>
+      phoneNumberCache.add(user.phoneNumber),
+    );
     try {
-      for (const item of processedData) {
-        const { email, realName, trackName, phoneNumber, cardinalNo } = item;
+      for (const item of validData) {
+        const { email, realName, trackName, phoneNumberKey, cardinalNo } = item;
+        const phoneNumber = phoneNumberKey.replace(/-/g, '');
 
-        // 트랙 정보 확인
-        const track = await this.trackRepo.findOne({
-          where: { trackName, cardinalNo },
-        });
+        const trackKey = `${trackName}-${cardinalNo}`;
+        let track = trackCache.get(trackKey);
 
-        // 트랙이 존재하지 않는 경우 에러 발생
+        // 캐시에 없으면 데이터베이스에서 조회
         if (!track) {
-          throw new BusinessException(
-            'track',
-            `트랙 '(${trackName}${cardinalNo})'을 찾을 수 없습니다.`,
-            `트랙 '(${trackName}${cardinalNo})'을 찾을 수 없습니다. 먼저 트랙을 생성하세요.`,
-            HttpStatus.NOT_FOUND,
-          );
+          track = await this.trackRepo.findOne({
+            where: { trackName, cardinalNo },
+          });
+          trackCache.set(trackKey, track);
         }
 
+        // 트랙이 존재하지 않으면 경고 및 건너뛰기
+        if (!track) {
+          console.warn(`트랙 '${trackName} ${cardinalNo}'을 찾을 수 없습니다.`);
+          continue;
+        }
+
+        if (!track) {
+          console.warn(`트랙 '${trackName} ${cardinalNo}'을 찾을 수 없습니다.`);
+          continue; // Skip this entry if track does not exist
+        }
+
+        if (phoneNumberCache.has(phoneNumber)) {
+          console.info(`전화번호 ${phoneNumber}가 이미 존재합니다.`);
+          continue; // 이미 존재하는 전화번호는 건너뛰기
+        }
+
+        // 캐시에 없으면 새로 추가
+        phoneNumberCache.add(phoneNumber);
         const user = new User();
         user.email = email;
         user.realName = realName;
         user.phoneNumber = phoneNumber;
         user.track = track;
 
-        // 유저 정보 저장
         await queryRunner.manager.save(User, user);
       }
-      // 모든 처리가 성공하면 트랜잭션 커밋
+
       await queryRunner.commitTransaction();
+      console.info(`Successfully imported ${validData.length} users.`);
     } catch (error) {
-      // 오류 발생 시 트랜잭션 롤백
       await queryRunner.rollbackTransaction();
-      throw error; // 오류 재발생시키기
+      console.error('Failed to import users:', error);
+      throw error;
     } finally {
-      // 트랜잭션 종료
+      await queryRunner.release();
+    }
+  }
+
+  async importCoachesFromExcel(file: Express.Multer.File): Promise<any> {
+    const data = parseExcel(file);
+    const fields = [
+      { key: 'email', terms: ['이메일'] },
+      { key: 'realName', terms: ['이름'] },
+      { key: 'phoneNumberKey', terms: ['핸드폰', '휴대폰'] },
+      { key: 'role', terms: ['역할'] },
+    ];
+
+    const validData = validateData(data, fields);
+
+    const queryRunner = this.userRepo.manager.connection.createQueryRunner();
+    await queryRunner.startTransaction();
+    // 전화번호 중복 검사를 위한 캐시
+    const phoneNumberCache = new Set<string>();
+
+    // 데이터베이스에서 기존의 핸드폰 번호 캐시에 로드
+    const existingPhoneNumbers = await this.userRepo.manager.find(User, {
+      select: ['phoneNumber'], // 전화번호만 선택
+    });
+    existingPhoneNumbers.forEach((user) =>
+      phoneNumberCache.add(user.phoneNumber),
+    );
+    try {
+      for (const item of validData) {
+        const { email, realName, phoneNumberKey, role } = item;
+        const phoneNumber = phoneNumberKey.replace(/-/g, '');
+
+        // 트랙이 존재하지 않으면 경고 및 건너뛰기
+
+        if (phoneNumberCache.has(phoneNumber)) {
+          console.info(`전화번호 ${phoneNumber}가 이미 존재합니다.`);
+          continue; // 이미 존재하는 전화번호는 건너뛰기
+        }
+
+        // 캐시에 없으면 새로 추가
+        phoneNumberCache.add(phoneNumber);
+        const user = new User();
+        user.email = email;
+        user.realName = realName;
+        user.phoneNumber = phoneNumber;
+        user.role = role;
+
+        await queryRunner.manager.save(User, user);
+      }
+
+      await queryRunner.commitTransaction();
+      console.info(`Successfully imported ${validData.length} users.`);
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.error('Failed to import users:', error);
+      throw error;
+    } finally {
       await queryRunner.release();
     }
   }

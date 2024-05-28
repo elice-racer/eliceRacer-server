@@ -1,14 +1,17 @@
 import { BaseEntity } from 'src/common/entity';
 import { Project } from 'src/modules/project/entities';
 import { User } from 'src/modules/user/entities';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, Unique } from 'typeorm';
 
+@Unique(['trackName', 'cardinalNo'])
 @Entity({ name: 'tracks' })
 export class Track extends BaseEntity {
-  @Column()
+  @Column({
+    name: 'track_name',
+  })
   trackName: string;
 
-  @Column()
+  @Column({ name: 'cardinal_no' })
   cardinalNo: string;
 
   @OneToMany(() => User, (user) => user.track, { onDelete: 'RESTRICT' })
