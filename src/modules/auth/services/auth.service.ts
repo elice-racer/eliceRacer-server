@@ -87,7 +87,7 @@ export class AuthService {
     await this.refreshTokenService.setRefreshToken(
       payload.jti,
       refreshToken,
-      60 * 60 * 24 * 3, //3일
+      1000 * 60 * 24 * 3, //3일
     );
 
     return { accessToken, refreshToken };
