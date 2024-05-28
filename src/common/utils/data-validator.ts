@@ -1,9 +1,13 @@
 import { HttpStatus } from '@nestjs/common';
 import { BusinessException } from 'src/exception';
+import { Field } from 'src/modules/admin/types';
 
 // 데이터 유효성 검사 및 키 매핑 함수
-export const validateData = (data: any[], fields: any[]): any[] => {
-  const keyCache: any = {};
+export const validateData = (
+  data: Record<string, string | string[]>[],
+  fields: Field[],
+) => {
+  const keyCache: Record<string, string> = {};
 
   const validData = data
     .map((item) => {
@@ -89,17 +93,4 @@ export const validateCoaches = (data: any[], fields: any[]): any[] => {
     .filter((item) => item !== null); // null 아닌 항목만 필터링
 
   return validData;
-
-  return data.map((item) => {
-    const coaches = Object.keys(item)
-      .filter((key) => key.toLowerCase().includes('코치'))
-      .map((key) => item[key])
-      .filter(Boolean);
-    if (coaches.length > 0) {
-      item.coaches = coaches;
-    } else {
-      item.coaches = []; // 코치 정보가 없다면 빈 배열 할당
-    }
-    return item;
-  });
 };

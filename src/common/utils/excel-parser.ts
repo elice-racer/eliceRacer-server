@@ -1,6 +1,8 @@
 import * as xlsx from 'xlsx';
 
-export const parseExcel = (file: Express.Multer.File): any[] => {
+export const parseExcel = (
+  file: Express.Multer.File,
+): Record<string, string | string[]>[] => {
   const workbook = xlsx.read(file.buffer, { type: 'buffer' });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
