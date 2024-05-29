@@ -16,6 +16,7 @@ jest.mock('./src/modules/auth/services/auth.service');
 jest.mock('./src/modules/auth/services/verification.service');
 jest.mock('./src/modules/auth/services/refresh-token.service');
 jest.mock('./src/modules/mail/mail.service');
+jest.mock('./src/modules/team/services/team.service');
 
 //Repository
 jest.mock('./src/modules/auth/repositories/verification.repository');
