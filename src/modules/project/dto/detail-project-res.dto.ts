@@ -5,5 +5,5 @@ export class DetailProjectResDto {
   projectName: string;
 
   @Expose()
-  round: string;
+  round: number;
 }
