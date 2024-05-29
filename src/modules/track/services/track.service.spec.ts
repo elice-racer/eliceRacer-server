@@ -10,13 +10,13 @@ describe('TrackService', () => {
   let trackRepo: jest.Mocked<TrackRepository>;
   const dto: TrackDto = {
     trackName: 'Track',
-    cardinalNo: '1',
+    cardinalNo: 1,
   };
 
   const resDto: TrackResDto = {
     id: 'uuid',
     trackName: 'Track',
-    cardinalNo: '1',
+    cardinalNo: 1,
   };
 
   beforeEach(async () => {
@@ -33,6 +33,13 @@ describe('TrackService', () => {
   });
 
   describe('createTrack', () => {
+    it('해당 track이 이미 존재하면 BusinessException을 던진다', async () => {
+      const track = new Track();
+
+      trackRepo.findOne.mockResolvedValue(track);
+
+      await expect(service.createTrack(dto)).rejects.toThrow(BusinessException);
+    });
     it('track을 생성한다', async () => {
       const track = new Track();
       track.id = 'uuid';

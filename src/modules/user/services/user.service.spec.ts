@@ -36,6 +36,27 @@ describe('UserService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('getUser', () => {
+    it('유저가 존재하지 않으면 BusinessException을 던진다', async () => {
+      const userId = 'uuid';
+
+      userRepo.findUserByIdWithDetail.mockResolvedValue(undefined);
+      await expect(service.getUser(userId)).rejects.toThrow(BusinessException);
+    });
+
+    it('유저의 정보를 반환한다', async () => {
+      const userId = 'uuid';
+      const user = new User();
+
+      userRepo.findUserByIdWithDetail.mockResolvedValue(user);
+
+      const result = await service.getUser(userId);
+
+      expect(result).toEqual(user);
+    });
+  });
+
   describe('updateUserRole', () => {
     it('유저가 존재하지 않으면 BusinessException을 던진다', async () => {
       const role: UserRole = 'COACH' as UserRole;
@@ -59,6 +80,7 @@ describe('UserService', () => {
       expect(result).toEqual(user);
     });
   });
+
   describe('getAllUsers', () => {
     it('유저가 존재하지 않으면 BusinessException을 던진다', async () => {
       const users = [];
@@ -82,7 +104,7 @@ describe('UserService', () => {
   describe('getAllUsersByTrack', () => {
     const dto: TrackDto = {
       trackName: 'trackName',
-      cardinalNo: '1',
+      cardinalNo: 1,
     };
     const page = 1;
     const pageSize = 10;
@@ -153,7 +175,7 @@ describe('UserService', () => {
     const userId = 'uuid';
     const trackDto: TrackDto = {
       trackName: 'trackName',
-      cardinalNo: '1',
+      cardinalNo: 1,
     };
     it('사용자가 존재하지 않으면 BusinessException을 던진다', async () => {
       jest.spyOn(service, 'findUserById').mockResolvedValue(undefined);
@@ -191,7 +213,7 @@ describe('UserService', () => {
       const user = new User();
       const track = new Track();
       track.trackName = 'Track';
-      track.cardinalNo = '1';
+      track.cardinalNo = 1;
       user.track = null;
       user.role = UserRole.RACER;
 

@@ -12,7 +12,7 @@ export class Track extends BaseEntity {
   trackName: string;
 
   @Column({ name: 'cardinal_no' })
-  cardinalNo: string;
+  cardinalNo: number;
 
   @OneToMany(() => User, (user) => user.track, { onDelete: 'RESTRICT' })
   users: User[];
