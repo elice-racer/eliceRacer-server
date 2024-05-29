@@ -8,6 +8,17 @@ export class TrackService {
   constructor(private readonly trackRepo: TrackRepository) {}
 
   async createTrack(dto: TrackDto): Promise<TrackResDto> {
+    const track = await this.trackRepo.findOne({
+      where: { trackName: dto.trackName, cardinalNo: dto.cardinalNo },
+    });
+
+    if (track)
+      throw new BusinessException(
+        'track',
+        `해당 트랙(${dto.trackName}${dto.cardinalNo})이 이미 존재합니다.`,
+        `해당 트랙(${dto.trackName}${dto.cardinalNo})이 이미 존재합니다.`,
+        HttpStatus.CONFLICT,
+      );
     return await this.trackRepo.createTrack(dto);
   }
 

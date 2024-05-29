@@ -42,9 +42,10 @@ export class UserController {
     @Query('page') page: string,
     @Query('pageSize') pageSize: string,
   ) {
+    const cardinalNo = parseInt(cardinal);
     const trackDto: TrackDto = {
       trackName: track,
-      cardinalNo: cardinal,
+      cardinalNo,
     };
     const pageNumber = parseInt(page, 10);
     const pageSizeNumber = parseInt(pageSize, 10);

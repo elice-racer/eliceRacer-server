@@ -104,7 +104,7 @@ describe('UserService', () => {
   describe('getAllUsersByTrack', () => {
     const dto: TrackDto = {
       trackName: 'trackName',
-      cardinalNo: '1',
+      cardinalNo: 1,
     };
     const page = 1;
     const pageSize = 10;
@@ -175,7 +175,7 @@ describe('UserService', () => {
     const userId = 'uuid';
     const trackDto: TrackDto = {
       trackName: 'trackName',
-      cardinalNo: '1',
+      cardinalNo: 1,
     };
     it('사용자가 존재하지 않으면 BusinessException을 던진다', async () => {
       jest.spyOn(service, 'findUserById').mockResolvedValue(undefined);
@@ -213,7 +213,7 @@ describe('UserService', () => {
       const user = new User();
       const track = new Track();
       track.trackName = 'Track';
-      track.cardinalNo = '1';
+      track.cardinalNo = 1;
       user.track = null;
       user.role = UserRole.RACER;
 
