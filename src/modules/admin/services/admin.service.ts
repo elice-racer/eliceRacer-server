@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import * as argon2 from 'argon2';
-import { generateToken } from 'src/common/utils';
+import { convertDate, generateToken } from 'src/common/utils';
 import { MailService } from 'src/modules/mail/mail.service';
 import { VerificationService } from 'src/modules/auth/services/verification.service';
 import { AdminRepository } from '../repositories';
@@ -88,6 +88,8 @@ export class AdminService {
       { key: 'realName', terms: ['이름'] },
       { key: 'phoneNumberKey', terms: ['핸드폰', '휴대폰'] },
       { key: 'notion', terms: ['노션'] },
+      { key: 'startDate', terms: ['시작'] },
+      { key: 'endDate', terms: ['종료'] },
     ];
 
     const validData = validateData(data, fields);
@@ -107,9 +109,13 @@ export class AdminService {
       });
 
       if (!project) {
+        const processedStartDate = convertDate(validData[0].startDate);
+        const processedEndDate = convertDate(validData[0].endDate);
         project = queryRunner.manager.create(Project, {
           projectName: validData[0].projectName,
           round: validData[0].round,
+          startDate: processedStartDate,
+          endDate: processedEndDate,
         });
         await queryRunner.manager.save(project);
       }

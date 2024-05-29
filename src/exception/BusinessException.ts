@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { genId } from 'src/common/utils';
+import { genId, utcToKoreanTDate } from 'src/common/utils';
 
 export type ErrorDomain =
   | 'validate'
@@ -24,6 +24,6 @@ export class BusinessException extends Error {
   ) {
     super(message);
     this.id = genId();
-    this.timestamp = new Date();
+    this.timestamp = utcToKoreanTDate(new Date());
   }
 }

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { appendFileSync, existsSync, mkdirSync } from 'fs';
 import { Observable, tap } from 'rxjs';
+import { utcToKoreanTDate } from 'src/common/utils';
 import { User } from 'src/modules/user/entities';
 
 export class LoggingInterceptor implements NestInterceptor {
@@ -40,7 +41,7 @@ export class LoggingInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         const elapsedTime = Date.now() - start;
-        const logMessage = `${new Date().toISOString()} ${method} ${originalUrl} Agent: ${userAgent} - IP: ${ip} - User: ${userId} - Status: ${response.statusCode} - ${elapsedTime}ms \n`;
+        const logMessage = `${utcToKoreanTDate(new Date()).toISOString()} ${method} ${originalUrl} Agent: ${userAgent} - IP: ${ip} - User: ${userId} - Status: ${response.statusCode} - ${elapsedTime}ms \n`;
 
         try {
           appendFileSync(accessLogPath, logMessage);
