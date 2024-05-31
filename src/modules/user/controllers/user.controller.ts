@@ -13,6 +13,9 @@ import {
   CreateUserDto,
   CurrentResDto,
   DetailUserResDto,
+  PaginationDto,
+  PaginationTrackCardinalDto,
+  PaginationTrackDto,
   updateReqDto,
 } from '../dto';
 import { CurrentUser } from 'src/common/decorators';
@@ -21,7 +24,6 @@ import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor } from 'src/interceptors';
 import { Serialize } from 'src/interceptors';
 import { OutputUserDto } from '../dto';
-import { TrackDto } from 'src/modules/track/dto';
 
 @UseInterceptors(ResponseInterceptor)
 @Controller('users')
@@ -33,39 +35,30 @@ export class UserController {
     return await this.userService.chang(username);
   }
 
+  @Get('/all')
+  // @UseGuards(JwtAuthGuard)
+  // @Serialize(OutputUserDto)
+  async getAllRacers(@Query() dto: PaginationDto) {
+    return await this.userService.getAllRacres(dto);
+  }
   @Get('/tracks/all')
-  @UseGuards(JwtAuthGuard)
-  @Serialize(OutputUserDto)
-  async getAllUsersByTrack(
-    @Query('track') track: string,
-    @Query('cardinal') cardinal: string,
-    @Query('page') page: string,
-    @Query('pageSize') pageSize: string,
-  ) {
-    const cardinalNo = parseInt(cardinal);
-    const trackDto: TrackDto = {
-      trackName: track,
-      cardinalNo,
-    };
-    const pageNumber = parseInt(page, 10);
-    const pageSizeNumber = parseInt(pageSize, 10);
-    return await this.userService.getAllUsersByTrack(
-      trackDto,
-      pageNumber,
-      pageSizeNumber,
-    );
+  async getAllRacersByTrack(@Query() dto: PaginationTrackDto) {
+    const { users, pagination } =
+      await this.userService.getAllRacersByTrack(dto);
+
+    return { users, pagination };
   }
 
-  @Get('/all')
-  @UseGuards(JwtAuthGuard)
-  async allUsers(
-    @Query('page') page: string,
-    @Query('pageSize') pageSize: string,
+  @Get('/tracks-cardinal/all')
+  // @UseGuards(JwtAuthGuard)
+  // @Serialize(OutputUserDto)
+  async getAllRacresByTrackAndCardinalNo(
+    @Query() dto: PaginationTrackCardinalDto,
   ) {
-    const pageNumber = parseInt(page, 10);
-    const pageSizeNumber = parseInt(pageSize, 10);
+    const { users, pagination } =
+      await this.userService.getAllRacersByTrackAndCardinalNo(dto);
 
-    return await this.userService.getAllUsers(pageNumber, pageSizeNumber);
+    return { users, pagination };
   }
 
   @Get('/current')
@@ -77,8 +70,8 @@ export class UserController {
 
   @Patch('/signup')
   @Serialize(OutputUserDto)
-  async signup(@Body() createUserDto: CreateUserDto) {
-    await this.userService.handleSignUp(createUserDto);
+  async signup(@Body() dto: CreateUserDto) {
+    await this.userService.handleSignUp(dto);
   }
 
   @Patch('/mypage')

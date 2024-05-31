@@ -1,7 +1,14 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User, UserRole, UserStatus } from '../entities';
-import { CreateUserDto, updateReqDto } from '../dto';
+import {
+  CoachPaginationDto,
+  CreateUserDto,
+  PaginationDto,
+  PaginationTrackCardinalDto,
+  PaginationTrackDto,
+  updateReqDto,
+} from '../dto';
 import { hashPassword } from 'src/common/utils';
 import { BusinessException } from 'src/exception';
 import { TrackRepository } from 'src/modules/track/repositories';
@@ -36,6 +43,100 @@ export class UserService {
       );
     return userWithDetail;
   }
+
+  async getAllCoaches(dto: CoachPaginationDto) {
+    const { pageSize } = dto;
+    const pageSizeToInt = parseInt(pageSize);
+
+    const users = await this.userRepo.findAllCoaches(dto);
+
+    let next: string | null = null;
+
+    if (users.length > pageSizeToInt) {
+      const lastUser = users[pageSizeToInt - 1];
+      next = `https://api.elicerracer.store/api/users/all?pageSize=10&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      users.pop();
+    }
+
+    return { users, pagination: { next, count: users.length } };
+  }
+
+  //모든 레이서
+  async getAllRacres(dto: PaginationDto) {
+    const { pageSize } = dto;
+    const pageSizeToInt = parseInt(pageSize);
+
+    const users = await this.userRepo.findAllRcers(dto, pageSizeToInt);
+
+    let next: string | null = null;
+
+    if (users.length > pageSizeToInt) {
+      const lastUser = users[pageSizeToInt - 1];
+      next = `https://api.elicerracer.store/api/users/all?pageSize=10&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      users.pop();
+    }
+
+    return { users, pagination: { next, count: users.length } };
+  }
+
+  //트랙별 모든 레이서
+  async getAllRacersByTrack(dto: PaginationTrackDto) {
+    const { trackName, pageSize } = dto;
+    const pageSizeToInt = parseInt(pageSize);
+
+    const track = await this.trackRepo.findOne({ where: { trackName } });
+
+    if (!track)
+      throw new BusinessException(
+        `user`,
+        `해당 트랙(${trackName})이 존재하지 않습니다.`,
+        `해당 트랙(${trackName})이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    const users = await this.userRepo.findRacersByTrack(dto);
+
+    let next: string | null = null;
+    if (users.length > pageSizeToInt) {
+      const lastUser = users[pageSizeToInt - 1];
+      next = `https://api.elicerracer.store/api/users/all?pageSize=10&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      users.pop();
+    }
+
+    return { users, pagination: { next, count: users.length } };
+  }
+
+  //트랙+기수별 모든 레이서
+  async getAllRacersByTrackAndCardinalNo(dto: PaginationTrackCardinalDto) {
+    const { trackName, cardinalNo, pageSize } = dto;
+    const cardinalNoToInt = parseInt(cardinalNo);
+    const pageSizeToInt = parseInt(pageSize);
+
+    const track = await this.trackRepo.findOne({
+      where: { trackName, cardinalNo: cardinalNoToInt },
+    });
+
+    if (!track)
+      throw new BusinessException(
+        `user`,
+        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
+        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    const users = await this.userRepo.findRacersByTrackAndCardinalNo(dto);
+
+    let next: string | null = null;
+    if (users.length > pageSizeToInt) {
+      const lastUser = users[pageSizeToInt - 1];
+      next = `https://api.elicerracer.store/api/users/all?pageSize=10&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+
+      users.pop();
+    }
+
+    return { users, pagination: { next, count: users.length } };
+  }
+
   async updateUserRole(userId: string, role: UserRole) {
     const user = await this.userRepo.findOneBy({ id: userId });
     if (!user)
@@ -50,58 +151,6 @@ export class UserService {
 
     return this.userRepo.save(user);
   }
-
-  //TODO user, page
-  async getAllUsers(page: number, pageSize: number) {
-    const [users, total] = await this.userRepo.findAllUsers(page, pageSize);
-    if (total === 0)
-      throw new BusinessException(
-        `user`,
-        `사용자가 존재하지 않습니다.`,
-        `사용자가 존재하지 않습니다.`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    return users;
-  }
-
-  //트랙별 모든 suer
-  async getAllUsersByTrack(
-    trackDto: TrackDto,
-    page: number,
-    pageSize: number,
-  ): Promise<User[]> {
-    const { trackName, cardinalNo } = trackDto;
-
-    const track = await this.trackRepo.findOne({
-      where: { trackName, cardinalNo },
-    });
-
-    if (!track)
-      throw new BusinessException(
-        `user`,
-        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
-        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    const [users, total] = await this.userRepo.findUsersByTrack(
-      trackDto,
-      page,
-      pageSize,
-    );
-
-    if (total === 0)
-      throw new BusinessException(
-        `user`,
-        `등록된 레이서가 존재하지 않습니다.`,
-        `등록된 레이서가 존재하지 않습니다.`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    return users;
-  }
-
   async updateMypage(userId: string, dto: updateReqDto): Promise<User> {
     const user = await this.userRepo.findUserByIdWithTracks(userId);
     if (!user) {
