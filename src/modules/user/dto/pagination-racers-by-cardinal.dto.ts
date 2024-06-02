@@ -1,4 +1,4 @@
-export class PaginationTrackCardinalDto {
+export class PaginationRacersByCardinalDto {
   trackName: string;
   cardinalNo: string;
   pageSize: string;

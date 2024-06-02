@@ -1,6 +1,6 @@
-export class PaginationTrackDto {
+export class PaginationRacersDto {
   pageSize: string;
-  trackName: string;
+  lastTrackName?: string;
   lastCardinalNo?: string;
   lastRealName?: string;
   lastId?: string;
