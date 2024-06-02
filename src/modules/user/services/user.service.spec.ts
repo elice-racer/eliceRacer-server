@@ -2,11 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { UserRepository } from '../repositories';
 import {
-  CoachPaginationDto,
   CreateUserDto,
-  PaginationDto,
-  PaginationTrackCardinalDto,
-  PaginationTrackDto,
+  PaginationCoachesDto,
+  PaginationRacersByCardinalDto,
+  PaginationRacersByTrackDto,
+  PaginationRacersDto,
   updateReqDto,
 } from '../dto';
 import { User, UserRole, UserStatus } from '../entities';
@@ -65,7 +65,7 @@ describe('UserService', () => {
   });
 
   describe('getAllCoaches', () => {
-    const dto: CoachPaginationDto = {
+    const dto: PaginationCoachesDto = {
       pageSize: '10',
       lastId: 'last-uuid',
       lastRealName: 'last-realname',
@@ -85,19 +85,11 @@ describe('UserService', () => {
     });
   });
   describe('getAllRacers', () => {
-    const dto: PaginationDto = {
+    const dto: PaginationRacersDto = {
       lastRealName: 'real-name',
       lastId: 'last-uuid',
       pageSize: '10',
     };
-    // it('유저가 존재하지 않으면 BusinessException을 던진다', async () => {
-    //   const users = [];
-    //   userRepo.findAllRcers.mockResolvedValueOnce(users);
-
-    //   await expect(service.getAllRacres(dto)).rejects.toThrow(
-    //     BusinessException,
-    //   );
-    // });
 
     it('유저가 존재하면 이름 오름차순으로 유저를 반환한다', async () => {
       const users: User[] = [{ realName: 'user1' } as User];
@@ -112,7 +104,7 @@ describe('UserService', () => {
   });
 
   describe('getAllRacersByTrack', () => {
-    const dto: PaginationTrackDto = {
+    const dto: PaginationRacersByTrackDto = {
       pageSize: '10',
       trackName: 'AI',
     };
@@ -140,7 +132,7 @@ describe('UserService', () => {
   });
 
   describe('getAllRacersByTrackAndCardinalNo', () => {
-    const dto: PaginationTrackCardinalDto = {
+    const dto: PaginationRacersByCardinalDto = {
       trackName: 'track-name',
       cardinalNo: '1',
       pageSize: '10',
@@ -155,18 +147,6 @@ describe('UserService', () => {
         service.getAllRacersByTrackAndCardinalNo(dto),
       ).rejects.toThrow(BusinessException);
     });
-
-    // it('트랙에 등록된 멤버가 없으면 등록된 레이서가 없다는 안내를 반환한다', async () => {
-    //   const track = new Track();
-    //   const users = [];
-
-    //   trackRepo.findOne.mockResolvedValue(track);
-    //   userRepo.findRacersByTrackAndCardinalNo.mockResolvedValueOnce(users);
-
-    //   await expect(
-    //     service.getAllRacersByTrackAndCardinalNo(dto),
-    //   ).rejects.toThrow(BusinessException);
-    // });
 
     it('트랙이 존재하고 멤버가 존재하면 이름 오른차순으로 레이서들을 반환한다', async () => {
       const users: User[] = [{ realName: 'user1' } as User];
