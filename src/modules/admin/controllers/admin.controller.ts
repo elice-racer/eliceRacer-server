@@ -36,6 +36,7 @@ export class AdminController {
   async singup(@Body() dto: CreateAdminDto) {
     return await this.adminService.signup(dto);
   }
+
   @Get('/verify-email')
   async verifyEmail(@Query() dto: VerifyEamilDto) {
     const result = await this.adminService.verifyEmail(dto.id, dto.token);
@@ -47,7 +48,7 @@ export class AdminController {
   // track
   //생성
   @Post('/tracks')
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @Serialize(TrackResDto)
   async createTrack(@Body() dto: TrackDto): Promise<TrackResDto> {
     return await this.trackService.createTrack(dto);
@@ -68,7 +69,7 @@ export class AdminController {
   //user 트랙 수정.
   @Patch('/users/tracks/:id')
   @Serialize(OutputUserDto)
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   async updateUserTrack(@Param('id') id: string, @Body() trackDto: TrackDto) {
     return await this.userService.updateUserTracks(id, trackDto);
   }
@@ -76,7 +77,7 @@ export class AdminController {
   //member
   //racer 등록
   @Post('/members/racers')
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importUsers(@UploadedFile() file: Express.Multer.File) {
     return this.memberService.importUsersFromExcel(file);
@@ -84,6 +85,7 @@ export class AdminController {
 
   // coach 등록
   @Post('/members/coaches')
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importCoaches(@UploadedFile() file: Express.Multer.File) {
     return this.memberService.importCoachesFromExcel(file);
@@ -91,6 +93,7 @@ export class AdminController {
 
   //project 등록 및 팀 빌딩 생성
   @Post('/teams')
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async createTeamAndProject(@UploadedFile() file: Express.Multer.File) {
     return this.adminService.createTeamAndProject(file);
