@@ -2,11 +2,11 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories';
 import { User, UserRole, UserStatus } from '../entities';
 import {
-  CoachPaginationDto,
   CreateUserDto,
-  PaginationDto,
-  PaginationTrackCardinalDto,
-  PaginationTrackDto,
+  PaginationCoachesDto,
+  PaginationRacersByCardinalDto,
+  PaginationRacersByTrackDto,
+  PaginationRacersDto,
   updateReqDto,
 } from '../dto';
 import { hashPassword } from 'src/common/utils';
@@ -44,7 +44,7 @@ export class UserService {
     return userWithDetail;
   }
 
-  async getAllCoaches(dto: CoachPaginationDto) {
+  async getAllCoaches(dto: PaginationCoachesDto) {
     const { pageSize } = dto;
     const pageSizeToInt = parseInt(pageSize);
 
@@ -54,7 +54,7 @@ export class UserService {
 
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/users/all?pageSize=10&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `https://api.elicerracer.store/api/users/coaches/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -62,7 +62,7 @@ export class UserService {
   }
 
   //모든 레이서
-  async getAllRacres(dto: PaginationDto) {
+  async getAllRacres(dto: PaginationRacersDto) {
     const { pageSize } = dto;
     const pageSizeToInt = parseInt(pageSize);
 
@@ -72,7 +72,7 @@ export class UserService {
 
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/users/all?pageSize=10&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `https://api.elicerracer.store/api/users/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -80,7 +80,7 @@ export class UserService {
   }
 
   //트랙별 모든 레이서
-  async getAllRacersByTrack(dto: PaginationTrackDto) {
+  async getAllRacersByTrack(dto: PaginationRacersByTrackDto) {
     const { trackName, pageSize } = dto;
     const pageSizeToInt = parseInt(pageSize);
 
@@ -99,7 +99,7 @@ export class UserService {
     let next: string | null = null;
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/users/all?pageSize=10&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `https://api.elicerracer.store/api/users/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -107,7 +107,7 @@ export class UserService {
   }
 
   //트랙+기수별 모든 레이서
-  async getAllRacersByTrackAndCardinalNo(dto: PaginationTrackCardinalDto) {
+  async getAllRacersByCardinalNo(dto: PaginationRacersByCardinalDto) {
     const { trackName, cardinalNo, pageSize } = dto;
     const cardinalNoToInt = parseInt(cardinalNo);
     const pageSizeToInt = parseInt(pageSize);
@@ -129,7 +129,7 @@ export class UserService {
     let next: string | null = null;
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/users/all?pageSize=10&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `https://api.elicerracer.store/api/users/tracks-cardinal/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
 
       users.pop();
     }
@@ -191,6 +191,7 @@ export class UserService {
         `${user.role}는 트랙을 변경할 수 없습니다.`,
         HttpStatus.FORBIDDEN,
       );
+
     if (!track)
       throw new BusinessException(
         'admin',

@@ -3,11 +3,11 @@ import { User, UserRole, UserStatus } from '../entities';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import {
-  CoachPaginationDto,
   CreateUserDto,
-  PaginationDto,
-  PaginationTrackCardinalDto,
-  PaginationTrackDto,
+  PaginationCoachesDto,
+  PaginationRacersByCardinalDto,
+  PaginationRacersByTrackDto,
+  PaginationRacersDto,
 } from '../dto';
 
 @Injectable()
@@ -52,7 +52,7 @@ export class UserRepository extends Repository<User> {
       .getOne();
   }
 
-  async findAllCoaches(dto: CoachPaginationDto) {
+  async findAllCoaches(dto: PaginationCoachesDto) {
     const { lastRealName, lastId, pageSize } = dto;
     const pageSizeToInt = parseInt(pageSize);
     const role = UserRole.COACH;
@@ -74,7 +74,7 @@ export class UserRepository extends Repository<User> {
   }
 
   async findAllRcers(
-    dto: PaginationDto,
+    dto: PaginationRacersDto,
     pageSize: number,
   ): Promise<User[] | []> {
     const { lastTrackName, lastCardinalNo, lastRealName, lastId } = dto;
@@ -101,7 +101,9 @@ export class UserRepository extends Repository<User> {
     return await query.limit(pageSize + 1).getMany();
   }
 
-  async findRacersByTrack(dto: PaginationTrackDto): Promise<User[] | []> {
+  async findRacersByTrack(
+    dto: PaginationRacersByTrackDto,
+  ): Promise<User[] | []> {
     const { trackName, pageSize, lastRealName, lastId, lastCardinalNo } = dto;
     const pageSizeToInt = parseInt(pageSize);
 
@@ -117,12 +119,12 @@ export class UserRepository extends Repository<User> {
       .addOrderBy('users.id', 'ASC');
 
     if (lastCardinalNo && lastRealName && lastId) {
-      const lastCardinalNoToInt = parseInt(lastCardinalNo);
+      const lastcardinalNo = parseInt(lastCardinalNo);
       query.andWhere(
-        `(tracks.cardinal_no > :lastCardinalNoToInt) OR 
-        (tracks.cardinal_no = :lastCardinalNoToInt AND users.real_name > :lastRealName) OR
-        (tracks.cardinal_no = :lastCardinalNoToInt AND users.real_name = :lastRealName AND users.id > :lastId)`,
-        { lastCardinalNoToInt, lastRealName, lastId },
+        `((tracks.cardinal_no > :lastcardinalNo) OR 
+        (tracks.cardinal_no = :lastcardinalNo AND users.real_name > :lastRealName) OR
+        (tracks.cardinal_no = :lastcardinalNo AND users.real_name = :lastRealName AND users.id > :lastId))`,
+        { lastcardinalNo, lastRealName, lastId },
       );
     }
 
@@ -130,11 +132,9 @@ export class UserRepository extends Repository<User> {
   }
 
   async findRacersByTrackAndCardinalNo(
-    dto: PaginationTrackCardinalDto,
+    dto: PaginationRacersByCardinalDto,
   ): Promise<User[] | []> {
     const { trackName, cardinalNo, pageSize, lastRealName, lastId } = dto;
-    const cardinalNoToInt = parseInt(cardinalNo);
-    const pageSizeToInt = parseInt(pageSize);
 
     const role = UserRole.RACER;
 
@@ -143,18 +143,21 @@ export class UserRepository extends Repository<User> {
       .leftJoinAndSelect('users.track', 'tracks')
       .where('tracks.track_name = :trackName', { trackName })
       .andWhere('users.role = :role', { role })
-      .andWhere('tracks.cardinal_no = :cardinalNoToInt', { cardinalNoToInt })
+      .andWhere('tracks.cardinal_no = :cardinalNo', {
+        cardinalNo: parseInt(cardinalNo),
+      })
       .orderBy('users.real_name', 'ASC')
       .addOrderBy('users.id', 'ASC');
 
     if (lastRealName && lastId) {
       query.andWhere(
-        `(users.real_name > :lastRealName) OR (users.real_name = :lastRealName AND users.id > :lastId)`,
+        `((users.real_name > :lastRealName) OR 
+        (users.real_name = :lastRealName AND users.id > :lastId))`,
         { lastRealName, lastId },
       );
     }
 
-    return query.limit(pageSizeToInt + 1).getMany();
+    return query.limit(parseInt(pageSize) + 1).getMany();
   }
 
   async findUserByIdWithDetail(userId: string): Promise<User> | undefined {

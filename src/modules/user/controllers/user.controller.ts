@@ -13,9 +13,9 @@ import {
   CreateUserDto,
   CurrentResDto,
   DetailUserResDto,
-  PaginationDto,
-  PaginationTrackCardinalDto,
-  PaginationTrackDto,
+  PaginationRacersByCardinalDto,
+  PaginationRacersByTrackDto,
+  PaginationRacersDto,
   updateReqDto,
 } from '../dto';
 import { CurrentUser } from 'src/common/decorators';
@@ -36,13 +36,15 @@ export class UserController {
   }
 
   @Get('/all')
-  // @UseGuards(JwtAuthGuard)
-  // @Serialize(OutputUserDto)
-  async getAllRacers(@Query() dto: PaginationDto) {
+  @UseGuards(JwtAuthGuard)
+  @Serialize(OutputUserDto)
+  async getAllRacers(@Query() dto: PaginationRacersDto) {
     return await this.userService.getAllRacres(dto);
   }
   @Get('/tracks/all')
-  async getAllRacersByTrack(@Query() dto: PaginationTrackDto) {
+  @UseGuards(JwtAuthGuard)
+  @Serialize(OutputUserDto)
+  async getAllRacersByTrack(@Query() dto: PaginationRacersByTrackDto) {
     const { users, pagination } =
       await this.userService.getAllRacersByTrack(dto);
 
@@ -50,15 +52,10 @@ export class UserController {
   }
 
   @Get('/tracks-cardinal/all')
-  // @UseGuards(JwtAuthGuard)
-  // @Serialize(OutputUserDto)
-  async getAllRacresByTrackAndCardinalNo(
-    @Query() dto: PaginationTrackCardinalDto,
-  ) {
-    const { users, pagination } =
-      await this.userService.getAllRacersByTrackAndCardinalNo(dto);
-
-    return { users, pagination };
+  @UseGuards(JwtAuthGuard)
+  @Serialize(OutputUserDto)
+  async getAllRacresByCardinalNo(@Query() dto: PaginationRacersByCardinalDto) {
+    return await this.userService.getAllRacersByCardinalNo(dto);
   }
 
   @Get('/current')
@@ -76,6 +73,7 @@ export class UserController {
 
   @Patch('/mypage')
   @UseGuards(JwtAuthGuard)
+  @Serialize(DetailUserResDto)
   async updateMypage(@Body() dto: updateReqDto, @CurrentUser() user: User) {
     return await this.userService.updateMypage(user.id, dto);
   }

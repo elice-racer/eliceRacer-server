@@ -143,9 +143,9 @@ describe('UserService', () => {
     it('트랙이 없으면 BusinessException을 던진다', async () => {
       trackRepo.findOne.mockResolvedValue(undefined);
 
-      await expect(
-        service.getAllRacersByTrackAndCardinalNo(dto),
-      ).rejects.toThrow(BusinessException);
+      await expect(service.getAllRacersByCardinalNo(dto)).rejects.toThrow(
+        BusinessException,
+      );
     });
 
     it('트랙이 존재하고 멤버가 존재하면 이름 오른차순으로 레이서들을 반환한다', async () => {
@@ -155,7 +155,7 @@ describe('UserService', () => {
       trackRepo.findOne.mockResolvedValue(track);
       userRepo.findRacersByTrackAndCardinalNo.mockResolvedValueOnce(users);
 
-      const result = await service.getAllRacersByTrackAndCardinalNo(dto);
+      const result = await service.getAllRacersByCardinalNo(dto);
       const expectedPagination = { next: null, count: 1 };
 
       expect(result.users).toEqual(users);
