@@ -12,6 +12,7 @@ import { BusinessException } from 'src/exception';
 import { Project } from '../entities';
 import { PaginationProjectsByCardinalDto } from '../dto/pagination-projects-by-carinal.dto';
 import { Track } from 'src/modules/track/entities';
+import { ConfigService } from '@nestjs/config';
 
 jest.unmock('./project.service');
 
@@ -22,7 +23,12 @@ describe('ProjectService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProjectService, ProjectRepository, TrackRepository],
+      providers: [
+        ProjectService,
+        ProjectRepository,
+        TrackRepository,
+        ConfigService,
+      ],
     }).compile();
 
     service = module.get<ProjectService>(ProjectService);
