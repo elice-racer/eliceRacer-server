@@ -13,13 +13,19 @@ import { hashPassword } from 'src/common/utils';
 import { BusinessException } from 'src/exception';
 import { TrackRepository } from 'src/modules/track/repositories';
 import { TrackDto } from 'src/modules/track/dto';
+import { ConfigService } from '@nestjs/config';
+import { ENV_BASE_URL_KEY } from 'src/common/const';
 
 @Injectable()
 export class UserService {
+  private baseUrl;
   constructor(
     private readonly userRepo: UserRepository,
     private readonly trackRepo: TrackRepository,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.baseUrl = configService.get<string>(ENV_BASE_URL_KEY);
+  }
 
   async chang(username: string) {
     const user = await this.userRepo.findOneBy({ username });
@@ -54,7 +60,7 @@ export class UserService {
 
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/users/coaches/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `${this.baseUrl}/api/users/coaches/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -72,7 +78,7 @@ export class UserService {
 
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/users/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `${this.baseUrl}/api/users/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -99,7 +105,7 @@ export class UserService {
     let next: string | null = null;
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/users/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `${this.baseUrl}/api/users/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -129,7 +135,7 @@ export class UserService {
     let next: string | null = null;
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/users/tracks-cardinal/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `${this.baseUrl}/api/users/tracks-cardinal/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
 
       users.pop();
     }

@@ -2,21 +2,18 @@ import {
   Body,
   Controller,
   Post,
+  Req,
+  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { VerifyCodeReqDto } from '../dto/verify-code-req.dto';
-import {
-  LoginResDto,
-  LogoutReqDto,
-  RefreshReqDto,
-  RefreshResDto,
-  VerifyCodeResDto,
-} from '../dto';
+import { VerifyCodeResDto } from '../dto';
 import { LoginReqDto } from '../dto/login-req.dto';
 import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
+import { Request, Response } from 'express';
 
 @UseInterceptors(ResponseInterceptor)
 @Controller('auth')
@@ -41,21 +38,42 @@ export class AuthController {
   }
 
   @Post('/login')
-  async login(@Body() loginReqDto: LoginReqDto): Promise<LoginResDto> {
-    return await this.authService.login(
+  async login(@Res() res: Response, @Body() loginReqDto: LoginReqDto) {
+    const { accessToken, refreshToken } = await this.authService.login(
       loginReqDto.identifier,
       loginReqDto.password,
     );
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      path: '/',
+      //TODO domain: secure:
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.header('Authorization', `Bearer ${accessToken}`);
+    return res.status(200).json({ message: '로그인 성공', statusCode: 200 });
   }
 
   @Post('/refresh')
-  async refresh(@Body() refreshReqDto: RefreshReqDto): Promise<RefreshResDto> {
-    return await this.authService.refresh(refreshReqDto.refreshToken);
+  async refresh(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies['refreshToken'];
+
+    const accessToken = await this.authService.refresh(refreshToken);
+    res.header('Authorization', `Bearer ${accessToken}`);
+
+    return res
+      .status(200)
+      .json({ message: '토큰이 갱신되었습니다', statusCode: 200 });
   }
 
   @Post('/logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@Body() logoutReqDto: LogoutReqDto): Promise<void> {
-    await this.authService.logout(logoutReqDto.refreshToken);
+  async logout(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const refreshToken = req.cookies['refreshToken'];
+    res.clearCookie('refreshToken', { path: '/' });
+    await this.authService.logout(refreshToken);
+
+    res.status(200).json({ message: '로그아웃 성공', statusCode: 200 });
   }
 }

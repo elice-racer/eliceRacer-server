@@ -9,13 +9,19 @@ import {
 } from '../dto';
 import { BusinessException } from 'src/exception';
 import { PaginationProjectsByCardinalDto } from '../dto/pagination-projects-by-carinal.dto';
+import { ConfigService } from '@nestjs/config';
+import { ENV_BASE_URL_KEY } from 'src/common/const';
 
 @Injectable()
 export class ProjectService {
+  private baseUrl;
   constructor(
     private readonly projectRepo: ProjectRepository,
     private readonly tarckRepo: TrackRepository,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.baseUrl = configService.get<string>(ENV_BASE_URL_KEY);
+  }
 
   async getProject(projectId: string) {
     const project = this.projectRepo.findOneBy({ id: projectId });
@@ -39,7 +45,7 @@ export class ProjectService {
     let next: string | null = null;
     if (projects.length > parseInt(pageSize)) {
       const lastProject = projects[parseInt(pageSize) - 1];
-      next = `https://api.elicerracer.store/api/projects/all?pageSize=${pageSize}&lastTrackName=${lastProject.track.trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
+      next = `${this.baseUrl}/api/projects/all?pageSize=${pageSize}&lastTrackName=${lastProject.track.trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
       projects.pop();
     }
     return { projects, pagination: { next, count: projects.length } };
@@ -65,7 +71,7 @@ export class ProjectService {
     let next: string | null = null;
     if (projects.length > pageSizeToInt) {
       const lastProject = projects[pageSizeToInt - 1];
-      next = `https://api.elicerracer.store/api/projects/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
+      next = `${this.baseUrl}/api/projects/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
       projects.pop();
     }
 
@@ -92,7 +98,7 @@ export class ProjectService {
     let next: string | null = null;
     if (projects.length > parseInt(pageSize)) {
       const lastProject = projects[parseInt(pageSize) - 1];
-      next = `https://api.elicerracer.store/api/projects/tracks-cardinal/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
+      next = `${this.baseUrl}/api/projects/tracks-cardinal/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
       projects.pop();
     }
 

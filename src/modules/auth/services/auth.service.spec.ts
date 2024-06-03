@@ -122,7 +122,7 @@ describe('AuthService', () => {
 
       const result = await service.refresh(validRefreshToken);
 
-      expect(result).toEqual({ accessToken: expectedAccessToken });
+      expect(result).toEqual(expectedAccessToken);
     });
   });
 
