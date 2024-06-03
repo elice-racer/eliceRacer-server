@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { parseExcel } from 'src/common/utils';
 import { validateData } from 'src/common/utils/data-validator';
+import { BusinessException } from 'src/exception';
 import { TrackRepository } from 'src/modules/track/repositories';
 import { User } from 'src/modules/user/entities';
 import { UserRepository } from 'src/modules/user/repositories';
@@ -57,13 +58,12 @@ export class MemberService {
 
         // 트랙이 존재하지 않으면 경고 및 건너뛰기
         if (!track) {
-          console.warn(`트랙 '${trackName} ${cardinalNo}'을 찾을 수 없습니다.`);
-          continue;
-        }
-
-        if (!track) {
-          console.warn(`트랙 '${trackName} ${cardinalNo}'을 찾을 수 없습니다.`);
-          continue; // Skip this entry if track does not exist
+          throw new BusinessException(
+            'member',
+            `트랙 '${trackName} ${cardinalNo}'을 찾을 수 없습니다.`,
+            `트랙 '${trackName} ${cardinalNo}'을 찾을 수 없습니다.`,
+            HttpStatus.NOT_FOUND,
+          );
         }
 
         if (phoneNumberCache.has(phoneNumber)) {
@@ -120,8 +120,6 @@ export class MemberService {
       for (const item of validData) {
         const { email, realName, phoneNumberKey, role } = item;
         const phoneNumber = phoneNumberKey.replace(/-/g, '');
-
-        // 트랙이 존재하지 않으면 경고 및 건너뛰기
 
         if (phoneNumberCache.has(phoneNumber)) {
           console.info(`전화번호 ${phoneNumber}가 이미 존재합니다.`);

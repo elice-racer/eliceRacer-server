@@ -1,1 +1,2 @@
-export * from './responset.dto';
+export * from './response.dto';
+export * from './pagination-response.dto';

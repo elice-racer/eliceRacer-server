@@ -74,7 +74,7 @@ export class AuthService {
     const payload: TokenPayload = this.createTokenPayload(user.id);
 
     const accessToken = this.createAccessToken(payload);
-    return { accessToken };
+    return accessToken;
   }
 
   async login(identifier: string, password: string): Promise<LoginResDto> {

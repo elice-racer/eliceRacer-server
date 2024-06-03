@@ -6,5 +6,5 @@ export class TrackResDto {
   @Expose()
   trackName: string;
   @Expose()
-  cardinalNo: string;
+  cardinalNo: number;
 }

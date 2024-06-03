@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import * as argon2 from 'argon2';
-import { generateToken } from 'src/common/utils';
+import { convertDate, generateToken } from 'src/common/utils';
 import { MailService } from 'src/modules/mail/mail.service';
 import { VerificationService } from 'src/modules/auth/services/verification.service';
 import { AdminRepository } from '../repositories';
@@ -15,6 +15,7 @@ import { TeamRepository } from 'src/modules/team/repositories/team.repository';
 import { UserRepository } from 'src/modules/user/repositories';
 import { Team } from 'src/modules/team/entities/team.entity';
 import { Project } from 'src/modules/project/entities';
+import { TrackRepository } from 'src/modules/track/repositories';
 
 @Injectable()
 export class AdminService {
@@ -25,6 +26,7 @@ export class AdminService {
     private readonly projectRepo: ProjectRepository,
     private readonly teamRepo: TeamRepository,
     private readonly userRepo: UserRepository,
+    private readonly trackRepo: TrackRepository,
     private readonly entityManager: EntityManager,
   ) {}
   async verifyEmail(id: string, token: string) {
@@ -66,8 +68,8 @@ export class AdminService {
     if (user)
       throw new BusinessException(
         'admin',
-        `${dto.email} already exist`,
-        `${dto.email} already exist`,
+        `${dto.email} 은 이미 존재하는 이메일입니다`,
+        `${dto.email} 은 이미 존재하는 이메일입니다`,
         HttpStatus.BAD_REQUEST,
       );
 
@@ -88,6 +90,8 @@ export class AdminService {
       { key: 'realName', terms: ['이름'] },
       { key: 'phoneNumberKey', terms: ['핸드폰', '휴대폰'] },
       { key: 'notion', terms: ['노션'] },
+      { key: 'startDate', terms: ['시작'] },
+      { key: 'endDate', terms: ['종료'] },
     ];
 
     const validData = validateData(data, fields);
@@ -107,9 +111,25 @@ export class AdminService {
       });
 
       if (!project) {
+        const trackName = validData[0].trackName;
+        const track = await this.trackRepo.findOne({ where: { trackName } });
+
+        if (!track)
+          throw new BusinessException(
+            `user`,
+            `해당 트랙(${trackName})이 존재하지 않습니다.`,
+            `해당 트랙(${trackName})이 존재하지 않습니다.`,
+            HttpStatus.NOT_FOUND,
+          );
+        const processedStartDate = convertDate(validData[0].startDate);
+        const processedEndDate = convertDate(validData[0].endDate);
+
         project = queryRunner.manager.create(Project, {
           projectName: validData[0].projectName,
           round: validData[0].round,
+          startDate: processedStartDate,
+          endDate: processedEndDate,
+          track,
         });
         await queryRunner.manager.save(project);
       }

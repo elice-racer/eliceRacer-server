@@ -8,7 +8,7 @@ export class Team extends BaseEntity {
   @Column({
     name: 'team_number',
   })
-  teamNumber: string;
+  teamNumber: number;
 
   @Column({ name: 'team_name', nullable: true })
   teamName: string;
