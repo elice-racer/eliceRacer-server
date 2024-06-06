@@ -37,3 +37,5 @@ export const ENV_SMS_API_SECRET_KEY = 'SMS_API_SECRET';
 export const ENV_SMS_FROM_NUMBER_KEY = 'SMS_FROM_NUMBER';
 
 export const ENV_BASE_URL_KEY = 'BASE_URL';
+
+export const ENV_RUNTIME_KEY = 'RUNTIME';
