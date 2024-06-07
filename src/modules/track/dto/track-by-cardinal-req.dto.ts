@@ -1,23 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
-import { IsNotEmpty } from 'class-validator';
 
-export class TrackDto {
+export class TrackByCardinalReqDto {
   @ApiProperty({
     description: '트랙 이름',
     example: 'AI',
     required: true,
   })
-  @IsNotEmpty()
-  @Expose()
   trackName: string;
 
   @ApiProperty({
     description: '트랙 기수',
-    example: 1,
+    example: '1',
     required: true,
   })
-  @IsNotEmpty()
-  @Expose()
-  cardinalNo: number;
+  cardinalNo: string;
 }

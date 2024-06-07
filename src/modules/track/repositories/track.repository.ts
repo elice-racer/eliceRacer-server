@@ -1,7 +1,7 @@
 import { EntityManager, Repository } from 'typeorm';
 import { Track } from '../entities';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { TrackDto } from '../dto';
+import { PaginationTrackByNameDto, PaginationTrackDto, TrackDto } from '../dto';
 
 export class TrackRepository extends Repository<Track> {
   constructor(
@@ -10,6 +10,42 @@ export class TrackRepository extends Repository<Track> {
     private readonly entityManager: EntityManager,
   ) {
     super(repo.target, repo.manager, repo.queryRunner);
+  }
+
+  async findAllTracks(dto: PaginationTrackDto) {
+    const { pageSize, lastTrackName, lastCardinalNo } = dto;
+
+    const query = this.repo
+      .createQueryBuilder('track')
+      .orderBy('track.track_name', 'ASC')
+      .addOrderBy('track.cardinal_no', 'ASC');
+
+    if (lastTrackName && lastCardinalNo) {
+      query.andWhere(
+        `(track.track_name > :lastTrackName) OR 
+      (track.track_name = :lastTrackName AND track.cardinal_no > :lastCardinalNo) `,
+        { lastTrackName, lastCardinalNo: parseInt(lastCardinalNo) },
+      );
+    }
+
+    return await query.limit(parseInt(pageSize) + 1).getMany();
+  }
+
+  async findTracksByTrackName(dto: PaginationTrackByNameDto) {
+    const { pageSize, trackName, lastCardinalNo } = dto;
+
+    const query = this.repo
+      .createQueryBuilder('track')
+      .where(`track.track_nmae =:trackName`, { trackName })
+      .orderBy('track.cardinal_no', 'ASC');
+
+    if (lastCardinalNo) {
+      query.andWhere(`track.cardinal_no > :lastCardinalNo `, {
+        lastCardinalNo: parseInt(lastCardinalNo),
+      });
+    }
+
+    return await query.limit(parseInt(pageSize) + 1).getMany();
   }
 
   async createTrack(dto: TrackDto): Promise<Track> {

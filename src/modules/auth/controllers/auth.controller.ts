@@ -14,7 +14,9 @@ import { LoginReqDto } from '../dto/login-req.dto';
 import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { Request, Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @UseInterceptors(ResponseInterceptor)
 @Controller('auth')
 export class AuthController {
