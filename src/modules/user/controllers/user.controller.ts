@@ -12,7 +12,6 @@ import {
 import { UserService } from '../services/user.service';
 import {
   CreateUserDto,
-  CurrentResDto,
   DetailUserResDto,
   PaginationCoachesDto,
   PaginationRacersByCardinalDto,
@@ -82,9 +81,9 @@ export class UserController {
   @Get('/current')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @Serialize(CurrentResDto)
-  async currentUser(@CurrentUser() user: User): Promise<CurrentResDto> {
-    return await this.userService.findUserWithTrackAndTeams(user.id);
+  @Serialize(DetailUserResDto)
+  async currentUser(@CurrentUser() user: User) {
+    return await this.userService.getUser(user.id);
   }
 
   @Patch('/signup')
@@ -105,7 +104,7 @@ export class UserController {
   @ApiBearerAuth('access-token')
   @Serialize(DetailUserResDto)
   async getMyPage(@CurrentUser() user: User) {
-    return await this.userService.findUserWithTrackAndTeams(user.id);
+    return await this.userService.getUser(user.id);
   }
 
   @Put('/skills')
@@ -130,14 +129,14 @@ export class UserController {
   @ApiBearerAuth('access-token')
   @Serialize(MiniProfileDto)
   async getMiniProfile(@Param('id') id: string) {
-    return await this.userService.findUserWithTrackAndTeams(id);
+    return await this.userService.getUser(id);
   }
 
   @Get('/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @Serialize(DetailUserResDto)
+  @Serialize(OutputUserDto)
   async getUser(@Param('id') id: string) {
-    return await this.userService.findUserWithTrackAndTeams(id);
+    return await this.userService.getUser(id);
   }
 }

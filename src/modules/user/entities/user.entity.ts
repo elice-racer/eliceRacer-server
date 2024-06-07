@@ -1,8 +1,9 @@
-import { Column, Entity, ManyToMany, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entity/base-entity';
 import { Track } from 'src/modules/track/entities/track.entity';
 import { Team } from 'src/modules/team/entities/team.entity';
 import { Skill } from './skill.entity';
+import { Notice } from 'src/modules/notice/entities/notice.entity';
 
 export enum UserRole {
   RACER = 'RACER',
@@ -76,4 +77,7 @@ export class User extends BaseEntity {
 
   @ManyToMany(() => Skill, (skill) => skill.users)
   skills: Skill[];
+
+  @OneToMany(() => Notice, (notice) => notice.user)
+  notices: Notice[];
 }
