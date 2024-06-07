@@ -12,6 +12,9 @@ import { ProjectRepository } from 'src/modules/project/repositories/project.repo
 import { TeamRepository } from 'src/modules/team/repositories/team.repository';
 import { UserRepository } from 'src/modules/user/repositories';
 import { EntityManager } from 'typeorm';
+import { TrackRepository } from 'src/modules/track/repositories';
+
+jest.unmock('./admin.service');
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -29,6 +32,7 @@ describe('AdminService', () => {
         ProjectRepository,
         TeamRepository,
         UserRepository,
+        TrackRepository,
         EntityManager,
       ],
     }).compile();
@@ -53,6 +57,7 @@ describe('AdminService', () => {
 
       expect(result).toBe(false);
     });
+
     it('유효한 토큰을 이용해서 이메일 인증에 성공하면 true를 반환한다', async () => {
       const userId = 'uuid';
       const token = 'valid-token';
@@ -67,6 +72,7 @@ describe('AdminService', () => {
       );
     });
   });
+
   describe('signUp', () => {
     it('관리자를 생성하고 이메일 인증 토큰을 이용해 인증 메일을 보낸다', async () => {
       const dto: CreateAdminDto = {
@@ -92,6 +98,7 @@ describe('AdminService', () => {
       );
     });
   });
+
   describe('createAdmin', () => {
     it('이미 등록된 이메일 주소로 등록을 시도하면 BusinessException 에러가 발생한다 ', async () => {
       const duplicateUserDto: CreateAdminDto = {

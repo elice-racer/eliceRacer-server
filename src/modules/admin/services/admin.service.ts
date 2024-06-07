@@ -30,7 +30,10 @@ export class AdminService {
     private readonly entityManager: EntityManager,
   ) {}
   async verifyEmail(id: string, token: string) {
-    const result = await this.verificationService.verifyCode(id, token);
+    const result = await this.verificationService.verifyCode(
+      `emailCode:${id}`,
+      token,
+    );
     if (!result) return result;
 
     this.verificationService.deleteVerificationCode(id);
@@ -50,9 +53,9 @@ export class AdminService {
 
     await Promise.all([
       this.verificationService.setVerificationCode(
-        admin.id,
+        `emailCode:${admin.id}`,
         verificationToken,
-        60 * 60,
+        1000 * 60 * 60, //1시간,
       ),
       this.mailService.sendVerificationEmail(
         admin,
