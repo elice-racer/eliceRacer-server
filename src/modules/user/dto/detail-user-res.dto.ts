@@ -19,10 +19,22 @@ export class DetailUserResDto {
   phoneNumber: string;
 
   @Expose()
+  comment: string;
+
+  @Expose()
   position: string;
 
   @Expose()
   github: string;
+
+  @Expose()
+  blog: string;
+
+  @Expose()
+  sns: string;
+
+  @Expose()
+  description: string;
 
   @Expose()
   role: string;
