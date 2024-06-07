@@ -78,6 +78,26 @@
         {
           "name": "BASE_URL",
           "valueFrom": "<PARA_STORE_ARN>BASE_URL"
+        },
+        {
+          "name": "RUNTIME",
+          "valueFrom": "<PARA_STORE_ARN>RUNTIME"
+        },
+        {
+          "name": "AWS_REGION",
+          "valueFrom": "<PARA_STORE_ARN>AWS_REGION"
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": "<PARA_STORE_ARN>AWS_ACCESS_KEY_ID"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": "<PARA_STORE_ARN>AWS_SECRET_ACCESS_KEY"
+        },
+        {
+          "name": "AWS_S3_BUCKET_NAME",
+          "valueFrom": "<PARA_STORE_ARN>AWS_S3_BUCKET_NAME"
         }
       ],
       "cpu": 0,
