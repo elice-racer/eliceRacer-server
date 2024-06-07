@@ -4,6 +4,7 @@ import { TrackDto, TrackResDto } from '../dto';
 import { TrackRepository } from '../repositories/track.repository';
 import { Track } from '../entities';
 import { BusinessException } from 'src/exception';
+import { ConfigService } from '@nestjs/config';
 
 describe('TrackService', () => {
   let service: TrackService;
@@ -21,7 +22,7 @@ describe('TrackService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TrackService, TrackRepository],
+      providers: [TrackService, TrackRepository, ConfigService],
     }).compile();
 
     service = module.get<TrackService>(TrackService);
@@ -32,6 +33,26 @@ describe('TrackService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('getTrack', () => {
+    const trackId = 'uuid';
+    it('트랙이 존재하지 않으면 BusinessException을 던진다', async () => {
+      trackRepo.findOneBy.mockResolvedValue(undefined);
+
+      await expect(service.getTrack(trackId)).rejects.toThrow(
+        BusinessException,
+      );
+    });
+
+    it('트랙이 존재하면 해당 트랙을 반환한다', async () => {
+      const track = new Track();
+
+      trackRepo.findOneBy.mockResolvedValue(track);
+
+      const result = await service.getTrack(trackId);
+
+      expect(result).toEqual(track);
+    });
+  });
   describe('createTrack', () => {
     it('해당 track이 이미 존재하면 BusinessException을 던진다', async () => {
       const track = new Track();
