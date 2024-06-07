@@ -3,10 +3,16 @@ import { DetailProjectResDto } from 'src/modules/project/dto';
 
 export class DetailTeamResDto {
   @Expose()
+  id: string;
+
+  @Expose()
   teamName: string;
 
   @Expose()
   teamNumber: string;
+
+  @Expose()
+  notion: string;
 
   @Expose()
   project: DetailProjectResDto;
