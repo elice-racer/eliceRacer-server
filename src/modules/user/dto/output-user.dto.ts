@@ -1,12 +1,10 @@
 import { Expose } from 'class-transformer';
+import { DetailTeamResDto } from 'src/modules/team/dto';
 import { TrackResDto } from 'src/modules/track/dto';
 
 export class OutputUserDto {
   @Expose()
   id: string;
-
-  @Expose()
-  email: string;
 
   @Expose()
   username: string;
@@ -15,13 +13,22 @@ export class OutputUserDto {
   realName: string;
 
   @Expose()
-  phoneNumber: string;
+  comment: string;
 
   @Expose()
   position: string;
 
   @Expose()
   github: string;
+
+  @Expose()
+  blog: string;
+
+  @Expose()
+  sns: string;
+
+  @Expose()
+  description: string;
 
   @Expose()
   role: string;
@@ -31,4 +38,7 @@ export class OutputUserDto {
 
   @Expose()
   track: TrackResDto;
+
+  @Expose()
+  teams: DetailTeamResDto;
 }

@@ -45,8 +45,9 @@ describe('VerificationService', () => {
     it('유효시간 내에 올바른 인증번호를 입력하면 true를 반환한다 ', async () => {
       const phoneNumber = '01012345678';
       const inputCode = '123456';
+      const storedCode = '123456';
 
-      jest.spyOn(service, 'getVerificationCode').mockResolvedValue(inputCode);
+      jest.spyOn(service, 'getVerificationCode').mockResolvedValue(storedCode);
       const result = await service.verifyCode(phoneNumber, inputCode);
 
       expect(result).toBe(true);

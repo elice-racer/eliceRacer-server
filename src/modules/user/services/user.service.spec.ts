@@ -193,6 +193,12 @@ describe('UserService', () => {
       realName: 'name',
       position: 'backend',
       github: 'gihub-address',
+      comment: '백엔드 개발자 000입니다.',
+      description:
+        '안녕하세요 저는 굉스터입니다. 제는 아무것도 안해도 능력치가 알아서 오르는 개발자가 되고싶습니다. 커비처럼 잡아먹고 그냥 능력을 뺏어오고 싶어요',
+      blog: 'velog.com/1234',
+      tmi: '하루에 커피 4잔 마셔요',
+      sns: 'linkedIn.com',
     };
 
     it('사용자가 존재하지 않으면 BusinessException을 던진다', async () => {

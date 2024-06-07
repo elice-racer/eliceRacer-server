@@ -6,4 +6,10 @@ export class DetailProjectResDto {
 
   @Expose()
   round: number;
+
+  @Expose()
+  startDate: Date;
+
+  @Expose()
+  endDate: Date;
 }

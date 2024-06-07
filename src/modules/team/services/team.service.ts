@@ -199,4 +199,18 @@ export class TeamService {
 
     return this.teamRepo.save(team);
   }
+
+  async deleteTeam(id: string) {
+    const team = await this.teamRepo.findOneBy({ id });
+
+    if (!team)
+      throw new BusinessException(
+        'team',
+        '해당 팀이 존재하지 않습니다',
+        '해당 팀이 존재하지 않습니다',
+        HttpStatus.NOT_FOUND,
+      );
+
+    await this.teamRepo.remove(team);
+  }
 }

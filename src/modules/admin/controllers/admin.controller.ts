@@ -21,7 +21,9 @@ import { UserRole } from 'src/modules/user/entities';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MemberService } from 'src/modules/member/services/member.service';
 import { OutputUserDto } from 'src/modules/user/dto/output-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('admin')
 @UseInterceptors(ResponseInterceptor)
 @Controller('admins')
 export class AdminController {
