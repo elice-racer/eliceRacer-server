@@ -14,7 +14,9 @@ import { PaginationProjectsByCardinalDto } from '../dto/pagination-projects-by-c
 import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { OutputProjectDto } from '../dto/output-project.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('project')
 @Controller('projects')
 @UseInterceptors(ResponseInterceptor)
 export class ProjectController {

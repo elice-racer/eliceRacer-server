@@ -27,7 +27,9 @@ export class SerializeInterceptor<T> implements NestInterceptor {
   intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
     return handler.handle().pipe(
       map((data: any) => {
-        if (data.pagination) {
+        if (data && !data.pagination) {
+          return plainToInstance(this.dto, data, options);
+        } else {
           const { pagination, ...resultData } = data;
           const results = resultData[Object.keys(resultData)[0]];
 
@@ -39,8 +41,6 @@ export class SerializeInterceptor<T> implements NestInterceptor {
             results: serializedResults,
             pagination,
           };
-        } else {
-          return plainToInstance(this.dto, data, options);
         }
       }),
     );
