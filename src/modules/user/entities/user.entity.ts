@@ -36,10 +36,25 @@ export class User extends BaseEntity {
   comment: string;
 
   @Column({ nullable: true })
+  description: string;
+
+  @Column({ nullable: true })
   position: string;
 
   @Column({ nullable: true })
+  skill: string;
+
+  @Column({ nullable: true })
   github: string;
+
+  @Column({ nullable: true })
+  blog: string;
+
+  @Column({ nullable: true })
+  sns: string;
+
+  @Column({ nullable: true })
+  tmi: string;
 
   @Column({
     type: 'enum',

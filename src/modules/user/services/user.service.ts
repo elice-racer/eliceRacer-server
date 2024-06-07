@@ -157,6 +157,7 @@ export class UserService {
 
     return this.userRepo.save(user);
   }
+
   async updateMypage(userId: string, dto: updateReqDto): Promise<User> {
     const user = await this.userRepo.findUserByIdWithTracks(userId);
     if (!user) {
@@ -168,9 +169,7 @@ export class UserService {
       );
     }
 
-    user.realName = dto.realName;
-    user.github = dto.github;
-    user.position = dto.position;
+    Object.assign(user, dto);
 
     return this.userRepo.save(user);
   }
@@ -266,5 +265,12 @@ export class UserService {
   }
   async findAnyUserByPhone(phoneNumber: string): Promise<User> | undefined {
     return this.userRepo.findOneBy({ phoneNumber });
+  }
+
+  async findUserWithTrackAndTeams(id: string): Promise<User | undefined> {
+    return this.userRepo.findOne({
+      where: { id: id },
+      relations: ['track', 'teams'],
+    });
   }
 }
