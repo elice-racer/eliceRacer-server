@@ -15,6 +15,8 @@ import { ProjectModule } from './modules/project/project.module';
 import { TeamModule } from './modules/team/team.module';
 import { DatabaseModule } from 'core/databse/database.module';
 import { RedisModule } from 'core/redis/redis.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { NoticeModule } from './modules/notice/notice.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { RedisModule } from 'core/redis/redis.module';
     AdminModule,
     ProjectModule,
     TeamModule,
+    ChatModule,
+    NoticeModule,
   ],
   controllers: [AppController],
   providers: [

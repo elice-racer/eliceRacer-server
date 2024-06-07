@@ -60,12 +60,12 @@ export class UserRepository extends Repository<User> {
     const query = this.repo
       .createQueryBuilder('users')
       .where('users.role = :role', { role })
-      .orderBy('users.real_name', 'ASC')
+      .orderBy('users.realName', 'ASC')
       .addOrderBy('users.id', 'ASC');
 
     if (lastRealName && lastId) {
       query.andWhere(
-        `(users.real_name > :lastRealName) OR (users.real_name = :lastRealName AND users.id > :lastId) `,
+        `(users.realName > :lastRealName) OR (users.realName = :lastRealName AND users.id > :lastId) `,
         { lastRealName, lastId },
       );
     }
@@ -84,16 +84,16 @@ export class UserRepository extends Repository<User> {
       .createQueryBuilder('users')
       .leftJoinAndSelect('users.track', 'tracks')
       .where('users.role = :role', { role })
-      .orderBy('tracks.track_name', 'ASC')
-      .addOrderBy('tracks.cardinal_no', 'ASC')
-      .addOrderBy('users.real_name', 'ASC')
+      .orderBy('tracks.trackName', 'ASC')
+      .addOrderBy('tracks.cardinalNo', 'ASC')
+      .addOrderBy('users.realName', 'ASC')
       .addOrderBy('users.id', 'ASC');
 
     if (lastTrackName && lastCardinalNo && lastRealName && lastId) {
       query.andWhere(
-        `(tracks.track_name > :lastTrackName) OR (tracks.track_name = :lastTrackName AND tracks.cardinal_no > :lastCardinalNo) OR 
-          (tracks.track_name = :lastTrackName AND tracks.cardinal_no = :lastCardinalNo AND users.real_name > :lastRealName) OR
-          (tracks.track_name = :lastTrackName AND tracks.cardinal_no = :lastCardinalNo AND users.real_name = :lastRealName AND users.id > :lastId)`,
+        `(tracks.trackName > :lastTrackName) OR (tracks.trackName = :lastTrackName AND tracks.cardinalNo > :lastCardinalNo) OR 
+          (tracks.trackName = :lastTrackName AND tracks.cardinalNo = :lastCardinalNo AND users.realName > :lastRealName) OR
+          (tracks.trackName = :lastTrackName AND tracks.cardinalNo = :lastCardinalNo AND users.realName = :lastRealName AND users.id > :lastId)`,
         { lastTrackName, lastCardinalNo, lastRealName, lastId },
       );
     }
@@ -112,18 +112,18 @@ export class UserRepository extends Repository<User> {
     const query = this.repo
       .createQueryBuilder('users')
       .leftJoinAndSelect('users.track', 'tracks')
-      .where('tracks.track_name = :trackName', { trackName })
+      .where('tracks.trackName = :trackName', { trackName })
       .andWhere('users.role = :role', { role })
-      .orderBy('tracks.cardinal_no', 'ASC')
-      .addOrderBy('users.real_name', 'ASC')
+      .orderBy('tracks.cardinalNo', 'ASC')
+      .addOrderBy('users.realName', 'ASC')
       .addOrderBy('users.id', 'ASC');
 
     if (lastCardinalNo && lastRealName && lastId) {
       const lastcardinalNo = parseInt(lastCardinalNo);
       query.andWhere(
-        `((tracks.cardinal_no > :lastcardinalNo) OR 
-        (tracks.cardinal_no = :lastcardinalNo AND users.real_name > :lastRealName) OR
-        (tracks.cardinal_no = :lastcardinalNo AND users.real_name = :lastRealName AND users.id > :lastId))`,
+        `((tracks.cardinalNo > :lastcardinalNo) OR 
+        (tracks.cardinalNo = :lastcardinalNo AND users.realName > :lastRealName) OR
+        (tracks.cardinalNo = :lastcardinalNo AND users.realName = :lastRealName AND users.id > :lastId))`,
         { lastcardinalNo, lastRealName, lastId },
       );
     }
@@ -141,18 +141,18 @@ export class UserRepository extends Repository<User> {
     const query = this.repo
       .createQueryBuilder('users')
       .leftJoinAndSelect('users.track', 'tracks')
-      .where('tracks.track_name = :trackName', { trackName })
+      .where('tracks.trackName = :trackName', { trackName })
       .andWhere('users.role = :role', { role })
-      .andWhere('tracks.cardinal_no = :cardinalNo', {
+      .andWhere('tracks.cardinalNo = :cardinalNo', {
         cardinalNo: parseInt(cardinalNo),
       })
-      .orderBy('users.real_name', 'ASC')
+      .orderBy('users.realName', 'ASC')
       .addOrderBy('users.id', 'ASC');
 
     if (lastRealName && lastId) {
       query.andWhere(
-        `((users.real_name > :lastRealName) OR 
-        (users.real_name = :lastRealName AND users.id > :lastId))`,
+        `((users.realName > :lastRealName) OR 
+        (users.realName = :lastRealName AND users.id > :lastId))`,
         { lastRealName, lastId },
       );
     }
@@ -163,10 +163,16 @@ export class UserRepository extends Repository<User> {
   async findUserByIdWithDetail(userId: string): Promise<User> | undefined {
     return this.repo
       .createQueryBuilder('users')
-      .leftJoinAndSelect('users.track', 'tracks')
+      .leftJoinAndSelect('users.track', 'track') // 'track'로 변경
       .leftJoinAndSelect('users.teams', 'teams')
       .leftJoinAndSelect('teams.project', 'projects')
-      .addSelect(['projects.id', 'projects.project_name'])
+      .leftJoinAndSelect('users.skills', 'skills') // skills 조인 추가
+      .addSelect([
+        'projects.id',
+        'projects.projectName',
+        'skills.id',
+        'skills.skillName',
+      ])
       .where('users.id = :userId', { userId })
       .getOne();
   }

@@ -17,13 +17,13 @@ export class TrackRepository extends Repository<Track> {
 
     const query = this.repo
       .createQueryBuilder('track')
-      .orderBy('track.track_name', 'ASC')
-      .addOrderBy('track.cardinal_no', 'ASC');
+      .orderBy('track.trackName', 'ASC')
+      .addOrderBy('track.cardinalNo', 'ASC');
 
     if (lastTrackName && lastCardinalNo) {
       query.andWhere(
-        `(track.track_name > :lastTrackName) OR 
-      (track.track_name = :lastTrackName AND track.cardinal_no > :lastCardinalNo) `,
+        `(track.trackName > :lastTrackName) OR 
+      (track.trackName = :lastTrackName AND track.cardinalNo > :lastCardinalNo) `,
         { lastTrackName, lastCardinalNo: parseInt(lastCardinalNo) },
       );
     }
@@ -36,11 +36,11 @@ export class TrackRepository extends Repository<Track> {
 
     const query = this.repo
       .createQueryBuilder('track')
-      .where(`track.track_nmae =:trackName`, { trackName })
-      .orderBy('track.cardinal_no', 'ASC');
+      .where(`track.trackName =:trackName`, { trackName })
+      .orderBy('track.cardinalNo', 'ASC');
 
     if (lastCardinalNo) {
-      query.andWhere(`track.cardinal_no > :lastCardinalNo `, {
+      query.andWhere(`track.cardinalNo > :lastCardinalNo `, {
         lastCardinalNo: parseInt(lastCardinalNo),
       });
     }
