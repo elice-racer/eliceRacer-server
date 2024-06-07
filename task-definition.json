@@ -80,6 +80,10 @@
           "valueFrom": "<PARA_STORE_ARN>BASE_URL"
         },
         {
+          "name": "LOCAL_URL",
+          "valueFrom": "<PARA_STORE_ARN>LOCAL_URL"
+        },
+        {
           "name": "RUNTIME",
           "valueFrom": "<PARA_STORE_ARN>RUNTIME"
         },
