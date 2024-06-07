@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Patch,
+  Put,
   Query,
   UseGuards,
   UseInterceptors,
@@ -27,12 +28,16 @@ import { Serialize } from 'src/interceptors';
 import { OutputUserDto } from '../dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MiniProfileDto } from '../dto/mini-profile.dto';
+import { SkillService } from '../services/skill.service';
 
 @ApiTags('users')
 @UseInterceptors(ResponseInterceptor)
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly skillService: SkillService,
+  ) {}
 
   @Patch('/chang')
   async chang(@Body('username') username: string) {
@@ -46,6 +51,7 @@ export class UserController {
   async getAllRacers(@Query() dto: PaginationRacersDto) {
     return await this.userService.getAllRacres(dto);
   }
+
   @Get('/tracks/all')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
@@ -78,7 +84,7 @@ export class UserController {
   @ApiBearerAuth('access-token')
   @Serialize(CurrentResDto)
   async currentUser(@CurrentUser() user: User): Promise<CurrentResDto> {
-    return user;
+    return await this.userService.findUserWithTrackAndTeams(user.id);
   }
 
   @Patch('/signup')
@@ -100,6 +106,23 @@ export class UserController {
   @Serialize(DetailUserResDto)
   async getMyPage(@CurrentUser() user: User) {
     return await this.userService.findUserWithTrackAndTeams(user.id);
+  }
+
+  @Put('/skills')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  async updateSkill(
+    @CurrentUser() user: User,
+    @Body('skills') skills: string[],
+  ) {
+    return await this.userService.updateSkills(user.id, skills);
+  }
+
+  @Get('/skills')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  async searchSkill(@Query('search') search: string) {
+    return await this.skillService.searchSkills(search);
   }
 
   @Get('/miniprofiles/:id')

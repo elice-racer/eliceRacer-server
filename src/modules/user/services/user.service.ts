@@ -15,6 +15,7 @@ import { TrackRepository } from 'src/modules/track/repositories';
 import { TrackDto } from 'src/modules/track/dto';
 import { ConfigService } from '@nestjs/config';
 import { ENV_BASE_URL_KEY } from 'src/common/const';
+import { SkillService } from './skill.service';
 
 @Injectable()
 export class UserService {
@@ -23,6 +24,7 @@ export class UserService {
     private readonly userRepo: UserRepository,
     private readonly trackRepo: TrackRepository,
     private readonly configService: ConfigService,
+    private readonly skillService: SkillService,
   ) {
     this.baseUrl = configService.get<string>(ENV_BASE_URL_KEY);
   }
@@ -174,6 +176,30 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
+  async updateSkills(userId: string, skillNames: string[]) {
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      relations: ['skills'],
+    });
+
+    if (!user) {
+      throw new BusinessException(
+        'user',
+        `유저를 찾을 수 없습니다`,
+        `유저를 찾을 수 없습니다`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const skills = await this.skillService.updateSkills(skillNames);
+
+    user.skills = skills;
+
+    await this.userRepo.save(user);
+
+    return skills;
+  }
+
   async updateUserTracks(userId: string, trackDto: TrackDto) {
     const { trackName, cardinalNo } = trackDto;
     const user = await this.userRepo.findUserByIdWithTracks(userId);
@@ -270,7 +296,7 @@ export class UserService {
   async findUserWithTrackAndTeams(id: string): Promise<User | undefined> {
     return this.userRepo.findOne({
       where: { id: id },
-      relations: ['track', 'teams'],
+      relations: ['track', 'teams', 'skills'],
     });
   }
 }

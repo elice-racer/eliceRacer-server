@@ -5,11 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities';
 import { UserRepository } from './repositories';
 import { TrackModule } from '../track/track.module';
+import { Skill } from './entities/skill.entity';
+import { SkillRepository } from './repositories/skill.repository';
+import { SkillService } from './services/skill.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), TrackModule],
+  imports: [TypeOrmModule.forFeature([User, Skill]), TrackModule],
   controllers: [UserController],
-  providers: [UserService, UserRepository],
+  providers: [UserService, UserRepository, SkillRepository, SkillService],
   exports: [UserService, UserRepository],
 })
 export class UserModule {}

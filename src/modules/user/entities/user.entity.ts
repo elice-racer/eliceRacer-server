@@ -2,6 +2,7 @@ import { Column, Entity, ManyToMany, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entity/base-entity';
 import { Track } from 'src/modules/track/entities/track.entity';
 import { Team } from 'src/modules/team/entities/team.entity';
+import { Skill } from './skill.entity';
 
 export enum UserRole {
   RACER = 'RACER',
@@ -42,9 +43,6 @@ export class User extends BaseEntity {
   position: string;
 
   @Column({ nullable: true })
-  skill: string;
-
-  @Column({ nullable: true })
   github: string;
 
   @Column({ nullable: true })
@@ -75,4 +73,7 @@ export class User extends BaseEntity {
 
   @ManyToMany(() => Team, (team) => team.users)
   teams: Team[];
+
+  @ManyToMany(() => Skill, (skill) => skill.users)
+  skills: Skill[];
 }

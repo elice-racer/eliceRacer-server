@@ -16,6 +16,7 @@ import { TrackRepository } from 'src/modules/track/repositories';
 import { Track } from 'src/modules/track/entities';
 import { TrackDto } from 'src/modules/track/dto';
 import { ConfigService } from '@nestjs/config';
+import { SkillService } from './skill.service';
 
 jest.unmock('./user.service');
 
@@ -33,7 +34,13 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService, UserRepository, TrackRepository, ConfigService],
+      providers: [
+        UserService,
+        UserRepository,
+        TrackRepository,
+        ConfigService,
+        SkillService,
+      ],
     }).compile();
 
     service = module.get<UserService>(UserService);
