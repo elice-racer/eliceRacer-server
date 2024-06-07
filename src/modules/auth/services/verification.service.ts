@@ -7,7 +7,6 @@ export class VerificationService {
 
   async verifyCode(key: string, inputCode: string): Promise<boolean> {
     const storedCode = await this.getVerificationCode(key);
-
     if (storedCode !== inputCode || storedCode === null) {
       return false;
     }

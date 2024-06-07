@@ -51,7 +51,7 @@ export class AuthService {
       );
     }
     const isNotExpired = await this.refreshTokenService.getRefreshToken(
-      payloadRes.jti,
+      `refreshToken:${payloadRes.jti}`,
     );
 
     if (!isNotExpired)
@@ -85,9 +85,9 @@ export class AuthService {
     const refreshToken = this.createRefreshToken(payload);
 
     await this.refreshTokenService.setRefreshToken(
-      payload.jti,
+      `refreshToken:${payload.jti}`,
       refreshToken,
-      1000 * 60 * 24 * 3, //3일
+      1000 * 60 * 60 * 24 * 3, //3일
     );
 
     return { accessToken, refreshToken };
@@ -129,7 +129,7 @@ export class AuthService {
     inputCode: string,
   ): Promise<VerifyCodeResDto> {
     const result = await this.verificationService.verifyCode(
-      phoneNumber,
+      `phoneCode:${phoneNumber}`,
       inputCode,
     );
     if (!result)
@@ -174,9 +174,9 @@ export class AuthService {
     const generatedCode = generateVerificationCode();
     // 3. 인증번호 저장
     await this.verificationService.setVerificationCode(
-      phoneNumber,
+      `phoneCode:${phoneNumber}`,
       generatedCode,
-      600,
+      1000 * 60 * 5, // 5분,
     );
     // 4. 메세지 전송
     await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
