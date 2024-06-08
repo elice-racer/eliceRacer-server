@@ -76,8 +76,16 @@
           "valueFrom": "<PARA_STORE_ARN>SMS_FROM_NUMBER"
         },
         {
+          "name": "CLIENT_URL",
+          "valueFrom": "<PARA_STORE_ARN>CLIENT_URL"
+        },
+        {
           "name": "BASE_URL",
           "valueFrom": "<PARA_STORE_ARN>BASE_URL"
+        },
+        {
+          "name": "SERVER_URL",
+          "valueFrom": "<PARA_STORE_ARN>SERVER_URL"
         },
         {
           "name": "LOCAL_URL",

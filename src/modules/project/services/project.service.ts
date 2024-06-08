@@ -10,7 +10,7 @@ import {
 import { BusinessException } from 'src/exception';
 import { PaginationProjectsByCardinalDto } from '../dto/pagination-projects-by-carinal.dto';
 import { ConfigService } from '@nestjs/config';
-import { ENV_BASE_URL_KEY } from 'src/common/const';
+import { ENV_SERVER_URL_KEY } from 'src/common/const';
 
 @Injectable()
 export class ProjectService {
@@ -20,7 +20,7 @@ export class ProjectService {
     private readonly tarckRepo: TrackRepository,
     private readonly configService: ConfigService,
   ) {
-    this.baseUrl = configService.get<string>(ENV_BASE_URL_KEY);
+    this.baseUrl = configService.get<string>(ENV_SERVER_URL_KEY);
   }
 
   async getProject(projectId: string) {

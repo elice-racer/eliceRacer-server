@@ -8,7 +8,7 @@ import {
 } from '../dto';
 import { BusinessException } from 'src/exception';
 import { ConfigService } from '@nestjs/config';
-import { ENV_BASE_URL_KEY } from 'src/common/const';
+import { ENV_SERVER_URL_KEY } from 'src/common/const';
 
 @Injectable()
 export class TrackService {
@@ -17,7 +17,7 @@ export class TrackService {
     private readonly trackRepo: TrackRepository,
     private readonly configService: ConfigService,
   ) {
-    this.baseUrl = configService.get<string>(ENV_BASE_URL_KEY);
+    this.baseUrl = configService.get<string>(ENV_SERVER_URL_KEY);
   }
 
   async getTrack(id: string) {

@@ -14,7 +14,7 @@ import { BusinessException } from 'src/exception';
 import { TrackRepository } from 'src/modules/track/repositories';
 import { TrackDto } from 'src/modules/track/dto';
 import { ConfigService } from '@nestjs/config';
-import { ENV_BASE_URL_KEY } from 'src/common/const';
+import { ENV_SERVER_URL_KEY } from 'src/common/const';
 import { SkillService } from './skill.service';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly skillService: SkillService,
   ) {
-    this.baseUrl = configService.get<string>(ENV_BASE_URL_KEY);
+    this.baseUrl = configService.get<string>(ENV_SERVER_URL_KEY);
   }
 
   async chang(username: string) {
