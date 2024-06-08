@@ -11,7 +11,8 @@ export type ErrorDomain =
   | 'member'
   | 'sms'
   | 'project'
-  | 'team';
+  | 'team'
+  | 'notice';
 
 export class BusinessException extends Error {
   public readonly id: string;

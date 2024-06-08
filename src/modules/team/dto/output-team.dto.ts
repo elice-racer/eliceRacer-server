@@ -11,5 +11,8 @@ export class OutputTeamDto {
   teamNumber: number;
 
   @Expose()
+  gitlab: string;
+
+  @Expose()
   notion: string;
 }

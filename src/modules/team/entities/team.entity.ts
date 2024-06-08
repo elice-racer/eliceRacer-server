@@ -16,6 +16,9 @@ export class Team extends BaseEntity {
   @Column()
   notion: string;
 
+  @Column({ nullable: true })
+  gitlab: string;
+
   @ManyToOne(() => Project, (project) => project.teams)
   project: Project;
 

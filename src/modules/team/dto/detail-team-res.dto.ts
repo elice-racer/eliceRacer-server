@@ -15,5 +15,8 @@ export class DetailTeamResDto {
   notion: string;
 
   @Expose()
+  gitlab: string;
+
+  @Expose()
   project: DetailProjectResDto;
 }
