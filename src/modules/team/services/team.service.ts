@@ -14,7 +14,7 @@ import { In } from 'typeorm';
 import { TrackRepository } from 'src/modules/track/repositories';
 import { ProjectRepository } from 'src/modules/project/repositories/project.repository';
 import { ConfigService } from '@nestjs/config';
-import { ENV_BASE_URL_KEY } from 'src/common/const';
+import { ENV_SERVER_URL_KEY } from 'src/common/const';
 
 @Injectable()
 export class TeamService {
@@ -26,7 +26,7 @@ export class TeamService {
     private readonly projectRepo: ProjectRepository,
     private readonly configService: ConfigService,
   ) {
-    this.baseUrl = configService.get<string>(ENV_BASE_URL_KEY);
+    this.baseUrl = configService.get<string>(ENV_SERVER_URL_KEY);
   }
 
   async getTeam(teamId: string) {
