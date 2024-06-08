@@ -20,15 +20,15 @@ export class ProjectRepository extends Repository<Project> {
     const query = this.repo
       .createQueryBuilder('project')
       .leftJoinAndSelect('project.track', 'track')
-      .orderBy('track.track_name', 'ASC')
-      .addOrderBy('track.cardinal_no', 'ASC')
+      .orderBy('track.trackName', 'ASC')
+      .addOrderBy('track.cardinalNo', 'ASC')
       .addOrderBy('project.round', 'ASC');
 
     if (lastTrackName && lastCardinalNo && lastRound) {
       query.andWhere(
-        `(track.track_name > :lastTrackName) OR 
-        (track.track_name = :lastTrackName AND track.cardinal_no > :lastCardinalNo) OR 
-        (track.track_name = :lastTrackName AND track.cardinal_no = :lastCardinalNo AND project.round > :lastRound)`,
+        `(track.trackName > :lastTrackName) OR 
+        (track.trackName = :lastTrackName AND track.cardinalNo > :lastCardinalNo) OR 
+        (track.trackName = :lastTrackName AND track.cardinalNo = :lastCardinalNo AND project.round > :lastRound)`,
         {
           lastTrackName,
           lastCardinalNo: parseInt(lastCardinalNo),
@@ -47,14 +47,14 @@ export class ProjectRepository extends Repository<Project> {
     const query = this.repo
       .createQueryBuilder('project')
       .leftJoinAndSelect('project.track', 'track')
-      .where('track.track_name = :trackName', { trackName })
-      .orderBy('track.cardinal_no', 'ASC')
+      .where('track.trackName = :trackName', { trackName })
+      .orderBy('track.cardinalNo', 'ASC')
       .addOrderBy('project.round', 'ASC');
 
     if (lastCardinalNo && lastRound) {
       query.andWhere(
-        `(track.cardinal_no > :lastCardinalNo) OR 
-        (track.cardinal_no = :lastCardinalNo AND project.round > :lastRound)`,
+        `(track.cardinalNo > :lastCardinalNo) OR 
+        (track.cardinalNo = :lastCardinalNo AND project.round > :lastRound)`,
         { lastCardinalNo, lastRound },
       );
     }
@@ -70,8 +70,8 @@ export class ProjectRepository extends Repository<Project> {
     const query = this.repo
       .createQueryBuilder('project')
       .leftJoinAndSelect('project.track', 'track')
-      .where('track.track_name = :trackName', { trackName })
-      .andWhere('track.cardinal_no = :cardinalNo', {
+      .where('track.trackName = :trackName', { trackName })
+      .andWhere('track.cardinalNo = :cardinalNo', {
         cardinalNo: parseInt(cardinalNo),
       })
       .orderBy('project.round', 'ASC');

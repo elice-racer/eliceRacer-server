@@ -11,10 +11,10 @@ export class Project extends BaseEntity {
   @Column()
   round: number;
 
-  @Column()
+  @Column({ name: 'start_date' })
   startDate: Date;
 
-  @Column()
+  @Column({ name: 'end_date' })
   endDate: Date;
 
   @ManyToOne(() => Track, (track) => track.projects)

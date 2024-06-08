@@ -31,17 +31,17 @@ export class TeamRepository extends Repository<Team> {
       .createQueryBuilder('team')
       .leftJoinAndSelect('team.project', 'project')
       .leftJoinAndSelect('project.track', 'track')
-      .orderBy('track.track_name', 'ASC')
-      .addOrderBy('track.cardinal_no', 'ASC')
+      .orderBy('track.trackName', 'ASC')
+      .addOrderBy('track.cardinalNo', 'ASC')
       .addOrderBy('project.round', 'ASC')
-      .addOrderBy('team.team_number', 'ASC');
+      .addOrderBy('team.teamNumber', 'ASC');
 
     if (lastTrackName && lastCardinalNo && lastRound && lastTeamNumber) {
       query.andWhere(
-        `(track.track_name > :lastTrackName) OR 
-          (track.track_name = :lastTrackName AND track.cardinal_no > :lastCardinalNo) OR 
-          (track.track_name = :lastTrackName AND track.cardinal_no = :lastCardinalNo AND project.round > :lastRound) OR
-          (track.track_name = :lastTrackName AND track.cardinal_no = :lastCardinalNo AND project.round = :lastRound AND team.team_number > :lastTeamNumber)`,
+        `(track.trackName > :lastTrackName) OR 
+          (track.trackName = :lastTrackName AND track.cardinalNo > :lastCardinalNo) OR 
+          (track.trackName = :lastTrackName AND track.cardinalNo = :lastCardinalNo AND project.round > :lastRound) OR
+          (track.trackName = :lastTrackName AND track.cardinalNo = :lastCardinalNo AND project.round = :lastRound AND team.teamNumber > :lastTeamNumber)`,
         {
           lastTrackName,
           lastCardinalNo: parseInt(lastCardinalNo),
@@ -58,21 +58,20 @@ export class TeamRepository extends Repository<Team> {
     const { trackName, pageSize, lastCardinalNo, lastRound, lastTeamNumber } =
       dto;
 
-    console.log(trackName);
     const query = this.repo
       .createQueryBuilder('team')
       .leftJoinAndSelect('team.project', 'project')
       .leftJoinAndSelect('project.track', 'track')
-      .where('track.track_name = :trackName', { trackName })
-      .orderBy('track.cardinal_no', 'ASC')
+      .where('track.trackName = :trackName', { trackName })
+      .orderBy('track.cardinalNo', 'ASC')
       .addOrderBy('project.round', 'ASC')
-      .addOrderBy('team.team_number', 'ASC');
+      .addOrderBy('team.teamNumber', 'ASC');
 
     if (lastCardinalNo && lastRound && lastTeamNumber) {
       query.andWhere(
-        `(track.cardinal_no > :lastCardinalNo) OR 
-        (track.cardinal_no = :lastCardinalNo AND project.round > :lastRound) OR 
-        (track.cardinal_no = :lastCardinalNo AND project.round = :lastRound AND team.team_number > :lastTeamNumber)`,
+        `(track.cardinalNo > :lastCardinalNo) OR 
+        (track.cardinalNo = :lastCardinalNo AND project.round > :lastRound) OR 
+        (track.cardinalNo = :lastCardinalNo AND project.round = :lastRound AND team.teamNumber > :lastTeamNumber)`,
         {
           lastCardinalNo: parseInt(lastCardinalNo),
           lastRound: parseInt(lastRound),
@@ -92,7 +91,7 @@ export class TeamRepository extends Repository<Team> {
       .leftJoinAndSelect('team.project', 'project')
       .leftJoinAndSelect('project.track', 'track')
       .where(
-        'track.track_name = :trackName AND track.cardinal_no = :cardinalNo',
+        'track.trackName = :trackName AND track.cardinalNo = :cardinalNo',
         { trackName, cardinalNo: parseInt(cardinalNo) },
       )
       .orderBy('project.round', 'ASC');
@@ -100,7 +99,7 @@ export class TeamRepository extends Repository<Team> {
     if (lastRound && lastTeamNumber) {
       query.andWhere(
         `(project.round > :lastRound) OR 
-          (project.round = :lastRound AND team.team_number > :lastTeamNumber)`,
+          (project.round = :lastRound AND team.teamNumber > :lastTeamNumber)`,
         {
           lastRound: parseInt(lastRound),
           lastTeamNumber: parseInt(lastTeamNumber),
@@ -118,10 +117,10 @@ export class TeamRepository extends Repository<Team> {
       .createQueryBuilder('team')
       .leftJoinAndSelect('team.project', 'project')
       .where('project.id = :projectId', { projectId })
-      .orderBy('team.team_number', 'ASC');
+      .orderBy('team.teamNumber', 'ASC');
 
     if (lastTeamNumber) {
-      query.andWhere('team.team_number > :lastTeamNumber', {
+      query.andWhere('team.teamNumber > :lastTeamNumber', {
         lastTeamNumber: parseInt(lastTeamNumber),
       });
     }
