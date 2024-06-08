@@ -55,7 +55,7 @@ export class AuthRepository {
     return this.userRepo
       .createQueryBuilder('users')
       .leftJoinAndSelect('users.track', 'tracks')
-      .where('users.phone_number = :phoneNumber', { phoneNumber })
+      .where('users.phoneNumber = :phoneNumber', { phoneNumber })
       .getOne();
   }
 }

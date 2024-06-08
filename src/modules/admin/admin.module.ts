@@ -9,6 +9,7 @@ import { TrackModule } from '../track/track.module';
 import { MemberModule } from '../member/member.module';
 import { TeamModule } from '../team/team.module';
 import { ProjectModule } from '../project/project.module';
+import { NoticeModule } from '../notice/notice.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ProjectModule } from '../project/project.module';
     UserModule,
     TeamModule,
     ProjectModule,
+    NoticeModule,
   ],
   controllers: [AdminController],
   providers: [AdminService, AdminRepository],

@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -15,13 +16,20 @@ import { CreateAdminDto, VerifyEamilDto } from '../dto';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { TrackService } from 'src/modules/track/services/track.service';
 import { TrackDto, TrackResDto } from 'src/modules/track/dto';
-import { AdminGuard } from 'src/common/guards';
+import { AdminGuard, JwtAuthGuard } from 'src/common/guards';
 import { UserService } from 'src/modules/user/services/user.service';
-import { UserRole } from 'src/modules/user/entities';
+import { User, UserRole } from 'src/modules/user/entities';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MemberService } from 'src/modules/member/services/member.service';
 import { OutputUserDto } from 'src/modules/user/dto/output-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  CreateNoticeDto,
+  OutputNoticeDto,
+  UpdateNoticeDto,
+} from 'src/modules/notice/dto';
+import { NoticeService } from 'src/modules/notice/services/notice.service';
+import { CurrentUser } from 'src/common/decorators';
 
 @ApiTags('admin')
 @UseInterceptors(ResponseInterceptor)
@@ -32,6 +40,7 @@ export class AdminController {
     private readonly trackService: TrackService,
     private readonly userService: UserService,
     private readonly memberService: MemberService,
+    private readonly noticeService: NoticeService,
   ) {}
 
   @Post('/signup')
@@ -99,5 +108,26 @@ export class AdminController {
   @UseInterceptors(FileInterceptor('file'))
   async createTeamAndProject(@UploadedFile() file: Express.Multer.File) {
     return this.adminService.createTeamAndProject(file);
+  }
+
+  @Post('/notices')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Serialize(OutputNoticeDto)
+  async createNotice(@CurrentUser() user: User, @Body() dto: CreateNoticeDto) {
+    return await this.noticeService.createNotice(user, dto);
+  }
+
+  @Put('/notices/:noticeId')
+  // @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard)
+  @Serialize(OutputNoticeDto)
+  @ApiBearerAuth('access-token')
+  async updateNotice(
+    @CurrentUser() user: User,
+    @Param('noticeId') noticeId: string,
+    @Body() dto: UpdateNoticeDto,
+  ) {
+    return await this.noticeService.updateNotice(user.id, noticeId, dto);
   }
 }
