@@ -11,7 +11,7 @@ export class OutputUserDto {
   username: string;
 
   @Expose()
-  eamil: string;
+  email: string;
 
   @Expose()
   realName: string;
