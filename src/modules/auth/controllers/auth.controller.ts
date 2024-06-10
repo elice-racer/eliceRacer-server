@@ -49,7 +49,7 @@ export class AuthController {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       path: '/',
-      domain: 'elicerracer.com',
+      domain: '.elicerracer.com',
       secure: true,
       sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
