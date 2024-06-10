@@ -4,11 +4,11 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import {
   CreateUserDto,
-  PaginationCoachesDto,
-  PaginationMembersDto,
+  PaginationParticipantsDto,
   PaginationRacersByCardinalDto,
   PaginationRacersByTrackDto,
   PaginationRacersDto,
+  PaginationUsersDto,
 } from '../dto';
 
 @Injectable()
@@ -53,17 +53,18 @@ export class UserRepository extends Repository<User> {
       .getOne();
   }
 
-  async findAllCoaches(dto: PaginationCoachesDto) {
-    const { lastRealName, lastId, pageSize } = dto;
-    const pageSizeToInt = parseInt(pageSize);
-    const role = UserRole.COACH;
+  async findAllUsers(user: User, dto: PaginationUsersDto) {
+    const { lastRealName, lastId, pageSize, role } = dto;
 
     const query = this.repo
       .createQueryBuilder('users')
-      .where('users.role = :role', { role })
+      .andWhere('user.id != :userId', { userId: user.id })
       .orderBy('users.realName', 'ASC')
       .addOrderBy('users.id', 'ASC');
 
+    if (role !== 'ALL') {
+      query.where('users.role = :role', { role });
+    }
     if (lastRealName && lastId) {
       query.andWhere(
         `(users.realName > :lastRealName) OR (users.realName = :lastRealName AND users.id > :lastId) `,
@@ -71,7 +72,7 @@ export class UserRepository extends Repository<User> {
       );
     }
 
-    return await query.limit(pageSizeToInt + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
 
   async findAllRcers(
@@ -177,7 +178,7 @@ export class UserRepository extends Repository<User> {
       .getOne();
   }
 
-  async findProjectParticipants(user: User, dto: PaginationMembersDto) {
+  async findProjectParticipants(user: User, dto: PaginationParticipantsDto) {
     const { pageSize, lastRealName, lastId } = dto;
 
     const query = this.repo
@@ -185,13 +186,17 @@ export class UserRepository extends Repository<User> {
       .leftJoin('user.teams', 'team')
       .leftJoin('team.project', 'project')
       .where('project.trackId = :trackId', { trackId: user.track.id })
+      .andWhere('user.id != :userId', { userId: user.id }) // 당사자 제외 조건 추가
       .leftJoinAndSelect('user.track', 'track');
 
+    // 관리자 또는 코치 역할을 가진 사용자를 포함하도록 조건을 추가
     query
-      .orWhere('user.role = :role', { role: UserRole.ADMIN })
+      .orWhere('user.role = :adminRole', { adminRole: UserRole.ADMIN })
+      .orWhere('user.role = :coachRole', { coachRole: UserRole.COACH })
       .orderBy('user.realName', 'DESC')
       .addOrderBy('user.id', 'DESC');
 
+    // 페이징을 위한 마지막 이름과 ID 조건 처리
     if (lastRealName && lastId) {
       query
         .andWhere('user.realName < :lastRealName', { lastRealName })
@@ -202,5 +207,11 @@ export class UserRepository extends Repository<User> {
     }
 
     return query.limit(pageSize + 1).getMany();
+  }
+
+  async searchUsers(query: string) {
+    return this.createQueryBuilder('user')
+      .where(`user.realName ILIKE :realName`, { realName: `%${query}%` })
+      .getMany();
   }
 }
