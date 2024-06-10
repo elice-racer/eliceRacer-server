@@ -7,5 +7,5 @@ export * from './output-user.dto';
 export * from './pagination-racers.dto';
 export * from './pagination-racers-by-cardinal.dto';
 export * from './pagination-racers-by-track.dto';
-export * from './pagination-coaches.dto';
-export * from './pagination-members.dto';
+export * from './pagination-users.dto';
+export * from './pagination-participants.dto';

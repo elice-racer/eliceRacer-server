@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
-export class PaginationMembersDto {
+export class PaginationParticipantsDto {
   @ApiProperty({
     description: '페이지당 항목 수',
     example: '10',

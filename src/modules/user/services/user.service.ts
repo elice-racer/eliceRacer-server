@@ -3,11 +3,11 @@ import { UserRepository } from '../repositories';
 import { User, UserRole, UserStatus } from '../entities';
 import {
   CreateUserDto,
-  PaginationCoachesDto,
-  PaginationMembersDto,
+  PaginationParticipantsDto,
   PaginationRacersByCardinalDto,
   PaginationRacersByTrackDto,
   PaginationRacersDto,
+  PaginationUsersDto,
   updateReqDto,
 } from '../dto';
 import { hashPassword } from 'src/common/utils';
@@ -60,17 +60,16 @@ export class UserService {
     return userWithDetail;
   }
 
-  async getAllCoaches(dto: PaginationCoachesDto) {
-    const { pageSize } = dto;
-    const pageSizeToInt = parseInt(pageSize);
+  async getAllUsers(user: User, dto: PaginationUsersDto) {
+    const { pageSize, role } = dto;
 
-    const users = await this.userRepo.findAllCoaches(dto);
+    const users = await this.userRepo.findAllUsers(user, dto);
 
     let next: string | null = null;
 
-    if (users.length > pageSizeToInt) {
-      const lastUser = users[pageSizeToInt - 1];
-      next = `${this.baseUrl}/api/users/coaches/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+    if (users.length > pageSize) {
+      const lastUser = users[pageSize - 1];
+      next = `${this.baseUrl}/api/users/all?pageSize=${pageSize}&role=${role.toLowerCase()}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -321,7 +320,8 @@ export class UserService {
     return this.userRepo.remove(user);
   }
 
-  async getProjectParticipants(userId: string, dto: PaginationMembersDto) {
+  async getProjectParticipants(userId: string, dto: PaginationParticipantsDto) {
+    const { pageSize } = dto;
     const user = await this.userRepo.findOne({
       where: { id: userId },
       relations: ['track'],
@@ -335,6 +335,18 @@ export class UserService {
         HttpStatus.NOT_FOUND,
       );
 
-    return this.userRepo.findProjectParticipants(user, dto);
+    const users = await this.userRepo.findProjectParticipants(user, dto);
+
+    let next: string | null = null;
+    if (users.length > pageSize) {
+      const lastUser = users[pageSize - 1];
+      next = `${this.baseUrl}/api/users?pageSize=${pageSize}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      users.pop();
+    }
+    return { users, pagination: { next, count: users.length } };
+  }
+
+  async searchUsers(query: string) {
+    return this.userRepo.searchUsers(query);
   }
 }
