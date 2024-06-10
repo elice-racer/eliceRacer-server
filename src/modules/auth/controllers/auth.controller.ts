@@ -49,7 +49,9 @@ export class AuthController {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       path: '/',
-      //TODO domain: secure:
+      domain: 'elicerracer.com',
+      secure: true,
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
     });
 
