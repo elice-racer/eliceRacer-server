@@ -1,7 +1,7 @@
 import { EntityManager, Repository } from 'typeorm';
 import { Notice } from '../entities/notice.entity';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { CreateNoticeDto } from '../dto';
+import { CreateNoticeDto, PaginationNoticesByAuthorDto } from '../dto';
 import { User } from 'src/modules/user/entities';
 import { Injectable } from '@nestjs/common';
 
@@ -29,13 +29,31 @@ export class NoticeRepository extends Repository<Notice> {
     return this.repo.save(notice);
   }
 
-  async findAllNotice(page: number, pageSize: number): Promise<Notice[]> {
+  async findAllNotices(
+    page: number,
+    pageSize: number,
+  ): Promise<[Notice[], number]> {
     return this.repo
       .createQueryBuilder('notice')
       .leftJoinAndSelect('notice.user', 'user')
       .orderBy('notice.createdAt', 'DESC')
       .skip((page - 1) * pageSize)
       .take(pageSize)
-      .getMany();
+      .getManyAndCount();
+  }
+
+  async findNoticeByAuthor(
+    dto: PaginationNoticesByAuthorDto,
+  ): Promise<[Notice[], number]> {
+    const { page, pageSize, userId } = dto;
+
+    return this.repo
+      .createQueryBuilder('notice')
+      .leftJoinAndSelect('notice.user', 'user')
+      .where('user.id  = :userId', { userId })
+      .orderBy('notice.createdAt', 'DESC')
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
   }
 }
