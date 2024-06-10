@@ -13,6 +13,15 @@ import { MessageService } from './services/message.service';
 
 @WebSocketGateway({
   namespace: 'chats',
+  cors: {
+    origin: [
+      process.env.CLIENT_URL,
+      process.env.LOCAL_URL,
+      process.env.BASE_URL,
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
