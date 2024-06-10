@@ -4,6 +4,8 @@ import { Track } from 'src/modules/track/entities/track.entity';
 import { Team } from 'src/modules/team/entities/team.entity';
 import { Skill } from './skill.entity';
 import { Notice } from 'src/modules/notice/entities/notice.entity';
+import { Chat } from 'src/modules/chat/entities/chat.entity';
+import { Message } from 'src/modules/chat/entities';
 
 export enum UserRole {
   RACER = 'RACER',
@@ -80,4 +82,10 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Notice, (notice) => notice.user)
   notices: Notice[];
+
+  @ManyToMany(() => Chat, (chat) => chat.users)
+  chats: Chat[];
+
+  @OneToMany(() => Message, (message) => message.user)
+  messages: Message[];
 }

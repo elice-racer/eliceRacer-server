@@ -10,6 +10,7 @@ import { MemberModule } from '../member/member.module';
 import { TeamModule } from '../team/team.module';
 import { ProjectModule } from '../project/project.module';
 import { NoticeModule } from '../notice/notice.module';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { NoticeModule } from '../notice/notice.module';
     TeamModule,
     ProjectModule,
     NoticeModule,
+    ChatModule,
   ],
   controllers: [AdminController],
   providers: [AdminService, AdminRepository],

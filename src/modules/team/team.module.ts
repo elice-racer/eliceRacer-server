@@ -17,6 +17,6 @@ import { ProjectModule } from '../project/project.module';
   ],
   controllers: [TeamController],
   providers: [TeamService, TeamRepository],
-  exports: [TeamRepository],
+  exports: [TeamService, TeamRepository],
 })
 export class TeamModule {}

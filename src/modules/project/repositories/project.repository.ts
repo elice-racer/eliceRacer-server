@@ -3,7 +3,9 @@ import { Project } from '../entities';
 import { EntityManager, Repository } from 'typeorm';
 import { PaginationProjectsByTrackDto, PaginationProjectsDto } from '../dto';
 import { PaginationProjectsByCardinalDto } from '../dto/pagination-projects-by-carinal.dto';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class ProjectRepository extends Repository<Project> {
   constructor(
     @InjectRepository(Project)

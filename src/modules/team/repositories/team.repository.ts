@@ -7,7 +7,9 @@ import {
   PaginationTeamsByTrackDto,
   PaginationTeamsDto,
 } from '../dto';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class TeamRepository extends Repository<Team> {
   constructor(
     @InjectRepository(Team)

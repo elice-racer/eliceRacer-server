@@ -12,19 +12,22 @@ import {
 export class TrackController {
   constructor(private readonly tracksService: TrackService) {}
 
-  @Get('/:id')
-  async getTrack(@Param('id') id: string) {
-    return await this.tracksService.getTrack(id);
+  @Get('/:trackId')
+  async getTrack(@Param('trackId') trackId: string) {
+    return await this.tracksService.getTrack(trackId);
   }
 
+  @Get('/all')
   async getAllTracks(@Query() dto: PaginationTrackDto) {
     return await this.tracksService.getAllTracks(dto);
   }
 
+  @Get('/names/all')
   async getTracksByTrackName(@Query() dto: PaginationTrackByNameDto) {
     return await this.tracksService.getTracksByTrackName(dto);
   }
 
+  @Get('/cardinals/all')
   async getTracksByCardinalNo(@Query() dto: TrackByCardinalReqDto) {
     return await this.tracksService.getTrackByCardinalNo(
       dto.trackName,

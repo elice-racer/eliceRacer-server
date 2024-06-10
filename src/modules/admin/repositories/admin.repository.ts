@@ -2,7 +2,9 @@ import { User, UserRole, UserStatus } from 'src/modules/user/entities';
 import { UserRepository } from 'src/modules/user/repositories';
 import { CreateAdminDto } from '../dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class AdminRepository {
   constructor(
     @InjectRepository(UserRepository)

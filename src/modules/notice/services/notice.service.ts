@@ -1,6 +1,11 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { NoticeRepository } from '../repositories/notice.repository';
-import { CreateNoticeDto, PaginationNoticeDto, UpdateNoticeDto } from '../dto';
+import {
+  CreateNoticeDto,
+  PaginationNoticeDto,
+  PaginationNoticesByAuthorDto,
+  UpdateNoticeDto,
+} from '../dto';
 import { BusinessException } from 'src/exception';
 import { User } from 'src/modules/user/entities';
 
@@ -12,15 +17,36 @@ export class NoticeService {
     return await this.noticeRepo.createNotice(user, dto);
   }
 
-  async getNotice() {}
+  async getNotice(noticeId: string) {
+    const notice = await this.noticeRepo.findOne({
+      where: { id: noticeId },
+      relations: ['user'],
+    });
 
-  async getNoticesByAuthor() {}
+    if (!notice)
+      throw new BusinessException(
+        'notice',
+        `해당 공지가 존재하지 않습니다`,
+        `해당 공지가 존재하지 않습니다`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return notice;
+  }
+
+  async getNoticesByAuthor(dto: PaginationNoticesByAuthorDto) {
+    const [notices, total] = await this.noticeRepo.findNoticeByAuthor(dto);
+    return { notices, pagination: { count: notices.length, total } };
+  }
 
   async getAllNotice(dto: PaginationNoticeDto) {
-    const intPage = parseInt(dto.page);
-    const intPageSize = parseInt(dto.pageSize);
+    const { page, pageSize } = dto;
 
-    return this.noticeRepo.findAllNotice(intPage, intPageSize);
+    const [notices, total] = await this.noticeRepo.findAllNotices(
+      page,
+      pageSize,
+    );
+    return { notices, pagination: { count: notices.length, total } };
   }
 
   async updateNotice(userId: string, noticeId: string, dto: UpdateNoticeDto) {

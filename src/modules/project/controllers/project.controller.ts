@@ -1,15 +1,13 @@
 import {
-  Body,
   Controller,
   Get,
   Param,
-  Put,
   Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectService } from '../services/project.service';
-import { PaginationProjectsByTrackDto, UpdateProjectReqDto } from '../dto';
+import { PaginationProjectsByTrackDto } from '../dto';
 import { PaginationProjectsByCardinalDto } from '../dto/pagination-projects-by-carinal.dto';
 import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
@@ -36,23 +34,13 @@ export class ProjectController {
     return await this.projectService.getProjectsByTrack(dto);
   }
 
-  @Get('/tracks-cardinal/all')
-  // @UseGuards(JwtAuthGuard)
+  @Get('/cardinals/all')
+  @UseGuards(JwtAuthGuard)
   @Serialize(OutputProjectDto)
   async getProjectsByTrackAndCardinalNo(
     @Query()
     dto: PaginationProjectsByCardinalDto,
   ) {
     return this.projectService.getProjectsByTrackAndCardinalNo(dto);
-  }
-
-  @Put('/:projectId')
-  @UseGuards(JwtAuthGuard)
-  @Serialize(OutputProjectDto)
-  async updateProject(
-    @Param('projectId') projectId: string,
-    @Body() dto: UpdateProjectReqDto,
-  ) {
-    return this.projectService.updateProject(projectId, dto);
   }
 }

@@ -4,6 +4,7 @@ import { User, UserRole, UserStatus } from '../entities';
 import {
   CreateUserDto,
   PaginationCoachesDto,
+  PaginationMembersDto,
   PaginationRacersByCardinalDto,
   PaginationRacersByTrackDto,
   PaginationRacersDto,
@@ -29,8 +30,14 @@ export class UserService {
     this.baseUrl = configService.get<string>(ENV_SERVER_URL_KEY);
   }
 
-  async chang(username: string) {
-    const user = await this.userRepo.findOneBy({ username });
+  async chang(identifier: string) {
+    const user = await this.userRepo
+      .createQueryBuilder('users')
+      .where(
+        '(users.email = :identifier OR users.username = :identifier) AND users.status = :status',
+        { identifier, status: UserStatus.VERIFIED_AND_REGISTERED },
+      )
+      .getOne();
 
     user.username = null;
     user.password = null;
@@ -91,7 +98,6 @@ export class UserService {
   //트랙별 모든 레이서
   async getAllRacersByTrack(dto: PaginationRacersByTrackDto) {
     const { trackName, pageSize } = dto;
-    const pageSizeToInt = parseInt(pageSize);
 
     const track = await this.trackRepo.findOne({ where: { trackName } });
 
@@ -106,8 +112,8 @@ export class UserService {
     const users = await this.userRepo.findRacersByTrack(dto);
 
     let next: string | null = null;
-    if (users.length > pageSizeToInt) {
-      const lastUser = users[pageSizeToInt - 1];
+    if (users.length > pageSize) {
+      const lastUser = users[pageSize - 1];
       next = `${this.baseUrl}/api/users/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
@@ -138,7 +144,7 @@ export class UserService {
     let next: string | null = null;
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `${this.baseUrl}/api/users/tracks-cardinal/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `${this.baseUrl}/api/users/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
 
       users.pop();
     }
@@ -299,5 +305,36 @@ export class UserService {
       where: { id: id },
       relations: ['track', 'teams', 'skills'],
     });
+  }
+
+  async deleteUser(userId: string) {
+    const user = await this.userRepo.findOneBy({ id: userId });
+
+    if (!user)
+      throw new BusinessException(
+        `user`,
+        `사용자가 존재하지 않습니다.`,
+        `사용자가 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return this.userRepo.remove(user);
+  }
+
+  async getProjectParticipants(userId: string, dto: PaginationMembersDto) {
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      relations: ['track'],
+    });
+
+    if (!user.track)
+      throw new BusinessException(
+        `user`,
+        `유저가 소속된 트랙이 존재하지 않습니다.`,
+        `유저가 소속된 트랙이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return this.userRepo.findProjectParticipants(user, dto);
   }
 }
