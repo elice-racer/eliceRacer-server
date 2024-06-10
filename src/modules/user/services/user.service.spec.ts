@@ -113,7 +113,7 @@ describe('UserService', () => {
 
   describe('getAllRacersByTrack', () => {
     const dto: PaginationRacersByTrackDto = {
-      pageSize: '10',
+      pageSize: 10,
       trackName: 'AI',
     };
     it('트랙이 존재하지 않으면 BusinessException을 던진다', async () => {

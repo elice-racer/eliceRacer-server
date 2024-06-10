@@ -101,7 +101,7 @@ export class TeamService {
     let next: string | null = null;
     if (teams.length > parseInt(pageSize)) {
       const lastTeam = teams[parseInt(pageSize) - 1];
-      next = `${this.baseUrl}/api/teams/tracks-cardinal/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRound=${lastTeam.project.round}&lastTeamNumber=${lastTeam.teamNumber}`;
+      next = `${this.baseUrl}/api/teams/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRound=${lastTeam.project.round}&lastTeamNumber=${lastTeam.teamNumber}`;
       teams.pop();
     }
 

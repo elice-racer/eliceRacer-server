@@ -1,11 +1,12 @@
 export class Pagination {
   next?: string;
-
   count: number;
+  total?: number;
 
-  constructor(next: string, count: number) {
+  constructor(next: string, count: number, total: number) {
     this.next = next;
     this.count = count;
+    this.total = total;
   }
 }
 

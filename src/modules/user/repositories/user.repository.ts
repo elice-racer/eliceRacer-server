@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CreateUserDto,
   PaginationCoachesDto,
+  PaginationMembersDto,
   PaginationRacersByCardinalDto,
   PaginationRacersByTrackDto,
   PaginationRacersDto,
@@ -105,7 +106,6 @@ export class UserRepository extends Repository<User> {
     dto: PaginationRacersByTrackDto,
   ): Promise<User[] | []> {
     const { trackName, pageSize, lastRealName, lastId, lastCardinalNo } = dto;
-    const pageSizeToInt = parseInt(pageSize);
 
     const role = UserRole.RACER;
 
@@ -128,7 +128,7 @@ export class UserRepository extends Repository<User> {
       );
     }
 
-    return await query.limit(pageSizeToInt + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
 
   async findRacersByTrackAndCardinalNo(
@@ -175,5 +175,32 @@ export class UserRepository extends Repository<User> {
       ])
       .where('users.id = :userId', { userId })
       .getOne();
+  }
+
+  async findProjectParticipants(user: User, dto: PaginationMembersDto) {
+    const { pageSize, lastRealName, lastId } = dto;
+
+    const query = this.repo
+      .createQueryBuilder('user')
+      .leftJoin('user.teams', 'team')
+      .leftJoin('team.project', 'project')
+      .where('project.trackId = :trackId', { trackId: user.track.id })
+      .leftJoinAndSelect('user.track', 'track');
+
+    query
+      .orWhere('user.role = :role', { role: UserRole.ADMIN })
+      .orderBy('user.realName', 'DESC')
+      .addOrderBy('user.id', 'DESC');
+
+    if (lastRealName && lastId) {
+      query
+        .andWhere('user.realName < :lastRealName', { lastRealName })
+        .orWhere('user.realName = :lastRealName AND user.id < :lastId', {
+          lastRealName,
+          lastId,
+        });
+    }
+
+    return query.limit(pageSize + 1).getMany();
   }
 }

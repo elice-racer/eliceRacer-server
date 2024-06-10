@@ -1,6 +1,10 @@
-import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
 import { NoticeService } from '../services/notice.service';
-import { OutputNoticeDto, PaginationNoticeDto } from '../dto';
+import {
+  OutputNoticeDto,
+  PaginationNoticeDto,
+  PaginationNoticesByAuthorDto,
+} from '../dto';
 import { ApiTags } from '@nestjs/swagger';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 
@@ -10,12 +14,21 @@ import { ResponseInterceptor, Serialize } from 'src/interceptors';
 export class NoticeController {
   constructor(private readonly noticeService: NoticeService) {}
 
-  @Get('/noticeId')
-  async getNotice() {}
+  @Get('/authors')
+  @Serialize(OutputNoticeDto)
+  async getNoticeByAuthor(@Query() dto: PaginationNoticesByAuthorDto) {
+    return await this.noticeService.getNoticesByAuthor(dto);
+  }
 
   @Get('/all')
   @Serialize(OutputNoticeDto)
   async getAllNotice(@Query() dto: PaginationNoticeDto) {
     return await this.noticeService.getAllNotice(dto);
+  }
+
+  @Get('/:noticeId')
+  @Serialize(OutputNoticeDto)
+  async getNotice(@Param('noticeId') noticeId: string) {
+    return await this.noticeService.getNotice(noticeId);
   }
 }

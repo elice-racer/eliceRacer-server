@@ -98,7 +98,7 @@ export class ProjectService {
     let next: string | null = null;
     if (projects.length > parseInt(pageSize)) {
       const lastProject = projects[parseInt(pageSize) - 1];
-      next = `${this.baseUrl}/api/projects/tracks-cardinal/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
+      next = `${this.baseUrl}/api/projects/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
       projects.pop();
     }
 

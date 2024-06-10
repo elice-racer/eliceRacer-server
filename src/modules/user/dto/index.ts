@@ -8,3 +8,4 @@ export * from './pagination-racers.dto';
 export * from './pagination-racers-by-cardinal.dto';
 export * from './pagination-racers-by-track.dto';
 export * from './pagination-coaches.dto';
+export * from './pagination-members.dto';

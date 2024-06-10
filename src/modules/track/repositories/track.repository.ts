@@ -2,7 +2,9 @@ import { EntityManager, Repository } from 'typeorm';
 import { Track } from '../entities';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { PaginationTrackByNameDto, PaginationTrackDto, TrackDto } from '../dto';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class TrackRepository extends Repository<Track> {
   constructor(
     @InjectRepository(Track) private readonly repo: Repository<Track>,
