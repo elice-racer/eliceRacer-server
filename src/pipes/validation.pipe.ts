@@ -22,7 +22,7 @@ export class ValidationPipe implements PipeTransform {
       );
     }
 
-    return value;
+    return object;
   }
 
   private toValidate(metatype: new (...args: any[]) => any): boolean {
