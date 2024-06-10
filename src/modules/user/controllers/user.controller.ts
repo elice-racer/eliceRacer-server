@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -14,6 +15,7 @@ import {
   CreateUserDto,
   DetailUserResDto,
   PaginationCoachesDto,
+  PaginationMembersDto,
   PaginationRacersByCardinalDto,
   PaginationRacersByTrackDto,
   PaginationRacersDto,
@@ -39,8 +41,8 @@ export class UserController {
   ) {}
 
   @Patch('/chang')
-  async chang(@Body('username') username: string) {
-    return await this.userService.chang(username);
+  async chang(@Body('identifier') identifier: string) {
+    return await this.userService.chang(identifier);
   }
 
   @Get('/all')
@@ -62,7 +64,7 @@ export class UserController {
     return { users, pagination };
   }
 
-  @Get('/tracks-cardinal/all')
+  @Get('/cardinals/all')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(OutputUserDto)
@@ -124,19 +126,39 @@ export class UserController {
     return await this.skillService.searchSkills(search);
   }
 
-  @Get('/miniprofiles/:id')
+  @Get('/miniprofiles/:userId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(MiniProfileDto)
-  async getMiniProfile(@Param('id') id: string) {
-    return await this.userService.getUser(id);
+  async getMiniProfile(@Param('userId') userId: string) {
+    return await this.userService.getUser(userId);
   }
 
-  @Get('/:id')
+  @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(OutputUserDto)
-  async getUser(@Param('id') id: string) {
-    return await this.userService.getUser(id);
+  async getProjectParticipants(
+    @CurrentUser() user: User,
+    @Query() dto: PaginationMembersDto,
+  ) {
+    return await this.userService.getProjectParticipants(user.id, dto);
+  }
+
+  // @Get()
+  // async searchUser(@Query('search') search: string) {}
+  @Get('/:userId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Serialize(OutputUserDto)
+  async getUser(@Param('userId') userId: string) {
+    return await this.userService.getUser(userId);
+  }
+
+  @Delete()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  async deleteUser(@CurrentUser() user: User) {
+    return await this.userService.deleteUser(user.id);
   }
 }
