@@ -49,7 +49,9 @@ export class AuthController {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       path: '/',
-      //TODO domain: secure:
+      // domain: 'elicerracer.store',
+      // secure: true,
+      // sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -59,7 +61,10 @@ export class AuthController {
 
   @Post('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
+    console.log('request header!!!!!!!!', req.header);
+    console.log('?????????????request headers!', req.headers);
     const refreshToken = req.cookies['refreshToken'];
+    console.log('!!!!!!!!!!!!!!', refreshToken);
 
     const accessToken = await this.authService.refresh(refreshToken);
     res.header('Authorization', `Bearer ${accessToken}`);
