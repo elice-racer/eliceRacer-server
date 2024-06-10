@@ -61,7 +61,8 @@ export class AuthController {
 
   @Post('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
-    console.log('?????????????', req.cookies);
+    console.log('request header!!!!!!!!', req.header);
+    console.log('?????????????request headers!', req.headers);
     const refreshToken = req.cookies['refreshToken'];
     console.log('!!!!!!!!!!!!!!', refreshToken);
 
