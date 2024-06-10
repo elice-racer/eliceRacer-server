@@ -87,7 +87,7 @@ export class UserService {
 
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `${this.baseUrl}/api/users/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `${this.baseUrl}/api/users/racers/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -113,7 +113,7 @@ export class UserService {
     let next: string | null = null;
     if (users.length > pageSize) {
       const lastUser = users[pageSize - 1];
-      next = `${this.baseUrl}/api/users/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `${this.baseUrl}/api/users/racers/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
 
@@ -143,7 +143,7 @@ export class UserService {
     let next: string | null = null;
     if (users.length > pageSizeToInt) {
       const lastUser = users[pageSizeToInt - 1];
-      next = `${this.baseUrl}/api/users/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      next = `${this.baseUrl}/api/users/racers/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
 
       users.pop();
     }
