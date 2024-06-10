@@ -14,11 +14,11 @@ import { UserService } from '../services/user.service';
 import {
   CreateUserDto,
   DetailUserResDto,
-  PaginationCoachesDto,
-  PaginationMembersDto,
+  PaginationParticipantsDto,
   PaginationRacersByCardinalDto,
   PaginationRacersByTrackDto,
   PaginationRacersDto,
+  PaginationUsersDto,
   updateReqDto,
 } from '../dto';
 import { CurrentUser } from 'src/common/decorators';
@@ -49,11 +49,30 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(OutputUserDto)
+  async getAllUsers(
+    @CurrentUser() user: User,
+    @Query() dto: PaginationUsersDto,
+  ) {
+    return await this.userService.getAllUsers(user, dto);
+  }
+
+  @Get('')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Serialize(OutputUserDto)
+  async searchUsers(@Query('search') search: string) {
+    return await this.userService.searchUsers(search);
+  }
+
+  @Get('/racers/all')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Serialize(OutputUserDto)
   async getAllRacers(@Query() dto: PaginationRacersDto) {
     return await this.userService.getAllRacres(dto);
   }
 
-  @Get('/tracks/all')
+  @Get('/racers/tracks/all')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(OutputUserDto)
@@ -64,20 +83,12 @@ export class UserController {
     return { users, pagination };
   }
 
-  @Get('/cardinals/all')
+  @Get('/racers/cardinals/all')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(OutputUserDto)
   async getAllRacresByCardinalNo(@Query() dto: PaginationRacersByCardinalDto) {
     return await this.userService.getAllRacersByCardinalNo(dto);
-  }
-
-  @Get('/coaches/all')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('access-token')
-  @Serialize(OutputUserDto)
-  async getAllCoaches(@Query() dto: PaginationCoachesDto) {
-    return await this.getAllCoaches(dto);
   }
 
   @Get('/current')
@@ -134,19 +145,17 @@ export class UserController {
     return await this.userService.getUser(userId);
   }
 
-  @Get()
+  @Get('/participants')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(OutputUserDto)
   async getProjectParticipants(
     @CurrentUser() user: User,
-    @Query() dto: PaginationMembersDto,
+    @Query() dto: PaginationParticipantsDto,
   ) {
     return await this.userService.getProjectParticipants(user.id, dto);
   }
 
-  // @Get()
-  // async searchUser(@Query('search') search: string) {}
   @Get('/:userId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
