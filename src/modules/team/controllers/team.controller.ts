@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -15,7 +14,6 @@ import {
   PaginationTeamsByProjectDto,
   PaginationTeamsByTrackDto,
   PaginationTeamsDto,
-  UpdateTeamMemberReqDto,
   UpdateTeamReqDto,
 } from '../dto';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
@@ -39,7 +37,7 @@ export class TeamController {
     return await this.teamService.getTeamsByTrack(dto);
   }
 
-  @Get('/tracks-cardinal/all')
+  @Get('/cardinals/all')
   @Serialize(OutputTeamDto)
   async getTeamsByCardinalNo(@Query() dto: PaginationTeamsByCardinalDto) {
     return await this.teamService.getTeamsByCardinalNo(dto);
@@ -51,29 +49,18 @@ export class TeamController {
     return await this.teamService.getTeamsByProject(dto);
   }
 
-  @Get('/:id')
+  @Get('/:teamId')
   @Serialize(OutputTeamDto)
-  async getTeam(@Param('id') id: string) {
-    return await this.teamService.getTeam(id);
+  async getTeam(@Param('teamId') teamId: string) {
+    return await this.teamService.getTeam(teamId);
   }
 
-  @Patch('/:id')
+  @Patch('/:teamId')
   @Serialize(OutputTeamDto)
-  async updateTeam(@Param('id') id: string, @Body() dto: UpdateTeamReqDto) {
-    return await this.teamService.updateTeam(id, dto);
-  }
-
-  @Patch('/:id')
-  @Serialize(OutputTeamDto)
-  async updateTeamMember(
-    @Param('id') id: string,
-    @Body() dto: UpdateTeamMemberReqDto,
+  async updateTeam(
+    @Param('teamId') teamId: string,
+    @Body() dto: UpdateTeamReqDto,
   ) {
-    return await this.teamService.updateTeamMember(id, dto);
-  }
-
-  @Delete('/:id')
-  async deleteTeam(@Param('id') id: string) {
-    await this.teamService.deleteTeam(id);
+    return await this.teamService.updateTeam(teamId, dto);
   }
 }
