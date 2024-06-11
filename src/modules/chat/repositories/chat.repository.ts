@@ -15,11 +15,21 @@ export class ChatRepository extends Repository<Chat> {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
-  async createTeamChat(chatName: string, users: User[]) {
+  //TODO 삭제해도 될 듯
+  async createTeamChat(chatName: string, users: User[], currentUser: User) {
     const chat = new Chat();
 
     chat.chatName = chatName;
-    chat.users = users;
+    chat.users = [...users, currentUser];
+
+    return this.repo.save(chat);
+  }
+
+  async createChatRoom(currentUser: User, users: User[], chatName: string) {
+    const chat = new Chat();
+
+    chat.chatName = chatName;
+    chat.users = [...users, currentUser];
 
     return this.repo.save(chat);
   }

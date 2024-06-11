@@ -14,7 +14,7 @@ export class RefreshTokenRepository {
     value: string,
     ttl: number,
   ): Promise<void> {
-    return this.cacheManager.set(key, value, ttl);
+    return this.cacheManager.set(key, value, { ttl } as any);
   }
 
   async deleteRefreshToken(key: string): Promise<void> {

@@ -34,7 +34,9 @@ export class AuthService {
       secret: this.configService.get<string>(ENV_JWT_SECRET_KEY),
     });
 
-    await this.refreshTokenService.deleteRefreshToken(payloadRes.jti);
+    await this.refreshTokenService.deleteRefreshToken(
+      `refreshToken:${payloadRes.jti}`,
+    );
   }
 
   async refresh(refreshToken: string) {
@@ -57,8 +59,8 @@ export class AuthService {
     if (!isNotExpired)
       throw new BusinessException(
         'auth',
-        `유효하지 않은 토큰`,
-        `유효하지 않은 토큰`,
+        `만료된 토큰`,
+        `만료된 토큰`,
         HttpStatus.UNAUTHORIZED,
       );
 
@@ -87,7 +89,7 @@ export class AuthService {
     await this.refreshTokenService.setRefreshToken(
       `refreshToken:${payload.jti}`,
       refreshToken,
-      1000 * 60 * 60 * 24 * 3, //3일
+      60 * 60 * 24 * 3, //3일
     );
 
     return { accessToken, refreshToken };
@@ -176,7 +178,7 @@ export class AuthService {
     await this.verificationService.setVerificationCode(
       `phoneCode:${phoneNumber}`,
       generatedCode,
-      1000 * 60 * 5, // 5분,
+      60 * 5, // 5분,
     );
     // 4. 메세지 전송
     await this.smsService.sendVerificationCode(phoneNumber, generatedCode);

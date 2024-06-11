@@ -44,7 +44,7 @@ describe('ProjectService', () => {
     const projectId = 'uuid';
 
     it('프로젝트가 존재하지 않으면 BusinessException을 던진다', async () => {
-      projectRepo.findOneBy.mockReturnValue(undefined);
+      projectRepo.findOne.mockReturnValue(undefined);
 
       await expect(service.getProject(projectId)).rejects.toThrow(
         BusinessException,
@@ -54,7 +54,7 @@ describe('ProjectService', () => {
     it('프로젝트가 존재하면 해당 프로젝트를 반환해준다', async () => {
       const project = new Project();
 
-      projectRepo.findOneBy.mockResolvedValue(project);
+      projectRepo.findOne.mockResolvedValue(project);
 
       const result = await service.getProject(projectId);
 

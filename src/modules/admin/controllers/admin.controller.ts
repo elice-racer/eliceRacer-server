@@ -99,10 +99,6 @@ export class AdminController {
     return await this.userService.updateUserTracks(userId, trackDto);
   }
 
-  // @Get('/users')
-  // @UseGuards(AdminGuard)
-  // async searchUser(@Query('search') search: string) {}
-
   //member
   //racer 등록
   @Post('/members/racers')
@@ -166,7 +162,6 @@ export class AdminController {
 
   @Delete('/notices/:noticeId')
   @UseGuards(AdminGuard)
-  @Serialize(OutputNoticeDto)
   @ApiBearerAuth('access-token')
   async deleteNotice(
     @CurrentUser() user: User,
@@ -187,8 +182,12 @@ export class AdminController {
   }
   //chat
   //팀 채팅방 생성
+  @UseGuards(AdminGuard)
   @Post('/chats/teams')
-  async createTeamChat(@Body() dto: CreateTeamChatDto) {
-    return await this.chatService.createTeamChat(dto);
+  async createTeamChat(
+    @CurrentUser() currentUser: User,
+    @Body() dto: CreateTeamChatDto,
+  ) {
+    return await this.chatService.createTeamChat(currentUser, dto);
   }
 }

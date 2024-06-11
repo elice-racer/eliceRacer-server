@@ -24,7 +24,10 @@ export class ProjectService {
   }
 
   async getProject(projectId: string) {
-    const project = this.projectRepo.findOneBy({ id: projectId });
+    const project = this.projectRepo.findOne({
+      where: { id: projectId },
+      relations: ['track'],
+    });
 
     if (!project)
       throw new BusinessException(

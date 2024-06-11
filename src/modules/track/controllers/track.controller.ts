@@ -12,11 +12,6 @@ import {
 export class TrackController {
   constructor(private readonly tracksService: TrackService) {}
 
-  @Get('/:trackId')
-  async getTrack(@Param('trackId') trackId: string) {
-    return await this.tracksService.getTrack(trackId);
-  }
-
   @Get('/all')
   async getAllTracks(@Query() dto: PaginationTrackDto) {
     return await this.tracksService.getAllTracks(dto);
@@ -33,5 +28,10 @@ export class TrackController {
       dto.trackName,
       dto.cardinalNo,
     );
+  }
+
+  @Get('/:trackId')
+  async getTrack(@Param('trackId') trackId: string) {
+    return await this.tracksService.getTrack(trackId);
   }
 }

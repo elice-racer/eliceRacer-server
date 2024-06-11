@@ -61,10 +61,7 @@ export class AuthController {
 
   @Post('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
-    console.log('request header!!!!!!!!', req.header);
-    console.log('?????????????request headers!', req.headers);
     const refreshToken = req.cookies['refreshToken'];
-    console.log('!!!!!!!!!!!!!!', refreshToken);
 
     const accessToken = await this.authService.refresh(refreshToken);
     res.header('Authorization', `Bearer ${accessToken}`);
