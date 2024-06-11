@@ -170,7 +170,7 @@ export class TeamService {
       },
     });
 
-    if (!users)
+    if (users.length === 0)
       throw new BusinessException(
         'user',
         '유저가 존재하지 않습니다',

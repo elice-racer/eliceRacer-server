@@ -1,11 +1,17 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ChatRepository } from '../repositories';
-import { CreateTeamChatDto, MemberTeamChatDto } from '../dto';
+import {
+  CreateChatRoomDto,
+  CreateTeamChatDto,
+  MemberTeamChatDto,
+} from '../dto';
 import { TeamRepository } from '../../team/repositories/team.repository';
 import { BusinessException } from 'src/exception';
 import { UserRepository } from '../../user/repositories';
 import { Chat } from '../entities/chat.entity';
 import { ChatGateway } from '../chat.gateway';
+import { User } from 'src/modules/user/entities';
+import { In } from 'typeorm';
 
 @Injectable()
 export class ChatService {
@@ -37,7 +43,21 @@ export class ChatService {
     return this.chatRepo.isMember(dto.chatId, dto.userId);
   }
 
-  async createTeamChat(dto: CreateTeamChatDto) {
+  async createChatRoom(currentUser: User, dto: CreateChatRoomDto) {
+    const users = await this.userRepo.find({ where: { id: In(dto.userIds) } });
+
+    if (users.length! == dto.userIds.length)
+      throw new BusinessException(
+        'chat',
+        '존재하지 않는 유저가 있습니다',
+        `존재하지 않는 유저가 있습니다`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return this.chatRepo.createChatRoom(currentUser, users, dto.chatName);
+  }
+
+  async createTeamChat(currentUser: User, dto: CreateTeamChatDto) {
     const team = await this.teamRepo.findOne({
       where: { id: dto.teamId },
       relations: ['users', 'project'],
@@ -53,7 +73,11 @@ export class ChatService {
 
     const chatName = `[${team.project.projectName}] ${team.teamNumber}팀`;
 
-    const chat = await this.chatRepo.createTeamChat(chatName, team.users);
+    const chat = await this.chatRepo.createTeamChat(
+      chatName,
+      team.users,
+      currentUser,
+    );
 
     return chat;
   }
