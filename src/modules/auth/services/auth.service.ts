@@ -16,7 +16,7 @@ import { VerificationService } from './verification.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { AuthRepository } from '../repositories';
 import { BusinessException } from 'src/exception';
-import { genId } from 'src/common/utils';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -201,7 +201,7 @@ export class AuthService {
     return {
       sub: userId,
       iat: Math.floor(Date.now() / 1000),
-      jti: genId(),
+      jti: uuidv4(),
     };
   }
 }

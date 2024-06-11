@@ -182,8 +182,9 @@ export class AdminController {
   }
   //chat
   //팀 채팅방 생성
-  @UseGuards(AdminGuard)
   @Post('/chats/teams')
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth('access-token')
   async createTeamChat(
     @CurrentUser() currentUser: User,
     @Body() dto: CreateTeamChatDto,

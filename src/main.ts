@@ -9,8 +9,8 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, getNestOptions());
   app.useGlobalFilters(new BusinessExceptionFilter());
-  app.use(cookieParser());
   app.use(helmet());
+  app.use(cookieParser());
 
   app.setGlobalPrefix('api');
   app.enableCors({

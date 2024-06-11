@@ -7,7 +7,7 @@ export class Skill extends BaseEntity {
   @Column({ name: 'skill_name', unique: true })
   skillName: string;
 
-  @ManyToMany(() => User, (user) => user.skills)
+  @ManyToMany(() => User, (user) => user.skills, { cascade: true })
   @JoinTable({
     name: 'skill_user',
   })
