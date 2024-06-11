@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
 
 export class TrackDto {
@@ -8,6 +8,7 @@ export class TrackDto {
     example: 'AI',
     required: true,
   })
+  @Transform(({ value }) => value.toUpperCase())
   @IsNotEmpty()
   @Expose()
   trackName: string;

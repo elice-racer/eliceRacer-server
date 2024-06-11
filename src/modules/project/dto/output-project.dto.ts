@@ -1,4 +1,5 @@
 import { Expose } from 'class-transformer';
+import { TrackResDto } from 'src/modules/track/dto';
 
 export class OutputProjectDto {
   @Expose()
@@ -15,4 +16,7 @@ export class OutputProjectDto {
 
   @Expose()
   endDate: Date;
+
+  @Expose()
+  track: TrackResDto;
 }
