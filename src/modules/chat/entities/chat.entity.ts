@@ -8,7 +8,7 @@ export class Chat extends BaseEntity {
   @Column()
   chatName: string;
 
-  @ManyToMany(() => User, (user) => user.chats)
+  @ManyToMany(() => User, (user) => user.chats, { cascade: true })
   @JoinTable({
     name: 'chat_user',
   })

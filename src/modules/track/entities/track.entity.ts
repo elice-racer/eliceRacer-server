@@ -14,11 +14,11 @@ export class Track extends BaseEntity {
   @Column({ name: 'cardinal_no' })
   cardinalNo: number;
 
-  @OneToMany(() => User, (user) => user.track, { onDelete: 'RESTRICT' })
+  @OneToMany(() => User, (user) => user.track)
   users: User[];
 
   @OneToMany(() => Project, (project) => project.track, {
-    onDelete: 'RESTRICT',
+    onDelete: 'SET NULL',
   })
   projects: Project[];
 }
