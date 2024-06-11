@@ -81,6 +81,7 @@ export class AdminService {
     return await this.adminRepo.createAdmin(dto, hashedPassword);
   }
 
+  //TODO 이동
   async createTeamAndProject(file: Express.Multer.File) {
     const data = parseExcel(file);
 
@@ -106,36 +107,41 @@ export class AdminService {
     await queryRunner.startTransaction();
 
     try {
-      let project = await queryRunner.manager.findOne(Project, {
-        where: {
-          projectName: validData[0].projectName,
-          round: validData[0].round,
-        },
+      const { trackName, cardinalNo, projectName, round } = validData[0];
+
+      const track = await this.trackRepo.findOne({
+        where: { trackName, cardinalNo },
       });
 
-      if (!project) {
-        const trackName = validData[0].trackName;
-        const track = await this.trackRepo.findOne({ where: { trackName } });
+      if (!track)
+        throw new BusinessException(
+          `user`,
+          `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
+          `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다. 트랙을 먼저 생성해주세요 `,
+          HttpStatus.NOT_FOUND,
+        );
 
-        if (!track)
-          throw new BusinessException(
-            `user`,
-            `해당 트랙(${trackName})이 존재하지 않습니다.`,
-            `해당 트랙(${trackName})이 존재하지 않습니다.`,
-            HttpStatus.NOT_FOUND,
-          );
-        const processedStartDate = convertDate(validData[0].startDate);
-        const processedEndDate = convertDate(validData[0].endDate);
+      const existingProject = await queryRunner.manager.findOne(Project, {
+        where: { track: { id: track.id }, projectName, round },
+        relations: ['teams'],
+      });
 
-        project = queryRunner.manager.create(Project, {
-          projectName: validData[0].projectName,
-          round: validData[0].round,
-          startDate: processedStartDate,
-          endDate: processedEndDate,
-          track,
-        });
-        await queryRunner.manager.save(project);
+      if (existingProject) {
+        await queryRunner.manager.remove(Team, existingProject.teams); // 연관된 팀 삭제
+        await queryRunner.manager.remove(Project, existingProject); // 프로젝트 삭제
       }
+
+      const processedStartDate = convertDate(validData[0].startDate);
+      const processedEndDate = convertDate(validData[0].endDate);
+
+      const project = queryRunner.manager.create(Project, {
+        projectName: validData[0].projectName,
+        round: validData[0].round,
+        startDate: processedStartDate,
+        endDate: processedEndDate,
+        track,
+      });
+      await queryRunner.manager.save(project);
 
       const teamCache = new Map();
 
