@@ -42,7 +42,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const message = await this.messageService.saveMessage(dto);
     console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', message);
     console.log('챗룹!!!!!!!!!!!!!!!!', dto.chatId);
-    this.server.to(dto.chatId).emit('receiveMessage', message);
+    this.server.to(dto.chatId).emit('receiveMessage', message.content);
   }
 
   @SubscribeMessage('joinChat')
