@@ -22,7 +22,7 @@ export class Team extends BaseEntity {
   @ManyToOne(() => Project, (project) => project.teams)
   project: Project;
 
-  @ManyToMany(() => User, (user) => user.teams, { onDelete: 'RESTRICT' })
+  @ManyToMany(() => User, (user) => user.teams, { cascade: true })
   @JoinTable({
     name: 'team_user',
   })

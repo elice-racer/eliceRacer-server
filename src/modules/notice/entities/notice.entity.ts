@@ -10,6 +10,6 @@ export class Notice extends BaseEntity {
   @Column()
   content: string;
 
-  @ManyToOne(() => User, (user) => user.notices)
+  @ManyToOne(() => User, (user) => user.notices, { onDelete: 'SET NULL' })
   user: User;
 }

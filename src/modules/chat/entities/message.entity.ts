@@ -8,7 +8,7 @@ export class Message extends BaseEntity {
   @Column()
   content: string;
 
-  @ManyToOne(() => User, (user) => user.messages)
+  @ManyToOne(() => User, (user) => user.messages, { onDelete: 'SET NULL' })
   user: User;
 
   @ManyToOne(() => Chat, (chat) => chat.messages)
