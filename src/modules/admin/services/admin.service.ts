@@ -55,7 +55,7 @@ export class AdminService {
       this.verificationService.setVerificationCode(
         `emailCode:${admin.id}`,
         verificationToken,
-        1000 * 60 * 60, //1시간,
+        60 * 60, //1시간,
       ),
       this.mailService.sendVerificationEmail(
         admin,

@@ -15,7 +15,7 @@ export class VerificationRepository {
     value: string,
     ttl: number,
   ): Promise<void> {
-    return this.cacheManager.set(key, value, ttl);
+    return this.cacheManager.set(key, value, { ttl } as any);
   }
 
   async deleteVerificationCode(key: string): Promise<void> {
