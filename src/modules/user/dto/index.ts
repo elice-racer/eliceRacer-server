@@ -9,3 +9,4 @@ export * from './pagination-racers-by-cardinal.dto';
 export * from './pagination-racers-by-track.dto';
 export * from './pagination-users.dto';
 export * from './pagination-participants.dto';
+export * from './message-user.res.dto';

@@ -2,6 +2,7 @@ import { Expose } from 'class-transformer';
 import { DetailTeamResDto } from 'src/modules/team/dto';
 import { TrackResDto } from 'src/modules/track/dto';
 import { OutputSkillDto } from './ouput-skill.dto';
+import { UserRole } from '../entities';
 
 export class OutputUserDto {
   @Expose()
@@ -38,7 +39,7 @@ export class OutputUserDto {
   tmi: string;
 
   @Expose()
-  role: string;
+  role: UserRole;
 
   @Expose()
   status: number;

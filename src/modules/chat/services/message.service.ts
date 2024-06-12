@@ -10,6 +10,9 @@ import { SendMessageDto } from '../dto/send-message.dto';
 import { PaginationMessagesDto } from '../dto';
 import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
+import { Serialize } from 'src/interceptors';
+import { MessageResDto } from '../dto/message-res.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class MessageService {
@@ -38,6 +41,7 @@ export class MessageService {
     return { messages, pagination: { next, count: messages.length } };
   }
 
+  @Serialize(MessageResDto)
   async saveMessage(dto: SendMessageDto) {
     const { userId, chatId, content } = dto;
     const chat = await this.chatRepo.findOneBy({ id: chatId });
@@ -50,7 +54,7 @@ export class MessageService {
         HttpStatus.NOT_FOUND,
       );
 
-    const user = await this.userRepo.findOneBy({ id: userId });
+    const user = await this.userRepo.findUserByIdWithTracks(userId);
 
     if (!user)
       throw new BusinessException(
@@ -60,10 +64,19 @@ export class MessageService {
         HttpStatus.NOT_FOUND,
       );
 
-    return this.createMessage(chat, user, content);
+    const message = await this.createMessage(chat, user, content);
+
+    return plainToInstance(MessageResDto, message, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
-  async createMessage(chat: Chat, user: User, content: string) {
+  async createMessage(
+    chat: Chat,
+    user: User,
+    content: string,
+  ): Promise<Message> {
     const message = new Message();
 
     message.content = content;
