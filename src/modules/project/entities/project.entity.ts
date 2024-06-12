@@ -1,4 +1,5 @@
 import { BaseEntity } from 'src/common/entity';
+import { Officehour } from 'src/modules/officehour/entities/officehour.entity';
 import { Team } from 'src/modules/team/entities/team.entity';
 import { Track } from 'src/modules/track/entities';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
@@ -19,6 +20,11 @@ export class Project extends BaseEntity {
 
   @ManyToOne(() => Track, (track) => track.projects)
   track: Track;
+
+  @OneToMany(() => Officehour, (officehour) => officehour.project, {
+    onDelete: 'SET NULL',
+  })
+  officehours: Officehour[];
 
   @OneToMany(() => Team, (team) => team.project, {
     onDelete: 'RESTRICT',

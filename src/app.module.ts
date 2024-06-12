@@ -17,6 +17,7 @@ import { DatabaseModule } from 'core/databse/database.module';
 import { RedisModule } from 'core/redis/redis.module';
 import { NoticeModule } from './modules/notice/notice.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { OfficehourModule } from './modules/officehour/officehour.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ChatModule } from './modules/chat/chat.module';
     TeamModule,
     ChatModule,
     NoticeModule,
+    OfficehourModule,
   ],
   controllers: [AppController],
   providers: [

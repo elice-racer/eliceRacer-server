@@ -41,6 +41,7 @@ export class MemberService {
       phoneNumberCache.add(user.phoneNumber),
     );
     try {
+      const userToSave: User[] = [];
       for (const item of validData) {
         const { email, realName, trackName, phoneNumberKey, cardinalNo } = item;
         const phoneNumber = phoneNumberKey.replace(/-/g, '');
@@ -79,8 +80,9 @@ export class MemberService {
         user.phoneNumber = phoneNumber;
         user.track = track;
 
-        await queryRunner.manager.save(User, user);
+        userToSave.push(user);
       }
+      await queryRunner.manager.save(User, userToSave);
 
       await queryRunner.commitTransaction();
       console.info(`Successfully imported ${validData.length} users.`);

@@ -11,6 +11,7 @@ import { TeamModule } from '../team/team.module';
 import { ProjectModule } from '../project/project.module';
 import { NoticeModule } from '../notice/notice.module';
 import { ChatModule } from '../chat/chat.module';
+import { OfficehourModule } from '../officehour/officehour.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ChatModule } from '../chat/chat.module';
     ProjectModule,
     NoticeModule,
     ChatModule,
+    OfficehourModule,
   ],
   controllers: [AdminController],
   providers: [AdminService, AdminRepository],
