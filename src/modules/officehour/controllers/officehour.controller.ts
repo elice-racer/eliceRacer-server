@@ -1,6 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { OfficehourService } from '../services/officehour.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('officehour')
 @Controller('officehours')
 export class OfficehourController {
   constructor(private readonly officehourService: OfficehourService) {}
