@@ -1,7 +1,15 @@
 import { BaseEntity } from 'src/common/entity';
+import { Officehour } from 'src/modules/officehour/entities/officehour.entity';
 import { Project } from 'src/modules/project/entities';
 import { User } from 'src/modules/user/entities';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 @Entity({ name: 'teams' })
 export class Team extends BaseEntity {
@@ -27,4 +35,7 @@ export class Team extends BaseEntity {
     name: 'team_user',
   })
   users: User[];
+
+  @OneToMany(() => Officehour, (officehour) => officehour.team)
+  officehours: Officehour[];
 }
