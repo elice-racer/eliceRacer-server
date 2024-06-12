@@ -38,6 +38,7 @@ import { CreateTeamChatDto } from 'src/modules/chat/dto';
 import { OutputProjectDto } from 'src/modules/project/dto/output-project.dto';
 import { UpdateProjectReqDto } from 'src/modules/project/dto';
 import { ProjectService } from 'src/modules/project/services/project.service';
+import { OfficehourService } from 'src/modules/officehour/services/officehour.service';
 
 @ApiTags('admin')
 @UseInterceptors(ResponseInterceptor)
@@ -52,6 +53,7 @@ export class AdminController {
     private readonly teamService: TeamService,
     private readonly chatService: ChatService,
     private readonly projectService: ProjectService,
+    private readonly officehoureService: OfficehourService,
   ) {}
 
   @Post('/signup')
@@ -190,5 +192,18 @@ export class AdminController {
     @Body() dto: CreateTeamChatDto,
   ) {
     return await this.chatService.createTeamChat(currentUser, dto);
+  }
+
+  @Post('/officehours/:projectId')
+  // @UseGuards(AdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async importOfficehours(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('projectId') projectId: string,
+  ) {
+    return await this.officehoureService.importOfficehoursFromExcel(
+      file,
+      projectId,
+    );
   }
 }
