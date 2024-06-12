@@ -40,9 +40,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleMessage(@MessageBody() dto: SendMessageDto) {
     const message = await this.messageService.saveMessage(dto);
-    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', message);
-    console.log('챗룹!!!!!!!!!!!!!!!!', dto.chatId);
-    this.server.to(dto.chatId).emit('receiveMessage', message.content);
+
+    this.server.to(dto.chatId).emit('receiveMessage', message);
   }
 
   @SubscribeMessage('joinChat')

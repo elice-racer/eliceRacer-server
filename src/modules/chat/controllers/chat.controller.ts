@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   UseGuards,
@@ -52,5 +53,8 @@ export class ChatController {
     return await this.chatService.createChat(currentUser, dto);
   }
 
-  @Get("/:chatId")
+  @Get('/:chatId')
+  async getChatRoom(@Param('chatId') chatId: string) {
+    return await this.chatService.getChat(chatId);
+  }
 }
