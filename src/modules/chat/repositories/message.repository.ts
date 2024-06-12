@@ -20,6 +20,8 @@ export class MessageRepository extends Repository<Message> {
     const query = this.repo
       .createQueryBuilder('message')
       .leftJoinAndSelect('message.chat', 'chat')
+      .leftJoinAndSelect('message.user', 'user')
+      .leftJoinAndSelect('user.track', 'track')
       .where('chat.id = :chatId', { chatId })
       .orderBy('message.createdAt', 'DESC')
       .addOrderBy('message.id', 'ASC');

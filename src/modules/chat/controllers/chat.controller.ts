@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   UseGuards,
@@ -19,6 +20,7 @@ import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { JwtAuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { User } from 'src/modules/user/entities';
+import { MessageResDto } from '../dto/message-res.dto';
 
 @ApiTags('chat')
 @UseInterceptors(ResponseInterceptor)
@@ -38,15 +40,21 @@ export class ChatController {
   }
 
   @Get('messages')
+  @Serialize(MessageResDto)
   async getMessages(@Query() dto: PaginationMessagesDto) {
     return await this.messageService.getMessages(dto);
   }
 
   @Post('')
-  async createChatRoom(
+  async createChat(
     @CurrentUser() currentUser: User,
     @Body() dto: CreateChatRoomDto,
   ) {
-    return await this.chatService.createChatRoom(currentUser, dto);
+    return await this.chatService.createChat(currentUser, dto);
+  }
+
+  @Get('/:chatId')
+  async getChatRoom(@Param('chatId') chatId: string) {
+    return await this.chatService.getChat(chatId);
   }
 }
