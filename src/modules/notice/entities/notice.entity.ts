@@ -7,7 +7,7 @@ export class Notice extends BaseEntity {
   @Column()
   title: string;
 
-  @Column()
+  @Column('varchar', { length: 1000 })
   content: string;
 
   @ManyToOne(() => User, (user) => user.notices, { onDelete: 'SET NULL' })

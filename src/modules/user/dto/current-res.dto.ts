@@ -27,5 +27,8 @@ export class CurrentResDto {
   github: string;
 
   @Expose()
+  profileImage: string;
+
+  @Expose()
   track: TrackDto;
 }
