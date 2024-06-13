@@ -4,3 +4,4 @@ export * from './join-room.dto';
 export * from './pagination-messages.dto';
 export * from './create-chat-room.dto';
 export * from './chat-room.res.dto';
+export * from './create-team-chat.dto';

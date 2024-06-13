@@ -19,5 +19,8 @@ export class MiniProfileDto {
   track: TrackDto;
 
   @Expose()
+  profileimage: string;
+
+  @Expose()
   team: OutputTeamDto[];
 }

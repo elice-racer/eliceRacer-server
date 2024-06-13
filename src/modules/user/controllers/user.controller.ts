@@ -7,6 +7,7 @@ import {
   Patch,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -30,6 +31,7 @@ import { OutputUserDto } from '../dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MiniProfileDto } from '../dto/mini-profile.dto';
 import { SkillService } from '../services/skill.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('users')
 @UseInterceptors(ResponseInterceptor)
@@ -169,5 +171,16 @@ export class UserController {
   @ApiBearerAuth('access-token')
   async deleteUser(@CurrentUser() user: User) {
     return await this.userService.deleteUser(user.id);
+  }
+
+  @Put('/profileImages')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfileImage(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: User,
+  ) {
+    return await this.userService.uploadProfileImage(file, user);
   }
 }

@@ -17,6 +17,7 @@ import { TrackDto } from 'src/modules/track/dto';
 import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
 import { SkillService } from './skill.service';
+import { UploadService } from 'src/modules/upload/services/upload.service';
 
 @Injectable()
 export class UserService {
@@ -26,6 +27,7 @@ export class UserService {
     private readonly trackRepo: TrackRepository,
     private readonly configService: ConfigService,
     private readonly skillService: SkillService,
+    private uploadService: UploadService,
   ) {
     this.baseUrl = configService.get<string>(ENV_SERVER_URL_KEY);
   }
@@ -348,5 +350,20 @@ export class UserService {
 
   async searchUsers(query: string) {
     return this.userRepo.searchUsers(query);
+  }
+
+  async uploadProfileImage(file: Express.Multer.File, user: User) {
+    const currentImageUrl = user.profileImage;
+
+    if (currentImageUrl) {
+      await this.uploadService.deleteFile(currentImageUrl);
+    }
+
+    const newImageUrl = await this.uploadService.uploadFile(file);
+    // 데이터베이스 업데이트
+    // 예: await this.userRepository.update(userId, { profileImage: newImageUrl });
+    user.profileImage = newImageUrl;
+
+    return this.userRepo.save(user);
   }
 }

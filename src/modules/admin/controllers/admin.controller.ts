@@ -8,7 +8,7 @@ import {
   Post,
   Put,
   Query,
-  Redirect,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -41,6 +41,7 @@ import { UpdateProjectReqDto } from 'src/modules/project/dto';
 import { ProjectService } from 'src/modules/project/services/project.service';
 import { OfficehourService } from 'src/modules/officehour/services/officehour.service';
 import { CreateChatResDto } from 'src/modules/chat/dto/create-chat-res.dto';
+import { Response } from 'express';
 
 @ApiTags('admin')
 @UseInterceptors(ResponseInterceptor)
@@ -64,11 +65,11 @@ export class AdminController {
   }
 
   @Get('/verify-email')
-  async verifyEmail(@Query() dto: VerifyEamilDto) {
+  async verifyEmail(@Res() res: Response, @Query() dto: VerifyEamilDto) {
     const result = await this.adminService.verifyEmail(dto.id, dto.token);
     //TODO 채영님 프론트 uri
-    if (result) Redirect('https://elicerracer.store/auth/success-auth');
-    if (!result) Redirect(`https://elicerracer.store/auth/fail`);
+    if (result) res.redirect('https://elicerracer.store/auth/success-auth');
+    if (!result) res.redirect('https://elicerracer.store/auth/fail');
   }
 
   // track

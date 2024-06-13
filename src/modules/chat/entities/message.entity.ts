@@ -5,7 +5,7 @@ import { Chat } from './chat.entity';
 
 @Entity({ name: 'messages' })
 export class Message extends BaseEntity {
-  @Column()
+  @Column('varchar', { length: 500 })
   content: string;
 
   @ManyToOne(() => User, (user) => user.messages, { onDelete: 'SET NULL' })
