@@ -65,7 +65,7 @@ export class User extends BaseEntity {
   @Column('varchar', { length: 1000, nullable: true })
   tmi: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'profile_image' })
   @IsUrl()
   @IsOptional()
   profileImage: string;
