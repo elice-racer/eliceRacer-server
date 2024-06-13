@@ -15,6 +15,7 @@ import { TrackRepository } from 'src/modules/track/repositories';
 import { ProjectRepository } from 'src/modules/project/repositories/project.repository';
 import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
+import { User } from 'src/modules/user/entities';
 
 @Injectable()
 export class TeamService {
@@ -132,8 +133,11 @@ export class TeamService {
     return { teams, pagination: { next, count: teams.length } };
   }
 
-  async updateTeam(teamId: string, dto: UpdateTeamReqDto) {
-    const team = await this.teamRepo.findOneBy({ id: teamId });
+  async updateTeam(teamId: string, dto: UpdateTeamReqDto, user: User) {
+    const team = await this.teamRepo.findOne({
+      where: { id: teamId },
+      relations: ['users'],
+    });
 
     if (!team)
       throw new BusinessException(
@@ -143,6 +147,16 @@ export class TeamService {
         HttpStatus.NOT_FOUND,
       );
 
+    const isMember = team.users.some((u) => u.id === user.id);
+
+    if (!isMember) {
+      throw new BusinessException(
+        'team',
+        '해당 작업을 수행할 권한이 없습니다',
+        '팀 멤버만이 팀 정보를 업데이트할 수 있습니다',
+        HttpStatus.FORBIDDEN,
+      );
+    }
     team.teamName = dto.teamName;
     team.teamNumber = dto.teamNumber;
     team.notion = dto.notion;

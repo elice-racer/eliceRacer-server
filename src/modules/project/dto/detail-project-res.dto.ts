@@ -2,6 +2,9 @@ import { Expose } from 'class-transformer';
 
 export class DetailProjectResDto {
   @Expose()
+  id: string;
+
+  @Expose()
   projectName: string;
 
   @Expose()
