@@ -148,14 +148,11 @@ export class AdminService {
       for (const item of validCoachesData) {
         const { teamNumber, phoneNumberKey, coaches, notion } = item;
         const phoneNumber = phoneNumberKey.replace(/-/g, '');
-
         let team = teamCache.get(teamNumber);
-
         if (!team) {
           team = await queryRunner.manager.findOne(Team, {
             where: { teamNumber: teamNumber, project },
           });
-
           if (!team) {
             team = queryRunner.manager.create(Team, {
               teamNumber: teamNumber,
@@ -165,20 +162,15 @@ export class AdminService {
             });
             await queryRunner.manager.save(team);
           }
-
           teamCache.set(teamNumber, team);
         }
-
         const racer = await queryRunner.manager.findOne(User, {
           where: { phoneNumber: phoneNumber, role: UserRole.RACER },
           relations: ['teams'],
         });
-
         if (racer && !team.users.find((u) => u.id === racer.id)) {
           team.users.push(racer);
-          await queryRunner.manager.save(team);
         }
-
         if (coaches && coaches.length > 0) {
           const coachesArr = await queryRunner.manager.find(User, {
             where: {
@@ -186,7 +178,6 @@ export class AdminService {
               realName: In(coaches),
             },
           });
-
           for (const coach of coachesArr) {
             if (!team.users.includes(coach)) {
               team.users.push(coach);
@@ -194,8 +185,8 @@ export class AdminService {
           }
           await queryRunner.manager.save(team);
         }
+        await queryRunner.manager.save(team);
       }
-
       await queryRunner.commitTransaction();
     } catch (err) {
       console.error(err);
