@@ -16,7 +16,7 @@ export class SyncWithRDS1687548392843 implements MigrationInterface {
 
       // users 테이블 변경
       await queryRunner.query(
-        `ALTER TABLE "users" ADD "profileImage" character varying`,
+        `ALTER TABLE "users" ADD "profile_image" character varying NULL`,
       );
       await queryRunner.query(
         `ALTER TABLE "users" ALTER COLUMN "phone_number" TYPE character varying(11)`,
@@ -42,7 +42,9 @@ export class SyncWithRDS1687548392843 implements MigrationInterface {
     await queryRunner.startTransaction();
     try {
       // users 테이블 롤백
-      await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "profileImage"`);
+      await queryRunner.query(
+        `ALTER TABLE "users" DROP COLUMN "profile_image"`,
+      );
       await queryRunner.query(
         `ALTER TABLE "users" ALTER COLUMN "phone_number" TYPE character varying`,
       );
