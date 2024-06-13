@@ -160,30 +160,44 @@ export class AdminService {
               notion,
               users: [],
             });
+
             await queryRunner.manager.save(team);
+            teamCache.set(teamNumber, team);
           }
-          teamCache.set(teamNumber, team);
         }
         const racer = await queryRunner.manager.findOne(User, {
-          where: { phoneNumber: phoneNumber, role: UserRole.RACER },
+          where: { phoneNumber, role: UserRole.RACER },
           relations: ['teams'],
         });
+
         if (racer && !team.users.find((u) => u.id === racer.id)) {
+          if (!racer.teams) {
+            racer.teams = [];
+          }
           team.users.push(racer);
+          racer.teams.push(team);
+          await queryRunner.manager.save(racer);
         }
+
         if (coaches && coaches.length > 0) {
           const coachesArr = await queryRunner.manager.find(User, {
             where: {
               role: UserRole.COACH,
               realName: In(coaches),
             },
+            relations: ['teams'],
           });
+
           for (const coach of coachesArr) {
-            if (!team.users.includes(coach)) {
+            if (!coach.teams) {
+              coach.teams = [];
+            }
+            if (!team.users.find((u) => u.id === coach.id)) {
               team.users.push(coach);
+              coach.teams.push(team);
+              await queryRunner.manager.save(coach);
             }
           }
-          await queryRunner.manager.save(team);
         }
         await queryRunner.manager.save(team);
       }
