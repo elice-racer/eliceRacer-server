@@ -28,6 +28,14 @@ export class ChatService {
       relations: ['team'],
     });
 
+    if (!chat)
+      throw new BusinessException(
+        `chat`,
+        `채팅방이 존재하지 않습니다.`,
+        `채팅방이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
     return chat;
   }
 
@@ -82,6 +90,14 @@ export class ChatService {
         HttpStatus.NOT_FOUND,
       );
 
+    if (team.isChatCreated)
+      throw new BusinessException(
+        'team',
+        '해당 팀은 이미 채팅방이 존재합니다',
+        '해당 팀은 이미 채팅방이 존재합니다',
+        HttpStatus.CONFLICT,
+      );
+
     const chatName = `[${team.project.projectName}] ${team.teamNumber}팀`;
 
     const chat = await this.chatRepo.createChat(
@@ -92,5 +108,75 @@ export class ChatService {
     );
 
     return chat;
+  }
+
+  async removeUserFromChat(chatId: string, currentUser: User) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      relations: ['users'],
+    });
+
+    if (!chat)
+      throw new BusinessException(
+        `chat`,
+        `채팅방이 존재하지 않습니다.`,
+        `채팅방이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    // 확인: 현재 유저가 채팅방 멤버인지
+    const isMember = chat.users.some((user) => user.id === currentUser.id);
+    if (!isMember) {
+      throw new BusinessException(
+        'team',
+        '해당 작업을 수행할 권한이 없습니다',
+        '채팅방에 존재하지 않는 회원입니다',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    // 유저 제거
+    chat.users = chat.users.filter((user) => user.id !== currentUser.id);
+    await this.chatRepo.save(chat);
+  }
+
+  async addUsersToChat(
+    chatId: string,
+    newUserIds: string[],
+    currentUser: User,
+  ) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      relations: ['users'],
+    });
+
+    if (!chat)
+      throw new BusinessException(
+        `chat`,
+        `채팅방이 존재하지 않습니다.`,
+        `채팅방이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    const isMember = chat.users.some((user) => user.id === currentUser.id);
+    if (!isMember) {
+      throw new BusinessException(
+        'team',
+        '해당 작업을 수행할 권한이 없습니다',
+        '채팅방에 참여한 회원만 새로운 회원을 추가할 수 있습니다',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const newUsers = await this.userRepo.findBy({
+      id: In(newUserIds),
+    });
+
+    const validNewUsers = newUsers.filter(
+      (user) => !chat.users.some((u) => u.id === user.id),
+    );
+
+    chat.users = [...chat.users, ...validNewUsers];
+    await this.chatRepo.save(chat);
   }
 }

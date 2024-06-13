@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  Redirect,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -39,6 +40,7 @@ import { OutputProjectDto } from 'src/modules/project/dto/output-project.dto';
 import { UpdateProjectReqDto } from 'src/modules/project/dto';
 import { ProjectService } from 'src/modules/project/services/project.service';
 import { OfficehourService } from 'src/modules/officehour/services/officehour.service';
+import { CreateChatResDto } from 'src/modules/chat/dto/create-chat-res.dto';
 
 @ApiTags('admin')
 @UseInterceptors(ResponseInterceptor)
@@ -65,8 +67,8 @@ export class AdminController {
   async verifyEmail(@Query() dto: VerifyEamilDto) {
     const result = await this.adminService.verifyEmail(dto.id, dto.token);
     //TODO 채영님 프론트 uri
-    if (result) return '성공';
-    if (!result) return '실패';
+    if (result) Redirect('https://elicerracer.store/auth/success-auth');
+    if (!result) Redirect(`https://elicerracer.store/auth/fail`);
   }
 
   // track
@@ -187,6 +189,7 @@ export class AdminController {
   @Post('/chats/teams')
   @UseGuards(AdminGuard)
   @ApiBearerAuth('access-token')
+  @Serialize(CreateChatResDto)
   async createTeamChat(
     @CurrentUser() currentUser: User,
     @Body() dto: CreateTeamChatDto,

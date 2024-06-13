@@ -19,4 +19,7 @@ export class DetailTeamResDto {
 
   @Expose()
   project: DetailProjectResDto;
+
+  @Expose()
+  isChatCreaated: boolean;
 }

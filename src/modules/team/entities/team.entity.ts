@@ -38,4 +38,7 @@ export class Team extends BaseEntity {
 
   @OneToMany(() => Officehour, (officehour) => officehour.team)
   officehours: Officehour[];
+
+  @Column({ default: false })
+  isChatCreated: boolean;
 }
