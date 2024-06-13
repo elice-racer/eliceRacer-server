@@ -6,6 +6,7 @@ import { Skill } from './skill.entity';
 import { Notice } from 'src/modules/notice/entities/notice.entity';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { Message } from 'src/modules/chat/entities';
+import { Length } from 'class-validator';
 
 export enum UserRole {
   RACER = 'RACER',
@@ -27,19 +28,28 @@ export class User extends BaseEntity {
   @Column({ nullable: true, unique: true })
   username: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', {
+    length: 24,
+    nullable: true,
+  })
+  @Length(8, 24)
   password: string;
 
   @Column({ name: 'real_name' })
   realName: string;
 
-  @Column({ name: 'phone_number', nullable: true, unique: true })
+  @Column('varchar', {
+    length: 11,
+    name: 'phone_number',
+    nullable: true,
+    unique: true,
+  })
   phoneNumber: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { length: 100, nullable: true })
   comment: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { length: 1000, nullable: true })
   description: string;
 
   @Column({ nullable: true })
@@ -54,7 +64,7 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   sns: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { length: 1000, nullable: true })
   tmi: string;
 
   @Column({
