@@ -8,9 +8,10 @@ import { TrackModule } from '../track/track.module';
 import { Skill } from './entities/skill.entity';
 import { SkillRepository } from './repositories/skill.repository';
 import { SkillService } from './services/skill.service';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Skill]), TrackModule],
+  imports: [TypeOrmModule.forFeature([User, Skill]), TrackModule, UploadModule],
   controllers: [UserController],
   providers: [UserService, UserRepository, SkillRepository, SkillService],
   exports: [UserService, UserRepository],

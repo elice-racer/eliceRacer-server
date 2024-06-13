@@ -16,5 +16,5 @@ export class MessageUserDto {
   role: UserRole;
 
   @Expose()
-  profileImage: null;
+  profileImage: string;
 }

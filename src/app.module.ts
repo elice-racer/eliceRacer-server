@@ -18,6 +18,7 @@ import { RedisModule } from 'core/redis/redis.module';
 import { NoticeModule } from './modules/notice/notice.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { OfficehourModule } from './modules/officehour/officehour.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { OfficehourModule } from './modules/officehour/officehour.module';
     ChatModule,
     NoticeModule,
     OfficehourModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [

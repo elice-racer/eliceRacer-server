@@ -39,6 +39,9 @@ export class OutputUserDto {
   tmi: string;
 
   @Expose()
+  profileImage: string;
+
+  @Expose()
   role: UserRole;
 
   @Expose()
