@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -56,5 +57,22 @@ export class ChatController {
   @Get('/:chatId')
   async getChatRoom(@Param('chatId') chatId: string) {
     return await this.chatService.getChat(chatId);
+  }
+
+  @Post('/:chatId/users')
+  async addUsers(
+    @Param('chatId') chatId: string,
+    @Body('userIds') userIds: string[],
+    @CurrentUser() currentUser: User,
+  ): Promise<void> {
+    await this.chatService.addUsersToChat(chatId, userIds, currentUser);
+  }
+
+  @Delete('/:chatId')
+  async removeCurrentUserFromChat(
+    @CurrentUser() user: User,
+    @Param('chatId') chatId: string,
+  ) {
+    return await this.chatService.removeUserFromChat(chatId, user);
   }
 }

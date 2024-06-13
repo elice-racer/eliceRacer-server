@@ -15,4 +15,7 @@ export class OutputTeamDto {
 
   @Expose()
   notion: string;
+
+  @Expose()
+  isChatCreaated: boolean;
 }
