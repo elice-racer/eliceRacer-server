@@ -184,7 +184,7 @@ export class AuthService {
       60 * 5, // 5분,
     );
     // 4. 메세지 전송
-    // await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
+    await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
   }
 
   async handlePasswordResetCode(
@@ -222,7 +222,7 @@ export class AuthService {
       60 * 10, // 10분,
     );
     // 4. 메세지 전송
-    // await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
+    await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
 
     return userId;
   }
