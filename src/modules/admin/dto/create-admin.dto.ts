@@ -16,7 +16,7 @@ export class CreateAdminDto {
   })
   @IsNotEmpty()
   @IsEmail()
-  @Matches(/^[^@]+@elicer.com\.com$/, {
+  @Matches(/^[^@]+@elicer\.com$/, {
     message: '관리자 가입은 elicer.com 로만 허용됩니다',
   })
   email: string;
