@@ -11,12 +11,13 @@ import {
   ENV_REFRESH_TOKEN_EXPIRY,
 } from 'src/common/const';
 import { TokenPayload, TokenPayloadRes } from '../types';
-import { LoginResDto, VerifyCodeResDto } from '../dto';
+import { LoginResDto, PasswordResetReqDto, VerifyCodeResDto } from '../dto';
 import { VerificationService } from './verification.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { AuthRepository } from '../repositories';
 import { BusinessException } from 'src/exception';
 import { v4 as uuidv4 } from 'uuid';
+import { updatePasswordReqDto } from '../dto/update-password-req.dto';
 
 @Injectable()
 export class AuthService {
@@ -141,7 +142,9 @@ export class AuthService {
         `유효하지 않은 번호입니다`,
         HttpStatus.BAD_REQUEST,
       );
-    await this.verificationService.deleteVerificationCode(phoneNumber);
+    await this.verificationService.deleteVerificationCode(
+      `phoneCode:${phoneNumber}`,
+    );
 
     const user = await this.authRepo.findAnyUserByPhoneWithTrack(phoneNumber);
 
@@ -181,7 +184,47 @@ export class AuthService {
       60 * 5, // 5분,
     );
     // 4. 메세지 전송
-    await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
+    // await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
+  }
+
+  async handlePasswordResetCode(
+    phoneNumber: string,
+    inputCode: string,
+  ): Promise<boolean> {
+    const result = await this.verificationService.verifyCode(
+      `passwordCode:${phoneNumber}`,
+      inputCode,
+    );
+    if (!result)
+      throw new BusinessException(
+        'auth',
+        `유효하지 않은 번호입니다`,
+        `유효하지 않은 번호입니다`,
+        HttpStatus.BAD_REQUEST,
+      );
+
+    await this.verificationService.deleteVerificationCode(
+      `passwordCode:${phoneNumber}`,
+    );
+
+    return true;
+  }
+  async handlePasswordResetVerification(dto: PasswordResetReqDto) {
+    const { identifier, phoneNumber } = dto;
+
+    const userId = await this.checkPhoneNumberMatch(identifier, phoneNumber);
+
+    const generatedCode = generateVerificationCode();
+    // 3. 인증번호 저장
+    await this.verificationService.setVerificationCode(
+      `passwordCode:${phoneNumber}`,
+      generatedCode,
+      60 * 10, // 10분,
+    );
+    // 4. 메세지 전송
+    // await this.smsService.sendVerificationCode(phoneNumber, generatedCode);
+
+    return userId;
   }
 
   async authencticatePhoneNumber(phoneNumber: string): Promise<void> {
@@ -203,5 +246,56 @@ export class AuthService {
       iat: Math.floor(Date.now() / 1000),
       jti: uuidv4(),
     };
+  }
+
+  async checkPhoneNumberMatch(identifier: string, phoneNumber: string) {
+    const user =
+      await this.authRepo.findRegisteredUserByEmailOrUsername(identifier);
+
+    if (user.phoneNumber !== phoneNumber) {
+      throw new BusinessException(
+        'auth',
+        `등록된 번호와 일치하지 않습니다`,
+        `등록된 번호와 일치하지 않습니다`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    return user.id;
+  }
+
+  async handleUpdatePassword(dto: updatePasswordReqDto) {
+    const user = await this.authRepo.findRegisteredUserById(dto.userId);
+
+    if (user.phoneNumber !== dto.phoneNumber)
+      throw new BusinessException(
+        'auth',
+        `인증한 핸드폰 번호와 일치하지 않습니다`,
+        `인증한 핸드폰 번호와 일치하지 않습니다`,
+        HttpStatus.FORBIDDEN,
+      );
+    await this.updatePassword(user, dto.password);
+  }
+
+  async updatePassword(user: User, password: string) {
+    const hashedPassword = await argon2.hash(password);
+
+    return this.authRepo.updateUserPassword(user, hashedPassword);
+  }
+
+  async getIdentifier(phoneNumber: string) {
+    const user =
+      await this.authRepo.findRegisteredUserByPhoneNumber(phoneNumber);
+
+    if (!user) {
+      throw new BusinessException(
+        'auth',
+        `등록된 번호가 존재하지 않습니다`,
+        `등록된 번호가 존재하지 않습니다`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return user;
   }
 }

@@ -5,3 +5,4 @@ export * from './login-res.dto';
 export * from './refresh-req.dto';
 export * from './refresh-res.dto';
 export * from './logout-req.dto';
+export * from './password-reset-req.dto';

@@ -123,9 +123,16 @@ export class AdminService {
 
       const existingProject = await queryRunner.manager.findOne(Project, {
         where: { track: { id: track.id }, projectName, round },
-        relations: ['teams'],
+        relations: ['teams', 'officehours'],
       });
 
+      if (existingProject.officehours.length !== 0)
+        throw new BusinessException(
+          `team`,
+          `오피스 아워가 등록되어 있습니다.`,
+          `오피스 아워가 등록되어 있습니다. 오피스아워를 먼저 삭제해주세요`,
+          HttpStatus.FORBIDDEN,
+        );
       if (existingProject) {
         await queryRunner.manager.remove(Team, existingProject.teams); // 연관된 팀 삭제
         await queryRunner.manager.remove(Project, existingProject); // 프로젝트 삭제

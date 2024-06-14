@@ -22,6 +22,7 @@ import { JwtAuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { User } from 'src/modules/user/entities';
 import { MessageResDto } from '../dto/message-res.dto';
+import { CreateChatResDto } from '../dto/create-chat-res.dto';
 
 @ApiTags('chat')
 @UseInterceptors(ResponseInterceptor)
@@ -55,6 +56,7 @@ export class ChatController {
   }
 
   @Get('/:chatId')
+  @Serialize(CreateChatResDto)
   async getChatRoom(@Param('chatId') chatId: string) {
     return await this.chatService.getChat(chatId);
   }

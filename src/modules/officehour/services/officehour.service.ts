@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { parseExcel } from 'src/common/utils';
 import { validateData } from 'src/common/utils/data-validator';
 import { OfficehourRepository } from '../repositories/officehour.repository';
 import { Officehour } from '../entities/officehour.entity';
 import { Team } from 'src/modules/team/entities/team.entity';
 import { Project } from 'src/modules/project/entities';
+import { BusinessException } from 'src/exception';
 
 @Injectable()
 export class OfficehourService {
@@ -31,6 +32,23 @@ export class OfficehourService {
       },
     });
   }
+
+  async deleteOfficehourByProjectId(proejctId: string) {
+    const officehours = await this.officehourRepo.find({
+      where: { project: { id: proejctId } },
+    });
+
+    if (officehours.length === 0)
+      throw new BusinessException(
+        'project',
+        `해당 프로젝트에는 오피스아워가 존재하지 않습니다`,
+        `해당 프로젝트에는 오피스아워가 존재하지 않습니다`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return this.officehourRepo.remove(officehours);
+  }
+
   async importOfficehoursFromExcel(
     file: Express.Multer.File,
     projectId: string,
