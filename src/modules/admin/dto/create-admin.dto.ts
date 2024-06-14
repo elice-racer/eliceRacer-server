@@ -15,9 +15,9 @@ export class CreateAdminDto {
   })
   @IsNotEmpty()
   @IsEmail()
-  //TODO @Matches(/^[^@]+@elicer.com\.com$/, {
-  //   message: '관리자 가입은 elicer.com 로만 허용됩니다',
-  // })
+  @Matches(/^[^@]+@elicer.com\.com$/, {
+    message: '관리자 가입은 elicer.com 로만 허용됩니다',
+  })
   email: string;
 
   @ApiProperty({ description: '실명', example: '임지은', required: true })
