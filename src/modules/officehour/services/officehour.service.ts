@@ -96,7 +96,6 @@ export class OfficehourService {
         }
         const dateTime = this.excelDateToJSDate(dateStr, timeStr);
 
-        console.log(dateTiem);
         const officeHour = new Officehour();
         officeHour.date = dateTime;
         officeHour.coach = coach;
