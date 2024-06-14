@@ -61,7 +61,7 @@ export class ChatController {
     return await this.chatService.getChat(chatId);
   }
 
-  @Post('/:chatId/users')
+  @Post('/users/:chatId')
   async addUsers(
     @Param('chatId') chatId: string,
     @Body('userIds') userIds: string[],

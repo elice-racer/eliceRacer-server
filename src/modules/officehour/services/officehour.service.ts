@@ -123,12 +123,12 @@ export class OfficehourService {
   }
 
   private excelDateToJSDate(dateNum: number, timeNum: number): Date {
-    const date = new Date(Date.UTC(0, 0, dateNum - 25569));
+    const date = new Date(Date.UTC(1899, 11, 30 + dateNum)); // 1900년 기준, 11은 0 기반 인덱스로 12월을 의미
     const timeInSeconds = timeNum * 86400;
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
 
-    date.setUTCHours(hours, minutes, 0); // UTC 기준 시간으로 설정
+    date.setUTCHours(hours, minutes, 0, 0); // UTC 기준 시간으로 설정
     date.setHours(date.getHours() + 9); // KST로 조정
     return date;
   }
