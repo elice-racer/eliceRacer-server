@@ -16,6 +16,7 @@ export class OfficehourService {
       order: {
         date: 'ASC', // 오름차순으로 정렬
       },
+      relations: ['team'],
       where: {
         project: { id: projectId },
       },
@@ -95,6 +96,7 @@ export class OfficehourService {
         }
         const dateTime = this.excelDateToJSDate(dateStr, timeStr);
 
+        console.log(dateTiem);
         const officeHour = new Officehour();
         officeHour.date = dateTime;
         officeHour.coach = coach;
@@ -122,12 +124,13 @@ export class OfficehourService {
   }
 
   private excelDateToJSDate(dateNum: number, timeNum: number): Date {
-    const date = new Date(Math.round((dateNum - 25569) * 86400 * 1000));
+    const date = new Date(Date.UTC(0, 0, dateNum - 25569));
     const timeInSeconds = timeNum * 86400;
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
 
-    date.setHours(hours + 9, minutes, 0);
+    date.setUTCHours(hours, minutes, 0); // UTC 기준 시간으로 설정
+    date.setHours(date.getHours() + 9); // KST로 조정
     return date;
   }
 }
