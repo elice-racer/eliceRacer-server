@@ -123,9 +123,16 @@ export class AdminService {
 
       const existingProject = await queryRunner.manager.findOne(Project, {
         where: { track: { id: track.id }, projectName, round },
-        relations: ['teams'],
+        relations: ['teams', 'officehours'],
       });
 
+      if (existingProject.officehours.length !== 0)
+        throw new BusinessException(
+          `team`,
+          `오피스 아워가 등록되어 있습니다.`,
+          `오피스 아워가 등록되어 있습니다. 오피스아워를 먼저 삭제해주세요`,
+          HttpStatus.FORBIDDEN,
+        );
       if (existingProject) {
         await queryRunner.manager.remove(Team, existingProject.teams); // 연관된 팀 삭제
         await queryRunner.manager.remove(Project, existingProject); // 프로젝트 삭제
@@ -148,14 +155,11 @@ export class AdminService {
       for (const item of validCoachesData) {
         const { teamNumber, phoneNumberKey, coaches, notion } = item;
         const phoneNumber = phoneNumberKey.replace(/-/g, '');
-
         let team = teamCache.get(teamNumber);
-
         if (!team) {
           team = await queryRunner.manager.findOne(Team, {
             where: { teamNumber: teamNumber, project },
           });
-
           if (!team) {
             team = queryRunner.manager.create(Team, {
               teamNumber: teamNumber,
@@ -163,20 +167,23 @@ export class AdminService {
               notion,
               users: [],
             });
+
             await queryRunner.manager.save(team);
+            teamCache.set(teamNumber, team);
           }
-
-          teamCache.set(teamNumber, team);
         }
-
         const racer = await queryRunner.manager.findOne(User, {
-          where: { phoneNumber: phoneNumber, role: UserRole.RACER },
+          where: { phoneNumber, role: UserRole.RACER },
           relations: ['teams'],
         });
 
         if (racer && !team.users.find((u) => u.id === racer.id)) {
+          if (!racer.teams) {
+            racer.teams = [];
+          }
           team.users.push(racer);
-          await queryRunner.manager.save(team);
+          racer.teams.push(team);
+          await queryRunner.manager.save(racer);
         }
 
         if (coaches && coaches.length > 0) {
@@ -185,17 +192,22 @@ export class AdminService {
               role: UserRole.COACH,
               realName: In(coaches),
             },
+            relations: ['teams'],
           });
 
           for (const coach of coachesArr) {
-            if (!team.users.includes(coach)) {
+            if (!coach.teams) {
+              coach.teams = [];
+            }
+            if (!team.users.find((u) => u.id === coach.id)) {
               team.users.push(coach);
+              coach.teams.push(team);
+              await queryRunner.manager.save(coach);
             }
           }
-          await queryRunner.manager.save(team);
         }
+        await queryRunner.manager.save(team);
       }
-
       await queryRunner.commitTransaction();
     } catch (err) {
       console.error(err);

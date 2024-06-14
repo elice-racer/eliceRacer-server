@@ -25,7 +25,7 @@ export class ChatService {
   async getChat(chatId: string) {
     const chat = await this.chatRepo.findOne({
       where: { id: chatId },
-      relations: ['team'],
+      relations: ['team', 'users'],
     });
 
     if (!chat)
@@ -65,7 +65,7 @@ export class ChatService {
   async createChat(currentUser: User, dto: CreateChatRoomDto) {
     const users = await this.userRepo.find({ where: { id: In(dto.userIds) } });
 
-    if (users.length! == dto.userIds.length)
+    if (users.length !== dto.userIds.length)
       throw new BusinessException(
         'chat',
         '존재하지 않는 유저가 있습니다',

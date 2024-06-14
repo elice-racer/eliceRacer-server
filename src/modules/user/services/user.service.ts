@@ -360,8 +360,7 @@ export class UserService {
     }
 
     const newImageUrl = await this.uploadService.uploadFile(file);
-    // 데이터베이스 업데이트
-    // 예: await this.userRepository.update(userId, { profileImage: newImageUrl });
+
     user.profileImage = newImageUrl;
 
     return this.userRepo.save(user);
