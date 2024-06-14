@@ -60,4 +60,10 @@ export class AuthRepository {
       .where('users.phoneNumber = :phoneNumber', { phoneNumber })
       .getOne();
   }
+
+  async updateUserPassword(user: User, hashedPassword) {
+    user.password = hashedPassword;
+
+    return this.userRepo.save(user);
+  }
 }

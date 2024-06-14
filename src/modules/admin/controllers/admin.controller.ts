@@ -199,7 +199,7 @@ export class AdminController {
   }
 
   @Post('/officehours/:projectId')
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importOfficehours(
     @UploadedFile() file: Express.Multer.File,
@@ -209,5 +209,11 @@ export class AdminController {
       file,
       projectId,
     );
+  }
+
+  @Delete('/officehours/:projectId')
+  @UseGuards(AdminGuard)
+  async deleteOfficehourByProjectId(@Param('projectId') projectId: string) {
+    return await this.officehoureService.deleteOfficehourByProjectId(projectId);
   }
 }
