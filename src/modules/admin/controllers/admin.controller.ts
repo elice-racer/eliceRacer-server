@@ -67,7 +67,6 @@ export class AdminController {
   @Get('/verify-email')
   async verifyEmail(@Res() res: Response, @Query() dto: VerifyEamilDto) {
     const result = await this.adminService.verifyEmail(dto.id, dto.token);
-    //TODO 채영님 프론트 uri
     if (result) res.redirect('https://elicerracer.store/auth/success-auth');
     if (!result) res.redirect('https://elicerracer.store/auth/fail');
   }
@@ -107,7 +106,7 @@ export class AdminController {
   //member
   //racer 등록
   @Post('/members/racers')
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importUsers(@UploadedFile() file: Express.Multer.File) {
     return this.memberService.importUsersFromExcel(file);
@@ -115,7 +114,7 @@ export class AdminController {
 
   // coach 등록
   @Post('/members/coaches')
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importCoaches(@UploadedFile() file: Express.Multer.File) {
     return this.memberService.importCoachesFromExcel(file);
@@ -123,7 +122,7 @@ export class AdminController {
 
   //project 등록 및 팀 빌딩 생성
   @Post('/teams')
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async createTeamAndProject(@UploadedFile() file: Express.Multer.File) {
     return this.adminService.createTeamAndProject(file);
@@ -199,7 +198,7 @@ export class AdminController {
   }
 
   @Post('/officehours/:projectId')
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importOfficehours(
     @UploadedFile() file: Express.Multer.File,
