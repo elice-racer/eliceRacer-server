@@ -48,7 +48,6 @@ export class MailService {
     token: string,
     type: string,
   ): Promise<void> {
-    //TODO 삼항연산자로 개발환경에 따라 baseURL
     const url = this.configService.get<string>(ENV_SERVER_URL_KEY);
     const baseUrl = `${url}/api/${type}/verify-email?id=${user.id}&token=${token}`;
     const subject = '[EliceRacer] 이메일 인증을 완료해주세요.';

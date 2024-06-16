@@ -38,7 +38,7 @@ export class ChatController {
   @Get('/rooms/all')
   @Serialize(ChatRoomResDto)
   async getChatRooms(@CurrentUser() user: User) {
-    return await this.chatService.getUserChats(user.id);
+    return await this.chatService.getChatOfCurrentUser(user.id);
   }
 
   @Get('messages')

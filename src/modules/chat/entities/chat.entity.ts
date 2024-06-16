@@ -12,9 +12,15 @@ import {
 import { Message } from './message.entity';
 import { Team } from 'src/modules/team/entities/team.entity';
 
+export enum ChatType {
+  PERSONAL = 'PERSONAL',
+  GROUP = 'GROUP',
+  TEAM = 'TEAM',
+}
+
 @Entity({ name: 'chats' })
 export class Chat extends BaseEntity {
-  @Column()
+  @Column({ name: 'chat_name' })
   chatName: string;
 
   @ManyToMany(() => User, (user) => user.chats, { cascade: true })
@@ -32,4 +38,10 @@ export class Chat extends BaseEntity {
   })
   @JoinColumn()
   team: Team | null;
+
+  @Column({
+    type: 'enum',
+    enum: ChatType,
+  })
+  type: ChatType;
 }
