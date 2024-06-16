@@ -48,6 +48,7 @@ export class ChatController {
   }
 
   @Post('')
+  @Serialize(CreateChatResDto)
   async createChat(
     @CurrentUser() currentUser: User,
     @Body() dto: CreateChatRoomDto,

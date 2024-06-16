@@ -24,7 +24,7 @@ export class Project extends BaseEntity {
   @OneToMany(() => Officehour, (officehour) => officehour.project, {
     onDelete: 'SET NULL',
   })
-  officehours: Officehour[];
+  officehours: Officehour[] | null;
 
   @OneToMany(() => Team, (team) => team.project, {
     onDelete: 'RESTRICT',

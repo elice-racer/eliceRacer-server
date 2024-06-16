@@ -71,8 +71,13 @@ export class ChatService {
         users[0].id,
       );
 
-      if (existingChat) return existingChat;
-
+      if (existingChat)
+        throw new BusinessException(
+          'chat',
+          `해당 채팅방이 이미 존재합니다 ${existingChat.id}`,
+          `해당 채팅방이 이미 존재합니다 ${existingChat.id}`,
+          HttpStatus.CONFLICT,
+        );
       return this.chatRepo.createPersonalChat(
         currentUser,
         users[0],
