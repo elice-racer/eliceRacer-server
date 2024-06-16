@@ -10,10 +10,10 @@ export class AddChatType1718549882670 implements MigrationInterface {
 
     // 모든 기타 레코드에 대해 기본 type 설정
     await queryRunner.query(`
-            UPDATE "chats"
-            SET "type" = ('TEAM'::chat_type)
-            WHERE "type" IS NULL
-        `);
+      UPDATE "chats"
+      SET "type" = ROW('TEAM')::chat_type
+      WHERE "type" IS NULL
+  `);
 
     // type 컬럼을 NOT NULL로 변경
     await queryRunner.query(
