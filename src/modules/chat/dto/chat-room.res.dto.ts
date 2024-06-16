@@ -8,6 +8,9 @@ export class ChatRoomResDto {
   chatName: string;
 
   @Expose()
+  type: string;
+
+  @Expose()
   @Transform(({ value }) => value.length)
   users: number;
 }
