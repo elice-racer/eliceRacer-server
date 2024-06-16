@@ -10,6 +10,9 @@ export class CreateChatResDto {
   chatName: string;
 
   @Expose()
+  type: string;
+
+  @Expose()
   team: OutputTeamDto;
 
   @Expose()
