@@ -1,14 +1,10 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ChatRepository } from '../repositories';
-import {
-  CreateChatRoomDto,
-  CreateTeamChatDto,
-  MemberTeamChatDto,
-} from '../dto';
+import { CreateChatRoomDto, CreateTeamChatDto } from '../dto';
 import { TeamRepository } from '../../team/repositories/team.repository';
 import { BusinessException } from 'src/exception';
 import { UserRepository } from '../../user/repositories';
-import { Chat } from '../entities/chat.entity';
+import { Chat, ChatType } from '../entities/chat.entity';
 import { ChatGateway } from '../chat.gateway';
 import { User } from 'src/modules/user/entities';
 import { In } from 'typeorm';
@@ -39,7 +35,7 @@ export class ChatService {
     return chat;
   }
 
-  async getUserChats(userId: string): Promise<Chat[]> {
+  async getChatOfCurrentUser(userId: string): Promise<Chat[]> {
     const user = await this.userRepo.findOne({
       where: { id: userId },
       relations: ['chats', 'chats.users'],
@@ -56,10 +52,6 @@ export class ChatService {
     return user.chats;
   }
 
-  async isMember(dto: MemberTeamChatDto) {
-    return this.chatRepo.isMember(dto.chatId, dto.userId);
-  }
-
   //TODO chatRoom 생성하는 건 하나만 두고
   //TODO team일경우에는 호출하는 방식으로 수정
   async createChat(currentUser: User, dto: CreateChatRoomDto) {
@@ -73,7 +65,22 @@ export class ChatService {
         HttpStatus.NOT_FOUND,
       );
 
-    return this.chatRepo.createChat(currentUser, users, dto.chatName);
+    if (users.length === 1) {
+      const existingChat = await this.chatRepo.findPersonalChat(
+        currentUser.id,
+        users[0].id,
+      );
+
+      if (existingChat) return existingChat;
+
+      return this.chatRepo.createPersonalChat(
+        currentUser,
+        users[0],
+        dto.chatName,
+      );
+    }
+
+    return this.chatRepo.createGroupChat(currentUser, users, dto.chatName);
   }
 
   async createTeamChat(currentUser: User, dto: CreateTeamChatDto) {
@@ -100,7 +107,7 @@ export class ChatService {
 
     const chatName = `[${team.project.projectName}] ${team.teamNumber}팀`;
 
-    const chat = await this.chatRepo.createChat(
+    const chat = await this.chatRepo.createTeamChat(
       currentUser,
       team.users,
       chatName,
@@ -166,6 +173,9 @@ export class ChatService {
         '채팅방에 참여한 회원만 새로운 회원을 추가할 수 있습니다',
         HttpStatus.FORBIDDEN,
       );
+    }
+
+    if (chat.type === ChatType.PERSONAL) {
     }
 
     const newUsers = await this.userRepo.findBy({
