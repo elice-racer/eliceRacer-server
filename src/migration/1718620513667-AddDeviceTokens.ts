@@ -20,12 +20,6 @@ export class AddDeviceTokens1718620513667 implements MigrationInterface {
                 );
             `);
 
-      // Modify 'users' table: move 'password' column
-      await queryRunner.query(`
-                ALTER TABLE users DROP COLUMN password;
-                ALTER TABLE users ADD COLUMN password character varying;
-            `);
-
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -44,12 +38,6 @@ export class AddDeviceTokens1718620513667 implements MigrationInterface {
       // Drop 'device_token' table
       await queryRunner.query(`
                 DROP TABLE device_token;
-            `);
-
-      // Revert 'users' table: move 'password' column back
-      await queryRunner.query(`
-                ALTER TABLE users DROP COLUMN password;
-                ALTER TABLE users ADD COLUMN password character varying;
             `);
 
       await queryRunner.commitTransaction();
