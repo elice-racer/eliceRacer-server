@@ -7,6 +7,7 @@ import { Notice } from 'src/modules/notice/entities/notice.entity';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { Message } from 'src/modules/chat/entities';
 import { IsOptional, IsUrl } from 'class-validator';
+import { DeviceToken } from 'src/modules/notification/entities/device-token.entity';
 
 export enum UserRole {
   RACER = 'RACER',
@@ -101,4 +102,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
+
+  @OneToMany(() => DeviceToken, (deviceToken) => deviceToken.user)
+  tokens: DeviceToken[];
 }
