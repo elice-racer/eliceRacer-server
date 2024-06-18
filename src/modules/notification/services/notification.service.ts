@@ -18,15 +18,19 @@ export class NotificationService {
 
   async saveUserToken(user: User, token: string) {
     const existingToken = await this.deviceTokenRepo.findOne({
-      where: { user, token },
+      where: {
+        user: { id: user.id }, // user의 id로 조건을 변경
+        token: token,
+      },
     });
+
     if (!existingToken) {
       const newToken = this.deviceTokenRepo.create({ user, token });
       await this.deviceTokenRepo.save(newToken);
     }
   }
 
-  @Cron('*/1 * * * *')
+  @Cron('*/1 9-23 * * *')
   async checkAndSendNotifications() {
     const now = new Date();
     const utcNow = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
@@ -43,6 +47,7 @@ export class NotificationService {
       },
       relations: ['team'],
     });
+
     if (notifications.length !== 0) {
       const teamIds = notifications.map((n) => n.team.id);
 
@@ -63,9 +68,10 @@ export class NotificationService {
         .flat();
       await this.sendBulkNotifications(messages);
     } else {
-      console.log('알림이 없습니다.');
+      console.log('알림이 없습니다.', koreaTime);
     }
   }
+
   private async getTokensForTeams(
     teamIds: string[],
   ): Promise<Map<string, string[]>> {
@@ -88,6 +94,24 @@ export class NotificationService {
     return tokensMap;
   }
 
+  @Cron('0 23 * * *') // 매일 밤 11시에 실행
+  async sendNightlyReminder() {
+    const tokens = await this.deviceTokenRepo.find();
+
+    if (tokens.length !== 0) {
+      const messages = tokens.map((deviceToken) => ({
+        token: deviceToken.token,
+        notification: {
+          title: '일일 알림',
+          body: 'QR, 과제제출 잊지마세요!',
+        },
+      }));
+
+      await this.sendBulkNotifications(messages);
+    } else {
+      throw new Error(`등록된 디바이스 토큰이 없습니다.`);
+    }
+  }
   private async sendBulkNotifications(
     messages: { token: string; notification: any }[],
   ) {
