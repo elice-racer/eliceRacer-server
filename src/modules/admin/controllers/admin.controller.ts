@@ -33,7 +33,7 @@ import {
 import { NoticeService } from 'src/modules/notice/services/notice.service';
 import { CurrentUser } from 'src/common/decorators';
 import { TeamService } from 'src/modules/team/services/team.service';
-import { OutputTeamDto, UpdateTeamMemberReqDto } from 'src/modules/team/dto';
+import { OutputTeamDto } from 'src/modules/team/dto';
 import { ChatService } from 'src/modules/chat/services/chat.service';
 import { CreateTeamChatDto } from 'src/modules/chat/dto';
 import { OutputProjectDto } from 'src/modules/project/dto/output-project.dto';
@@ -106,7 +106,7 @@ export class AdminController {
   //member
   //racer 등록
   @Post('/members/racers')
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importUsers(@UploadedFile() file: Express.Multer.File) {
     return this.memberService.importUsersFromExcel(file);
@@ -114,7 +114,7 @@ export class AdminController {
 
   // coach 등록
   @Post('/members/coaches')
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importCoaches(@UploadedFile() file: Express.Multer.File) {
     return this.memberService.importCoachesFromExcel(file);
@@ -122,7 +122,7 @@ export class AdminController {
 
   //project 등록 및 팀 빌딩 생성
   @Post('/teams')
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async createTeamAndProject(@UploadedFile() file: Express.Multer.File) {
     return this.adminService.createTeamAndProject(file);
@@ -138,9 +138,9 @@ export class AdminController {
   @Serialize(OutputTeamDto)
   async updateTeamMember(
     @Param('teamId') teamId: string,
-    @Body() dto: UpdateTeamMemberReqDto,
+    @Body('userIds') userIds: string[],
   ) {
-    return await this.teamService.updateTeamMember(teamId, dto);
+    return await this.teamService.updateTeamMember(teamId, userIds);
   }
 
   // notice  공지 등록 및 업데이트
@@ -198,7 +198,7 @@ export class AdminController {
   }
 
   @Post('/officehours/:projectId')
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   async importOfficehours(
     @UploadedFile() file: Express.Multer.File,

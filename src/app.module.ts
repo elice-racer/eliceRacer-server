@@ -19,6 +19,9 @@ import { NoticeModule } from './modules/notice/notice.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { OfficehourModule } from './modules/officehour/officehour.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { FirebaseModule } from 'core/firebase/firebase.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -28,6 +31,8 @@ import { UploadModule } from './modules/upload/upload.module';
     }),
     DatabaseModule,
     RedisModule,
+    FirebaseModule,
+    ScheduleModule.forRoot(),
 
     AuthModule,
     UserModule,
@@ -42,6 +47,7 @@ import { UploadModule } from './modules/upload/upload.module';
     NoticeModule,
     OfficehourModule,
     UploadModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

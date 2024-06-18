@@ -6,7 +6,6 @@ import {
   PaginationTeamsByProjectDto,
   PaginationTeamsByTrackDto,
   PaginationTeamsDto,
-  UpdateTeamMemberReqDto,
   UpdateTeamReqDto,
 } from '../dto';
 import { UserRepository } from 'src/modules/user/repositories';
@@ -164,7 +163,7 @@ export class TeamService {
     return this.teamRepo.save(team);
   }
 
-  async updateTeamMember(teamId: string, dto: UpdateTeamMemberReqDto) {
+  async updateTeamMember(teamId: string, userIds: string[]) {
     const team = await this.teamRepo.findOne({
       where: { id: teamId },
       relations: ['users'],
@@ -177,7 +176,7 @@ export class TeamService {
         '해당 팀이 존재하지 않습니다',
         HttpStatus.NOT_FOUND,
       );
-    const userIds: string[] = dto.users.map((user) => user.id);
+
     const users = await this.userRepo.find({
       where: {
         id: In(userIds),
@@ -193,18 +192,10 @@ export class TeamService {
       );
 
     if (userIds.length !== users?.length) {
-      const existringUserIds = users.map((user) => user.id);
-      const missingUsers = dto.users.filter(
-        (user) => !existringUserIds.includes(user.id),
-      );
-      const missingNames = missingUsers
-        .map((user) => `이름: ${user.realName}`)
-        .join(', ');
-
       throw new BusinessException(
         'user',
         '일부 유저가 존재하지 않습니다',
-        `일부 유저가 존재하지 않습니다 : ${missingNames}`,
+        `일부 유저가 존재하지 않습니다`,
         HttpStatus.NOT_FOUND,
       );
     }

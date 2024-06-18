@@ -13,7 +13,8 @@ export type ErrorDomain =
   | 'project'
   | 'team'
   | 'notice'
-  | 'chat';
+  | 'chat'
+  | 'notification';
 
 export class BusinessException extends Error {
   public readonly id: string;
