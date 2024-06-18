@@ -30,7 +30,7 @@ export class NotificationService {
     }
   }
 
-  @Cron('*/1 9-23 * * *')
+  @Cron('*/10 9-23 * * *')
   async checkAndSendNotifications() {
     const now = new Date();
     const utcNow = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
