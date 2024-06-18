@@ -27,7 +27,6 @@ import { FirebaseService } from './firebase.service';
         admin.initializeApp({
           credential: admin.credential.cert(firebaseParams),
         });
-        console.log(firebaseParams);
         return admin.messaging();
       },
       inject: [ConfigService],
