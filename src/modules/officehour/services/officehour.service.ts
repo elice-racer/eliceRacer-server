@@ -116,6 +116,7 @@ export class OfficehourService {
       return result;
     } catch (err) {
       await queryRunner.rollbackTransaction();
+
       throw new Error('Failed to update office hours');
     } finally {
       await queryRunner.release();
@@ -129,7 +130,8 @@ export class OfficehourService {
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
 
     date.setUTCHours(hours, minutes, 0, 0); // UTC 기준 시간으로 설정
-    // date.setHours(date.getHours() + 9); // KST로 조정
+    date.setHours(date.getHours() - 9); // KST로 조정
+    console.log(date);
     return date;
   }
 }

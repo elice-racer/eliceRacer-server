@@ -9,6 +9,6 @@ import { OfficehourRepository } from './repositories/officehour.repository';
   imports: [TypeOrmModule.forFeature([Officehour])],
   controllers: [OfficehourController],
   providers: [OfficehourService, OfficehourRepository],
-  exports: [OfficehourService],
+  exports: [OfficehourService, OfficehourRepository],
 })
 export class OfficehourModule {}
