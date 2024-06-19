@@ -32,10 +32,11 @@ export class UploadService {
   async uploadFile(file: Express.Multer.File): Promise<string> {
     const encodedFileName = encodeURIComponent(file.originalname);
     const key = `${uuidv4()}-${encodedFileName}`;
+    const decodedKey = decodeURIComponent(key);
     const bucket = this.configService.get<string>(ENV_AWS_S3_BUCKET_NAME_KEY);
     const command = new PutObjectCommand({
       Bucket: bucket,
-      Key: key,
+      Key: decodedKey,
       Body: file.buffer,
       ACL: 'public-read',
     });
