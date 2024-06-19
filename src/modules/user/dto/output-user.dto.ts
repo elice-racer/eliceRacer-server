@@ -3,6 +3,7 @@ import { DetailTeamResDto } from 'src/modules/team/dto';
 import { TrackResDto } from 'src/modules/track/dto';
 import { OutputSkillDto } from './ouput-skill.dto';
 import { UserRole } from '../entities';
+import { IsUrl } from 'class-validator';
 
 export class OutputUserDto {
   @Expose()
@@ -39,6 +40,7 @@ export class OutputUserDto {
   tmi: string;
 
   @Expose()
+  @IsUrl()
   profileImage: string;
 
   @Expose()
