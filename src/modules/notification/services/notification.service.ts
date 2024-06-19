@@ -46,11 +46,6 @@ export class NotificationService {
       relations: ['team'],
     });
 
-    console.log('한국시간', koreaDate);
-    console.log('Server Time Zone (process.env.TZ):', process.env.TZ);
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.log('Server Time Zone:', timeZone);
-    console.log(notifications);
     if (notifications.length !== 0) {
       const teamIds = notifications.map((n) => n.team.id);
 
@@ -111,7 +106,6 @@ export class NotificationService {
         },
       }));
 
-      console.log('과제 제출 알림');
       await this.sendBulkNotifications(messages);
     } else {
       throw new Error(`등록된 디바이스 토큰이 없습니다.`);
