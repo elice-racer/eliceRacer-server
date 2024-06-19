@@ -110,6 +110,22 @@
         {
           "name": "AWS_S3_BUCKET_NAME",
           "valueFrom": "<PARA_STORE_ARN>AWS_S3_BUCKET_NAME"
+        },
+        {
+          "name": "FIREBASE_TYPE",
+          "valueFrom": "<PARA_STORE_ARN>FIREBASE_TYPE"
+        },
+        {
+          "name": "FIREBASE_PROJECT_ID",
+          "valueFrom": "<PARA_STORE_ARN>FIREBASE_PROJECT_ID"
+        },
+        {
+          "name": "FIREBASE_PRIVATE_KEY",
+          "valueFrom": "<PARA_STORE_ARN>FIREBASE_PRIVATE_KEY"
+        },
+        {
+          "name": "FIREBASE_CLIENT_EMAIL",
+          "valueFrom": "<PARA_STORE_ARN>FIREBASE_CLIENT_EMAIL"
         }
       ],
       "cpu": 0,
