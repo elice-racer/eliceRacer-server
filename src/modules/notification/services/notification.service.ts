@@ -6,6 +6,7 @@ import { Cron } from '@nestjs/schedule';
 import { Between } from 'typeorm';
 import { User } from 'src/modules/user/entities';
 import { InjectRepository } from '@nestjs/typeorm';
+import { utcToKoreanTDate } from 'src/common/utils';
 
 export class NotificationService {
   constructor(
@@ -23,33 +24,33 @@ export class NotificationService {
         token: token,
       },
     });
-
     if (!existingToken) {
       const newToken = this.deviceTokenRepo.create({ user, token });
       await this.deviceTokenRepo.save(newToken);
     }
   }
 
-  @Cron('*/10 9-23 * * *')
+  @Cron('*/1 4-23 * * *', { timeZone: 'Asia/Seoul' })
   async checkAndSendNotifications() {
-    const now = new Date();
-    const utcNow = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    const now = new Date(); // UTC 기준 현재 시간
 
-    const koreaTime = new Date(utcNow.getTime() + 9 * 60 * 60 * 1000);
-    koreaTime.setSeconds(0, 0); // 초와 밀리초를 0으로 설정하여 정확한 분 단위로 비교
-
-    console.log('now', now);
-    console.log('utcNow', now);
-    const tenMinutesLater = new Date(utcNow.getTime() + 10 * 60 * 1000);
-    tenMinutesLater.setSeconds(59, 999); // 초와 밀리초를 최대값으로 설정하여 10분 후까지의 범위를 포함
+    const koreaDate = utcToKoreanTDate(now);
+    koreaDate.setSeconds(0, 0); // 초와 밀리초를 0으로 설정
+    const tenMinutesLater = new Date(koreaDate.getTime() + 10 * 60 * 1000);
+    tenMinutesLater.setSeconds(59, 999); // 10분 후까지의 범위를 포함
 
     const notifications = await this.officehourRepo.find({
       where: {
-        date: Between(utcNow, tenMinutesLater),
+        date: Between(koreaDate, tenMinutesLater),
       },
       relations: ['team'],
     });
 
+    console.log('한국시간', koreaDate);
+    console.log('Server Time Zone (process.env.TZ):', process.env.TZ);
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log('Server Time Zone:', timeZone);
+    console.log(notifications);
     if (notifications.length !== 0) {
       const teamIds = notifications.map((n) => n.team.id);
 
@@ -68,9 +69,10 @@ export class NotificationService {
           }));
         })
         .flat();
+
       await this.sendBulkNotifications(messages);
     } else {
-      console.log('알림이 없습니다.', koreaTime);
+      console.log('알림이 없습니다.', koreaDate);
     }
   }
 
@@ -96,7 +98,7 @@ export class NotificationService {
     return tokensMap;
   }
 
-  @Cron('0 23 * * *') // 매일 밤 11시에 실행
+  @Cron('37 02 * * *', { timeZone: 'Asia/Seoul' }) // 매일 밤 11시에 실행
   async sendNightlyReminder() {
     const tokens = await this.deviceTokenRepo.find();
 
@@ -118,11 +120,8 @@ export class NotificationService {
   private async sendBulkNotifications(
     messages: { token: string; notification: any }[],
   ) {
-    const promises = messages.map(
-      (message) => this.firebaseService.sendNotification(message),
-      // this.firebaseService.sendNotification(message.token, {
-      //   notification: message.notification,
-      // }),
+    const promises = messages.map((message) =>
+      this.firebaseService.sendNotification(message),
     );
     await Promise.all(promises);
   }

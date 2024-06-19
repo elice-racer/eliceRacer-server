@@ -12,7 +12,7 @@ export class OfficehourService {
   constructor(private readonly officehourRepo: OfficehourRepository) {}
 
   async getOfficehourByProject(projectId: string) {
-    return this.officehourRepo.find({
+    return await this.officehourRepo.find({
       order: {
         date: 'ASC', // 오름차순으로 정렬
       },
@@ -79,6 +79,13 @@ export class OfficehourService {
 
       if (project) await queryRunner.manager.delete(Officehour, { project });
 
+      if (!project)
+        throw new BusinessException(
+          'project',
+          `해당 프로젝트가 존재하지 않습니다`,
+          `해당 프로젝트가 존재하지 않습니다`,
+          HttpStatus.NOT_FOUND,
+        );
       const teamCache = new Map();
 
       // 먼저 해당 팀의 기존 오피스 아워를 삭제합니다.
@@ -117,7 +124,7 @@ export class OfficehourService {
     } catch (err) {
       await queryRunner.rollbackTransaction();
 
-      throw new Error('Failed to update office hours');
+      throw new Error(err.message);
     } finally {
       await queryRunner.release();
     }
@@ -130,7 +137,6 @@ export class OfficehourService {
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
 
     date.setUTCHours(hours, minutes, 0, 0); // UTC 기준 시간으로 설정
-    // date.setHours(date.getHours() + 9); // KST로 조정
     console.log(date);
     return date;
   }
