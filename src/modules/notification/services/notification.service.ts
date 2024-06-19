@@ -30,7 +30,7 @@ export class NotificationService {
     }
   }
 
-  @Cron('*/1 4-23 * * *', { timeZone: 'Asia/Seoul' })
+  @Cron('*/10 11-23 * * *', { timeZone: 'Asia/Seoul' })
   async checkAndSendNotifications() {
     const now = new Date(); // UTC 기준 현재 시간
 
@@ -93,7 +93,7 @@ export class NotificationService {
     return tokensMap;
   }
 
-  @Cron('37 02 * * *', { timeZone: 'Asia/Seoul' }) // 매일 밤 11시에 실행
+  @Cron('00 23 * * *', { timeZone: 'Asia/Seoul' }) // 매일 밤 11시에 실행
   async sendNightlyReminder() {
     const tokens = await this.deviceTokenRepo.find();
 
