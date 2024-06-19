@@ -38,12 +38,12 @@ export class NotificationService {
     const koreaTime = new Date(utcNow.getTime() + 9 * 60 * 60 * 1000);
     koreaTime.setSeconds(0, 0); // 초와 밀리초를 0으로 설정하여 정확한 분 단위로 비교
 
-    const tenMinutesLater = new Date(koreaTime.getTime() + 10 * 60 * 1000);
+    const tenMinutesLater = new Date(utcNow.getTime() + 10 * 60 * 1000);
     tenMinutesLater.setSeconds(59, 999); // 초와 밀리초를 최대값으로 설정하여 10분 후까지의 범위를 포함
 
     const notifications = await this.officehourRepo.find({
       where: {
-        date: Between(koreaTime, tenMinutesLater),
+        date: Between(utcNow, tenMinutesLater),
       },
       relations: ['team'],
     });
