@@ -1,10 +1,6 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache tzdata \
-    && cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
-    && echo "Asia/Seoul" > /etc/timezone \
-    && apk del tzdata
-
+RUN apk add --no-cache tzdata 
 
 WORKDIR /app
 COPY . .
