@@ -107,6 +107,7 @@ export class NotificationService {
         },
       }));
 
+      console.log('과제 제출 알림');
       await this.sendBulkNotifications(messages);
     } else {
       throw new Error(`등록된 디바이스 토큰이 없습니다.`);
