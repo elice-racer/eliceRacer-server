@@ -46,8 +46,8 @@ export class ProjectService {
     const projects = await this.projectRepo.findAllProjects(dto);
 
     let next: string | null = null;
-    if (projects.length > parseInt(pageSize)) {
-      const lastProject = projects[parseInt(pageSize) - 1];
+    if (projects.length > pageSize) {
+      const lastProject = projects[pageSize - 1];
       next = `${this.baseUrl}/api/projects/all?pageSize=${pageSize}&lastTrackName=${lastProject.track.trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
       projects.pop();
     }
@@ -56,8 +56,6 @@ export class ProjectService {
 
   async getProjectsByTrack(dto: PaginationProjectsByTrackDto) {
     const { trackName, pageSize } = dto;
-
-    const pageSizeToInt = parseInt(pageSize);
 
     const track = await this.tarckRepo.findOne({ where: { trackName } });
 
@@ -72,8 +70,8 @@ export class ProjectService {
     const projects = await this.projectRepo.findProjectsByTrack(dto);
 
     let next: string | null = null;
-    if (projects.length > pageSizeToInt) {
-      const lastProject = projects[pageSizeToInt - 1];
+    if (projects.length > pageSize) {
+      const lastProject = projects[pageSize - 1];
       next = `${this.baseUrl}/api/projects/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
       projects.pop();
     }
@@ -84,7 +82,7 @@ export class ProjectService {
     const { trackName, cardinalNo, pageSize } = dto;
 
     const track = await this.tarckRepo.findOne({
-      where: { trackName, cardinalNo: parseInt(cardinalNo) },
+      where: { trackName, cardinalNo },
     });
 
     if (!track)
@@ -99,8 +97,8 @@ export class ProjectService {
       await this.projectRepo.findProjectsByTrackAndCardinalNo(dto);
 
     let next: string | null = null;
-    if (projects.length > parseInt(pageSize)) {
-      const lastProject = projects[parseInt(pageSize) - 1];
+    if (projects.length > pageSize) {
+      const lastProject = projects[pageSize - 1];
       next = `${this.baseUrl}/api/projects/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
       projects.pop();
     }

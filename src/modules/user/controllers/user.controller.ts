@@ -20,7 +20,7 @@ import {
   PaginationRacersByTrackDto,
   PaginationRacersDto,
   PaginationUsersDto,
-  updateReqDto,
+  updateUserReqDto,
 } from '../dto';
 import { CurrentUser } from 'src/common/decorators';
 import { User } from '../entities';
@@ -110,7 +110,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(DetailUserResDto)
-  async updateMypage(@Body() dto: updateReqDto, @CurrentUser() user: User) {
+  async updateMypage(@Body() dto: updateUserReqDto, @CurrentUser() user: User) {
     return await this.userService.updateMypage(user.id, dto);
   }
 
