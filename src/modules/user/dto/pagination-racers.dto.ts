@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsUUID } from 'class-validator';
 
 export class PaginationRacersDto {
   @ApiProperty({
@@ -6,7 +8,8 @@ export class PaginationRacersDto {
     example: '10',
     required: true,
   })
-  pageSize: string;
+  @Transform(({ value }) => parseInt(value))
+  pageSize: number;
 
   @ApiProperty({
     description: '페이징을 시작할 마지막 트랙 이름 (있는 경우)',
@@ -20,7 +23,8 @@ export class PaginationRacersDto {
     example: '1',
     required: false,
   })
-  lastCardinalNo?: string;
+  @Transform(({ value }) => parseInt(value))
+  lastCardinalNo?: number;
 
   @ApiProperty({
     description: '페이징을 시작할 마지막 실제 이름 (있는 경우)',
@@ -34,5 +38,6 @@ export class PaginationRacersDto {
     example: 'uuid-1234',
     required: false,
   })
+  @IsUUID('4', { message: 'uuid값을 넣어야합니다' })
   lastId?: string;
 }

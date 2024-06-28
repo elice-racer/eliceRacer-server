@@ -4,7 +4,7 @@ import {
   CreateNoticeDto,
   PaginationNoticeDto,
   PaginationNoticesByAuthorDto,
-  UpdateNoticeDto,
+  UpdateNoticeReqDto,
 } from '../dto';
 import { BusinessException } from 'src/exception';
 import { User } from 'src/modules/user/entities';
@@ -49,7 +49,11 @@ export class NoticeService {
     return { notices, pagination: { count: notices.length, total } };
   }
 
-  async updateNotice(userId: string, noticeId: string, dto: UpdateNoticeDto) {
+  async updateNotice(
+    userId: string,
+    noticeId: string,
+    dto: UpdateNoticeReqDto,
+  ) {
     const notice = await this.noticeRepo.findOne({
       where: { id: noticeId },
       relations: ['user'],

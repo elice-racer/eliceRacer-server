@@ -8,7 +8,7 @@ import {
   PaginationRacersByTrackDto,
   PaginationRacersDto,
   PaginationUsersDto,
-  updateReqDto,
+  updateUserReqDto,
 } from '../dto';
 import { hashPassword } from 'src/common/utils';
 import { BusinessException } from 'src/exception';
@@ -81,14 +81,13 @@ export class UserService {
   //모든 레이서
   async getAllRacres(dto: PaginationRacersDto) {
     const { pageSize } = dto;
-    const pageSizeToInt = parseInt(pageSize);
 
-    const users = await this.userRepo.findAllRcers(dto, pageSizeToInt);
+    const users = await this.userRepo.findAllRcers(dto, pageSize);
 
     let next: string | null = null;
 
-    if (users.length > pageSizeToInt) {
-      const lastUser = users[pageSizeToInt - 1];
+    if (users.length > pageSize) {
+      const lastUser = users[pageSize - 1];
       next = `${this.baseUrl}/api/users/racers/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
       users.pop();
     }
@@ -125,11 +124,9 @@ export class UserService {
   //트랙+기수별 모든 레이서
   async getAllRacersByCardinalNo(dto: PaginationRacersByCardinalDto) {
     const { trackName, cardinalNo, pageSize } = dto;
-    const cardinalNoToInt = parseInt(cardinalNo);
-    const pageSizeToInt = parseInt(pageSize);
 
     const track = await this.trackRepo.findOne({
-      where: { trackName, cardinalNo: cardinalNoToInt },
+      where: { trackName, cardinalNo },
     });
 
     if (!track)
@@ -143,8 +140,8 @@ export class UserService {
     const users = await this.userRepo.findRacersByTrackAndCardinalNo(dto);
 
     let next: string | null = null;
-    if (users.length > pageSizeToInt) {
-      const lastUser = users[pageSizeToInt - 1];
+    if (users.length > pageSize) {
+      const lastUser = users[pageSize - 1];
       next = `${this.baseUrl}/api/users/racers/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
 
       users.pop();
@@ -168,7 +165,7 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
-  async updateMypage(userId: string, dto: updateReqDto): Promise<User> {
+  async updateMypage(userId: string, dto: updateUserReqDto): Promise<User> {
     const user = await this.userRepo.findUserByIdWithTracks(userId);
     if (!user) {
       throw new BusinessException(

@@ -48,8 +48,8 @@ export class TeamService {
     const teams = await this.teamRepo.findAllTeams(dto);
 
     let next: string | null = null;
-    if (teams.length > parseInt(pageSize)) {
-      const lastTeam = teams[parseInt(pageSize) - 1];
+    if (teams.length > pageSize) {
+      const lastTeam = teams[pageSize - 1];
       next = `${this.baseUrl}/api/teams/all?pageSize=${pageSize}&lastTrackName=${lastTeam.project.track.trackName}&lastCardinalNo=${lastTeam.project.track.cardinalNo}&lastRound=${lastTeam.project.round}&lastTeamNumber=${lastTeam.teamNumber}`;
       teams.pop();
     }
@@ -73,8 +73,8 @@ export class TeamService {
     const teams = await this.teamRepo.findTeamsByTrack(dto);
 
     let next: string | null = null;
-    if (teams.length > parseInt(pageSize)) {
-      const lastTeam = teams[parseInt(pageSize) - 1];
+    if (teams.length > pageSize) {
+      const lastTeam = teams[pageSize - 1];
       next = `${this.baseUrl}/api/teams/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastTeam.project.track.cardinalNo}&lastRound=${lastTeam.project.round}&lastTeamNumber=${lastTeam.teamNumber}`;
       teams.pop();
     }
@@ -86,7 +86,7 @@ export class TeamService {
     const { pageSize, trackName, cardinalNo } = dto;
 
     const track = await this.trackRepo.findOne({
-      where: { trackName, cardinalNo: parseInt(cardinalNo) },
+      where: { trackName, cardinalNo },
     });
 
     if (!track)
@@ -99,8 +99,8 @@ export class TeamService {
     const teams = await this.teamRepo.findTeamsByCardinalNo(dto);
 
     let next: string | null = null;
-    if (teams.length > parseInt(pageSize)) {
-      const lastTeam = teams[parseInt(pageSize) - 1];
+    if (teams.length > pageSize) {
+      const lastTeam = teams[pageSize - 1];
       next = `${this.baseUrl}/api/teams/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRound=${lastTeam.project.round}&lastTeamNumber=${lastTeam.teamNumber}`;
       teams.pop();
     }
@@ -123,8 +123,8 @@ export class TeamService {
 
     const teams = await this.teamRepo.findTeamsByProject(dto);
     let next: string | null = null;
-    if (teams.length > parseInt(pageSize)) {
-      const lastTeam = teams[parseInt(pageSize) - 1];
+    if (teams.length > pageSize) {
+      const lastTeam = teams[pageSize - 1];
       next = `${this.baseUrl}/api/teams/projects/all?pageSize=${pageSize}&projectId=${projectId}&lastTeamNumber=${lastTeam.teamNumber}`;
       teams.pop(); // Remove the extra item used for determining the next cursor
     }

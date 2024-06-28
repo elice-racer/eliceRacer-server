@@ -33,18 +33,16 @@ export class ProjectRepository extends Repository<Project> {
         (track.trackName = :lastTrackName AND track.cardinalNo = :lastCardinalNo AND project.round > :lastRound)`,
         {
           lastTrackName,
-          lastCardinalNo: parseInt(lastCardinalNo),
-          lastRound: parseInt(lastRound),
+          lastCardinalNo,
+          lastRound,
         },
       );
     }
 
-    return await query.limit(parseInt(pageSize) + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
   async findProjectsByTrack(dto: PaginationProjectsByTrackDto) {
     const { pageSize, trackName, lastCardinalNo, lastRound } = dto;
-
-    const pageSizeToInt = parseInt(pageSize);
 
     const query = this.repo
       .createQueryBuilder('project')
@@ -61,7 +59,7 @@ export class ProjectRepository extends Repository<Project> {
       );
     }
 
-    return await query.limit(pageSizeToInt + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
 
   async findProjectsByTrackAndCardinalNo(
@@ -74,13 +72,13 @@ export class ProjectRepository extends Repository<Project> {
       .leftJoinAndSelect('project.track', 'track')
       .where('track.trackName = :trackName', { trackName })
       .andWhere('track.cardinalNo = :cardinalNo', {
-        cardinalNo: parseInt(cardinalNo),
+        cardinalNo,
       })
       .orderBy('project.round', 'ASC');
 
     if (lastRound !== undefined) {
       query.andWhere('project.round > :lastRound', {
-        lastRound: parseInt(lastRound),
+        lastRound,
       });
     }
 
@@ -88,6 +86,6 @@ export class ProjectRepository extends Repository<Project> {
       query.andWhere('project.round > :lastRound', { lastRound });
     }
 
-    return await query.limit(parseInt(pageSize) + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
 }

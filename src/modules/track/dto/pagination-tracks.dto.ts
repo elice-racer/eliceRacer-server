@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class PaginationTrackDto {
   @ApiProperty({
@@ -6,7 +7,8 @@ export class PaginationTrackDto {
     example: '10',
     required: true,
   })
-  pageSize: string;
+  @Transform(({ value }) => parseInt(value))
+  pageSize: number;
 
   @ApiProperty({
     description: '페이징을 시작할 마지막 트랙 이름 (있는 경우)',
@@ -20,5 +22,6 @@ export class PaginationTrackDto {
     example: '1',
     required: false,
   })
-  lastCardinalNo?: string;
+  @Transform(({ value }) => parseInt(value))
+  lastCardinalNo?: number;
 }

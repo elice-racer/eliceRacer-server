@@ -22,7 +22,8 @@ export class PaginationRacersByTrackDto {
     example: '1',
     required: false,
   })
-  lastCardinalNo?: string;
+  @Transform(({ value }) => parseInt(value))
+  lastCardinalNo?: number;
 
   @ApiProperty({
     description: '페이징을 시작할 마지막 실제 이름 (있는 경우)',

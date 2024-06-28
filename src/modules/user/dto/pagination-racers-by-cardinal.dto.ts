@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class PaginationRacersByCardinalDto {
   @ApiProperty({
@@ -6,7 +7,8 @@ export class PaginationRacersByCardinalDto {
     example: '10',
     required: true,
   })
-  pageSize: string;
+  @Transform(({ value }) => parseInt(value))
+  pageSize: number;
 
   @ApiProperty({
     description: '트랙 이름',
@@ -20,7 +22,8 @@ export class PaginationRacersByCardinalDto {
     example: '1',
     required: true,
   })
-  cardinalNo: string;
+  @Transform(({ value }) => parseInt(value))
+  cardinalNo: number;
 
   @ApiProperty({
     description: '페이징을 시작할 마지막 실제 이름 (있는 경우)',

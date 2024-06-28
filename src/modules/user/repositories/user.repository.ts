@@ -120,12 +120,11 @@ export class UserRepository extends Repository<User> {
       .addOrderBy('users.id', 'ASC');
 
     if (lastCardinalNo && lastRealName && lastId) {
-      const lastcardinalNo = parseInt(lastCardinalNo);
       query.andWhere(
         `((tracks.cardinalNo > :lastcardinalNo) OR 
         (tracks.cardinalNo = :lastcardinalNo AND users.realName > :lastRealName) OR
         (tracks.cardinalNo = :lastcardinalNo AND users.realName = :lastRealName AND users.id > :lastId))`,
-        { lastcardinalNo, lastRealName, lastId },
+        { lastCardinalNo, lastRealName, lastId },
       );
     }
 
@@ -145,7 +144,7 @@ export class UserRepository extends Repository<User> {
       .where('tracks.trackName = :trackName', { trackName })
       .andWhere('users.role = :role', { role })
       .andWhere('tracks.cardinalNo = :cardinalNo', {
-        cardinalNo: parseInt(cardinalNo),
+        cardinalNo,
       })
       .orderBy('users.realName', 'ASC')
       .addOrderBy('users.id', 'ASC');
@@ -158,7 +157,7 @@ export class UserRepository extends Repository<User> {
       );
     }
 
-    return query.limit(parseInt(pageSize) + 1).getMany();
+    return query.limit(pageSize + 1).getMany();
   }
 
   async findUserByIdWithDetail(userId: string): Promise<User> | undefined {

@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 
 export class UserDto {
-  @IsUUID()
+  @IsUUID('4', { message: '각 userId는 UUID 형식이어야 합니다.' })
   id: string;
 
   @IsNotEmpty()

@@ -26,11 +26,11 @@ export class TrackRepository extends Repository<Track> {
       query.andWhere(
         `(track.trackName > :lastTrackName) OR 
       (track.trackName = :lastTrackName AND track.cardinalNo > :lastCardinalNo) `,
-        { lastTrackName, lastCardinalNo: parseInt(lastCardinalNo) },
+        { lastTrackName, lastCardinalNo },
       );
     }
 
-    return await query.limit(parseInt(pageSize) + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
 
   async findTracksByTrackName(dto: PaginationTrackByNameDto) {
@@ -43,11 +43,11 @@ export class TrackRepository extends Repository<Track> {
 
     if (lastCardinalNo) {
       query.andWhere(`track.cardinalNo > :lastCardinalNo `, {
-        lastCardinalNo: parseInt(lastCardinalNo),
+        lastCardinalNo,
       });
     }
 
-    return await query.limit(parseInt(pageSize) + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
 
   async createTrack(dto: TrackDto): Promise<Track> {

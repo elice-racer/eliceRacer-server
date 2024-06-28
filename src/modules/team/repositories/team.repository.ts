@@ -46,14 +46,14 @@ export class TeamRepository extends Repository<Team> {
           (track.trackName = :lastTrackName AND track.cardinalNo = :lastCardinalNo AND project.round = :lastRound AND team.teamNumber > :lastTeamNumber)`,
         {
           lastTrackName,
-          lastCardinalNo: parseInt(lastCardinalNo),
-          lastRound: parseInt(lastRound),
-          lastTeamNumber: parseInt(lastTeamNumber),
+          lastCardinalNo,
+          lastRound,
+          lastTeamNumber,
         },
       );
     }
 
-    return query.limit(parseInt(pageSize) + 1).getMany();
+    return query.limit(pageSize + 1).getMany();
   }
 
   async findTeamsByTrack(dto: PaginationTeamsByTrackDto) {
@@ -75,14 +75,14 @@ export class TeamRepository extends Repository<Team> {
         (track.cardinalNo = :lastCardinalNo AND project.round > :lastRound) OR 
         (track.cardinalNo = :lastCardinalNo AND project.round = :lastRound AND team.teamNumber > :lastTeamNumber)`,
         {
-          lastCardinalNo: parseInt(lastCardinalNo),
-          lastRound: parseInt(lastRound),
-          lastTeamNumber: parseInt(lastTeamNumber),
+          lastCardinalNo,
+          lastRound,
+          lastTeamNumber,
         },
       );
     }
 
-    return query.limit(parseInt(pageSize) + 1).getMany();
+    return query.limit(pageSize + 1).getMany();
   }
 
   async findTeamsByCardinalNo(dto: PaginationTeamsByCardinalDto) {
@@ -94,7 +94,7 @@ export class TeamRepository extends Repository<Team> {
       .leftJoinAndSelect('project.track', 'track')
       .where(
         'track.trackName = :trackName AND track.cardinalNo = :cardinalNo',
-        { trackName, cardinalNo: parseInt(cardinalNo) },
+        { trackName, cardinalNo },
       )
       .orderBy('project.round', 'ASC');
 
@@ -103,13 +103,13 @@ export class TeamRepository extends Repository<Team> {
         `(project.round > :lastRound) OR 
           (project.round = :lastRound AND team.teamNumber > :lastTeamNumber)`,
         {
-          lastRound: parseInt(lastRound),
-          lastTeamNumber: parseInt(lastTeamNumber),
+          lastRound,
+          lastTeamNumber,
         },
       );
     }
 
-    return await query.limit(parseInt(pageSize) + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
 
   async findTeamsByProject(dto: PaginationTeamsByProjectDto) {
@@ -127,6 +127,6 @@ export class TeamRepository extends Repository<Team> {
       });
     }
 
-    return await query.limit(parseInt(pageSize) + 1).getMany();
+    return await query.limit(pageSize + 1).getMany();
   }
 }

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class PaginationTeamsDto {
   @ApiProperty({
@@ -6,7 +7,8 @@ export class PaginationTeamsDto {
     example: '10',
     required: true,
   })
-  pageSize: string;
+  @Transform(({ value }) => parseInt(value))
+  pageSize: number;
 
   @ApiProperty({
     description: '페이징을 시작할 마지막 트랙 이름 (있는 경우)',
@@ -20,19 +22,22 @@ export class PaginationTeamsDto {
     example: '1',
     required: false,
   })
-  lastCardinalNo?: string;
+  @Transform(({ value }) => parseInt(value))
+  lastCardinalNo?: number;
 
   @ApiProperty({
     description: ' 페이징을 시작할 마지막 프로젝트 회차(있는 경우)',
     example: '1',
     required: false,
   })
-  lastRound?: string;
+  @Transform(({ value }) => parseInt(value))
+  lastRound?: number;
 
   @ApiProperty({
     description: ' 페이징을 시작할 마지막 팀 번호 (있는 경우)',
     example: '1',
     required: false,
   })
-  lastTeamNumber?: string;
+  @Transform(({ value }) => parseInt(value))
+  lastTeamNumber?: number;
 }

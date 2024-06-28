@@ -56,8 +56,8 @@ export class TrackService {
 
     let next: string | null = null;
 
-    if (tracks.length > parseInt(pageSize)) {
-      const lastTrack = tracks[parseInt(pageSize) - 1];
+    if (tracks.length > pageSize) {
+      const lastTrack = tracks[pageSize - 1];
       next = `${this.baseUrl}/api/tracks/all?pageSize=${pageSize}&lastTrackName=${lastTrack.trackName}&lastCardinalNo=${lastTrack.cardinalNo}`;
       tracks.pop();
     }
@@ -71,8 +71,8 @@ export class TrackService {
 
     let next: string | null = null;
 
-    if (tracks.length > parseInt(pageSize)) {
-      const lastTrack = tracks[parseInt(pageSize) - 1];
+    if (tracks.length > pageSize) {
+      const lastTrack = tracks[pageSize - 1];
       next = `${this.baseUrl}/api/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastTrack.cardinalNo}`;
       tracks.pop();
     }

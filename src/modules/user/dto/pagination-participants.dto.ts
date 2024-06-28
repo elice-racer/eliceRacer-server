@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { IsUUID } from 'class-validator';
 
 export class PaginationParticipantsDto {
   @ApiProperty({
@@ -22,5 +23,6 @@ export class PaginationParticipantsDto {
     example: 'uuid-1234',
     required: false,
   })
+  @IsUUID('4', { message: 'uuid 값을 입력하세요' })
   lastId?: string;
 }
