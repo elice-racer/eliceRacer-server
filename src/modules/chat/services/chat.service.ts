@@ -88,7 +88,10 @@ export class ChatService {
     return this.chatRepo.createGroupChat(currentUser, users, dto.chatName);
   }
 
-  async createTeamChat(currentUser: User, dto: CreateTeamChatDto) {
+  async createTeamChat(
+    currentUser: User,
+    dto: CreateTeamChatDto,
+  ): Promise<Chat> {
     const team = await this.teamRepo.findOne({
       where: { id: dto.teamId },
       relations: ['users', 'project'],

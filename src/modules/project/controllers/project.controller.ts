@@ -7,8 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectService } from '../services/project.service';
-import { PaginationProjectsByTrackDto, PaginationProjectsDto } from '../dto';
-import { PaginationProjectsByCardinalDto } from '../dto/pagination-projects-by-carinal.dto';
+import { PaginationAllProjectsDto } from '../dto';
 import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { OutputProjectDto } from '../dto/output-project.dto';
@@ -24,23 +23,8 @@ export class ProjectController {
 
   @Get('all')
   @Serialize(OutputProjectDto)
-  async getAllProejcts(@Query() dto: PaginationProjectsDto) {
+  async getAllProejcts(@Query() dto: PaginationAllProjectsDto) {
     return await this.projectService.getAllProejcts(dto);
-  }
-
-  @Get('/tracks/all')
-  @Serialize(OutputProjectDto)
-  async getProjectsByTrack(@Query() dto: PaginationProjectsByTrackDto) {
-    return await this.projectService.getProjectsByTrack(dto);
-  }
-
-  @Get('/cardinals/all')
-  @Serialize(OutputProjectDto)
-  async getProjectsByTrackAndCardinalNo(
-    @Query()
-    dto: PaginationProjectsByCardinalDto,
-  ) {
-    return this.projectService.getProjectsByTrackAndCardinalNo(dto);
   }
 
   @Get('/:projectId')

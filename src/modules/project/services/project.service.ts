@@ -2,13 +2,9 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { ProjectRepository } from '../repositories/project.repository';
 import { TrackRepository } from 'src/modules/track/repositories';
 import { Project } from '../entities';
-import {
-  PaginationProjectsByTrackDto,
-  PaginationProjectsDto,
-  UpdateProjectReqDto,
-} from '../dto';
+import { PaginationAllProjectsDto, UpdateProjectReqDto } from '../dto';
 import { BusinessException } from 'src/exception';
-import { PaginationProjectsByCardinalDto } from '../dto/pagination-projects-by-carinal.dto';
+
 import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
 
@@ -40,69 +36,17 @@ export class ProjectService {
     return project;
   }
 
-  async getAllProejcts(dto: PaginationProjectsDto) {
-    const { pageSize } = dto;
+  async getAllProejcts(dto: PaginationAllProjectsDto) {
+    const { pageSize, trackName, cardinalNo, round } = dto;
 
     const projects = await this.projectRepo.findAllProjects(dto);
 
     let next: string | null = null;
     if (projects.length > pageSize) {
       const lastProject = projects[pageSize - 1];
-      next = `${this.baseUrl}/api/projects/all?pageSize=${pageSize}&lastTrackName=${lastProject.track.trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
+      next = `${this.baseUrl}/api/projects/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&round=${round}&lastTrackName=${lastProject.track.trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
       projects.pop();
     }
-    return { projects, pagination: { next, count: projects.length } };
-  }
-
-  async getProjectsByTrack(dto: PaginationProjectsByTrackDto) {
-    const { trackName, pageSize } = dto;
-
-    const track = await this.tarckRepo.findOne({ where: { trackName } });
-
-    if (!track)
-      throw new BusinessException(
-        `project`,
-        `해당 트랙(${trackName})이 존재하지 않습니다.`,
-        `해당 트랙(${trackName})이 존재하지 않습니다.`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    const projects = await this.projectRepo.findProjectsByTrack(dto);
-
-    let next: string | null = null;
-    if (projects.length > pageSize) {
-      const lastProject = projects[pageSize - 1];
-      next = `${this.baseUrl}/api/projects/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
-      projects.pop();
-    }
-
-    return { projects, pagination: { next, count: projects.length } };
-  }
-  async getProjectsByTrackAndCardinalNo(dto: PaginationProjectsByCardinalDto) {
-    const { trackName, cardinalNo, pageSize } = dto;
-
-    const track = await this.tarckRepo.findOne({
-      where: { trackName, cardinalNo },
-    });
-
-    if (!track)
-      throw new BusinessException(
-        `project`,
-        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
-        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    const projects =
-      await this.projectRepo.findProjectsByTrackAndCardinalNo(dto);
-
-    let next: string | null = null;
-    if (projects.length > pageSize) {
-      const lastProject = projects[pageSize - 1];
-      next = `${this.baseUrl}/api/projects/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${lastProject.track.cardinalNo}&lastRound=${lastProject.round}`;
-      projects.pop();
-    }
-
     return { projects, pagination: { next, count: projects.length } };
   }
 

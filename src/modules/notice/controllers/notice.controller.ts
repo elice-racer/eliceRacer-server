@@ -23,7 +23,9 @@ export class NoticeController {
   @Get('/all')
   @Serialize(OutputNoticeDto)
   async getAllNotice(@Query() dto: PaginationNoticeDto) {
-    return await this.noticeService.getAllNotice(dto);
+    const { notices, pagination } = await this.noticeService.getAllNotice(dto);
+
+    return { notices, pagination };
   }
 
   @Get('/:noticeId')

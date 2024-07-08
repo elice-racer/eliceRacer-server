@@ -1,14 +1,10 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { TrackRepository } from '../repositories';
-import {
-  PaginationTrackByNameDto,
-  PaginationTrackDto,
-  TrackDto,
-  TrackResDto,
-} from '../dto';
+import { TrackDto, TrackResDto } from '../dto';
 import { BusinessException } from 'src/exception';
 import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
+import { PaginationAllTracksDto } from '../dto/pagination-all-tracks.dto';
 
 @Injectable()
 export class TrackService {
@@ -33,23 +29,7 @@ export class TrackService {
     return track;
   }
 
-  async getTrackByCardinalNo(trackName: string, cardinalNo: string) {
-    const track = await this.trackRepo.findOne({
-      where: { trackName, cardinalNo: parseInt(cardinalNo) },
-    });
-
-    if (!track)
-      throw new BusinessException(
-        `track`,
-        `해당 트랙이 존재하지 않습니다.`,
-        `해당 트랙이 존재하지 않습니다.`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    return track;
-  }
-
-  async getAllTracks(dto: PaginationTrackDto) {
+  async getAllTracks(dto: PaginationAllTracksDto) {
     const { pageSize } = dto;
 
     const tracks = await this.trackRepo.findAllTracks(dto);
@@ -58,22 +38,7 @@ export class TrackService {
 
     if (tracks.length > pageSize) {
       const lastTrack = tracks[pageSize - 1];
-      next = `${this.baseUrl}/api/tracks/all?pageSize=${pageSize}&lastTrackName=${lastTrack.trackName}&lastCardinalNo=${lastTrack.cardinalNo}`;
-      tracks.pop();
-    }
-    return { tracks, pagination: { next, count: tracks.length } };
-  }
-
-  async getTracksByTrackName(dto: PaginationTrackByNameDto) {
-    const { pageSize, trackName } = dto;
-
-    const tracks = await this.trackRepo.findTracksByTrackName(dto);
-
-    let next: string | null = null;
-
-    if (tracks.length > pageSize) {
-      const lastTrack = tracks[pageSize - 1];
-      next = `${this.baseUrl}/api/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastTrack.cardinalNo}`;
+      next = `${this.baseUrl}/api/tracks/all?pageSize=${pageSize}&trackName=${lastTrack.trackName}&cardinalNo=${lastTrack.cardinalNo}&lastTrackName=${lastTrack.trackName}&lastCardinalNo=${lastTrack.cardinalNo}`;
       tracks.pop();
     }
     return { tracks, pagination: { next, count: tracks.length } };
