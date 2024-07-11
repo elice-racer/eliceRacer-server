@@ -9,15 +9,18 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { VerifyCodeReqDto } from '../dto/verify-code-req.dto';
-import { PasswordResetReqDto, VerifyCodeResDto } from '../dto';
-import { LoginReqDto } from '../dto/login-req.dto';
+import {
+  LoginReqDto,
+  SendPasswordUpdateSmsReqDto,
+  updatePasswordReqDto,
+  VerifyCodeReqDto,
+  VerifyCodeResDto,
+  VerifyPasswordUpdateSmsReqDto,
+} from '../dto';
 import { JwtAuthGuard } from 'src/common/guards';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { Request, Response } from 'express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { VerifyPasswordResetReqDto } from '../dto/verify-password-reset-req.dto';
-import { updatePasswordReqDto } from '../dto/update-password-req.dto';
 
 @ApiTags('auth')
 @UseInterceptors(ResponseInterceptor)
@@ -97,16 +100,16 @@ export class AuthController {
   //비밀번호 바꾸기
   //1인증문자 보내기 2 번호 체크하기 3.새 비번받고 업데이트하기
   @ApiOperation({ summary: '비밀번호 업데이트 전 인증문자를 보내기 요청' })
-  @Post('/passwords/phones')
-  async sendPwCode(@Body() dto: PasswordResetReqDto) {
+  @Post('/passwords')
+  async sendPwCode(@Body() dto: SendPasswordUpdateSmsReqDto) {
     //userId값을 반환할거
     const userId = await this.authService.handlePasswordResetVerification(dto);
     return { userId };
   }
 
   @ApiOperation({ summary: '인증 번호 검증 요청' })
-  @Post('/passwords/verify-code')
-  async verifyPwAuthCode(@Body() dto: VerifyPasswordResetReqDto) {
+  @Post('/passwords/confirmations')
+  async verifyPwAuthCode(@Body() dto: VerifyPasswordUpdateSmsReqDto) {
     return await this.authService.handlePasswordResetCode(
       dto.phoneNumber,
       dto.authCode,
@@ -117,7 +120,7 @@ export class AuthController {
     summary:
       '인증번호가 검증된 후 비밀번호 업데이트 요청, *인증문자 보낼때 반환값인 userId값을 꼭 보내야 함',
   })
-  @Patch('/password')
+  @Patch('/passwords')
   async updatePassword(@Body() dto: updatePasswordReqDto) {
     await this.authService.handleUpdatePassword(dto);
   }
