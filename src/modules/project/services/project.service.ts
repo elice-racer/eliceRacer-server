@@ -19,10 +19,10 @@ export class ProjectService {
     this.baseUrl = configService.get<string>(ENV_SERVER_URL_KEY);
   }
 
-  async getProject(projectId: string) {
+  async getProjectByProjectId(projectId: string) {
     const project = this.projectRepo.findOne({
       where: { id: projectId },
-      relations: ['track'],
+      relations: ['track', 'teams', 'teams.users'],
     });
 
     if (!project)
@@ -36,7 +36,7 @@ export class ProjectService {
     return project;
   }
 
-  async getAllProejcts(dto: PaginationAllProjectsDto) {
+  async getProejcts(dto: PaginationAllProjectsDto) {
     const { pageSize, trackName, cardinalNo, round } = dto;
 
     const projects = await this.projectRepo.findAllProjects(dto);

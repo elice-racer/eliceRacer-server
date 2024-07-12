@@ -21,15 +21,15 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
-  @Get('all')
+  @Get('')
   @Serialize(OutputProjectDto)
-  async getAllProejcts(@Query() dto: PaginationAllProjectsDto) {
-    return await this.projectService.getAllProejcts(dto);
+  async getProejcts(@Query() dto: PaginationAllProjectsDto) {
+    return await this.projectService.getProejcts(dto);
   }
 
   @Get('/:projectId')
   @Serialize(OutputProjectDto)
-  async getProject(@Param('projectId') projectId: string) {
-    return this.projectService.getProject(projectId);
+  async getProjectByProjectId(@Param('projectId') projectId: string) {
+    return this.projectService.getProjectByProjectId(projectId);
   }
 }
