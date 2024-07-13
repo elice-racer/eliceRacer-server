@@ -1,5 +1,5 @@
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { OutputTeamDto } from 'src/modules/team/dto';
 import { Team } from 'src/modules/team/entities/team.entity';
 import { OutputUserDto } from 'src/modules/user/dto';
@@ -36,7 +36,15 @@ export class CreateChatResDto {
     type: Team,
   })
   @Expose()
+  @Type(() => OutputTeamDto)
   team: OutputTeamDto;
+
+  @Expose()
+  @Transform(({ obj }) => {
+    const test = obj.users.filter((user) => user.role === 'COACH');
+    return test.length;
+  })
+  userCount: number;
 
   @ApiProperty({
     description: '채팅방 참여 유저 정보',
@@ -44,5 +52,6 @@ export class CreateChatResDto {
     type: User,
   })
   @Expose()
-  users: OutputUserDto;
+  @Type(() => OutputUserDto)
+  users: OutputUserDto[];
 }
