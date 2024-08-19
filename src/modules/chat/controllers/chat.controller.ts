@@ -21,8 +21,8 @@ import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { JwtAuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { User } from 'src/modules/user/entities';
-import { MessageResDto } from '../dto/message-res.dto';
-import { CreateChatResDto } from '../dto/create-chat-res.dto';
+import { MessageResDto } from '../dto/responses/message-res.dto';
+import { CreateChatResDto } from '../dto/responses/create-chat-res.dto';
 
 @ApiTags('chat')
 @UseInterceptors(ResponseInterceptor)

@@ -8,7 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class CreateAdminDto {
+export class CreateAdminReqDto {
   @ApiProperty({
     description: '관리자 가입 이메일',
     example: 'test@elicer.com',

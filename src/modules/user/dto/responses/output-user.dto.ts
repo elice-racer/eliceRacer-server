@@ -1,9 +1,6 @@
 import { Expose } from 'class-transformer';
-import { DetailTeamResDto } from 'src/modules/team/dto';
-import { TrackResDto } from 'src/modules/track/dto';
-import { OutputSkillDto } from './ouput-skill.dto';
-import { UserRole } from '../entities';
 import { IsUrl } from 'class-validator';
+import { UserRole } from '../../entities';
 
 export class OutputUserDto {
   @Expose()
@@ -48,13 +45,4 @@ export class OutputUserDto {
 
   @Expose()
   status: number;
-
-  @Expose()
-  skills: OutputSkillDto;
-
-  @Expose()
-  track: TrackResDto;
-
-  @Expose()
-  teams: DetailTeamResDto;
 }

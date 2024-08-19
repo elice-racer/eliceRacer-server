@@ -4,7 +4,8 @@ import { TrackDto, TrackResDto } from '../dto';
 import { BusinessException } from 'src/exception';
 import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
-import { PaginationAllTracksDto } from '../dto/pagination-all-tracks.dto';
+import { PaginationAllTracksDto } from '../dto/requesets/pagination-all-tracks.dto';
+import { Track } from '../entities';
 
 @Injectable()
 export class TrackService {
@@ -44,7 +45,7 @@ export class TrackService {
     return { tracks, pagination: { next, count: tracks.length } };
   }
 
-  async createTrack(dto: TrackDto): Promise<TrackResDto> {
+  async createTrack(dto: TrackDto): Promise<Track> {
     const track = await this.trackRepo.findOne({
       where: { trackName: dto.trackName, cardinalNo: dto.cardinalNo },
     });
@@ -56,6 +57,7 @@ export class TrackService {
         `해당 트랙(${dto.trackName}${dto.cardinalNo})이 이미 존재합니다.`,
         HttpStatus.CONFLICT,
       );
+
     return await this.trackRepo.createTrack(dto);
   }
 

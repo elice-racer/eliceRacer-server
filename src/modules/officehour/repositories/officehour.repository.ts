@@ -12,4 +12,6 @@ export class OfficehourRepository extends Repository<Officehour> {
   ) {
     super(repo.target, repo.manager, repo.queryRunner);
   }
+
+  async updateOfficehour() {}
 }

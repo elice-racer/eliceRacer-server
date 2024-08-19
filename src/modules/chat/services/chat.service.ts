@@ -8,6 +8,7 @@ import { Chat, ChatType } from '../entities/chat.entity';
 import { ChatGateway } from '../chat.gateway';
 import { User } from 'src/modules/user/entities';
 import { In } from 'typeorm';
+import { ChatRoomsReqDto } from '../dto/requesets/chat-rooms-req.dto';
 
 @Injectable()
 export class ChatService {
@@ -33,6 +34,21 @@ export class ChatService {
       );
 
     return chat;
+  }
+
+  async getChatRooms(dto: ChatRoomsReqDto) {
+    const chatRooms = await this.chatRepo.findChatRooms(dto);
+
+    if (!chatRooms)
+      throw new BusinessException(
+        `chat`,
+        `채팅방이 존재하지 않습니다.`,
+        `채팅방이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    console.log(chatRooms);
+    return chatRooms;
   }
 
   async getChatByTeamId(teamId: string) {
@@ -110,7 +126,7 @@ export class ChatService {
   ): Promise<Chat> {
     const team = await this.teamRepo.findOne({
       where: { id: dto.teamId },
-      relations: ['users', 'project'],
+      relations: ['users', 'project', 'chat'],
     });
 
     if (!team)
@@ -121,7 +137,7 @@ export class ChatService {
         HttpStatus.NOT_FOUND,
       );
 
-    if (team.isChatCreated)
+    if (team.chat)
       throw new BusinessException(
         'team',
         '해당 팀은 이미 채팅방이 존재합니다',

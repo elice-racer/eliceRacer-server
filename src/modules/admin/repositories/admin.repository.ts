@@ -1,6 +1,6 @@
 import { User, UserRole, UserStatus } from 'src/modules/user/entities';
 import { UserRepository } from 'src/modules/user/repositories';
-import { CreateAdminDto } from '../dto';
+import { CreateAdminReqDto } from '../dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 
@@ -26,7 +26,7 @@ export class AdminRepository {
   }
 
   async createAdmin(
-    dto: CreateAdminDto,
+    dto: CreateAdminReqDto,
     hashedPassword: string,
   ): Promise<User> {
     const user = new User();

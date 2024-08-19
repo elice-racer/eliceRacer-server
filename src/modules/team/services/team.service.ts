@@ -24,7 +24,13 @@ export class TeamService {
   }
 
   async getTeam(teamId: string) {
-    const team = await this.teamRepo.findOneBy({ id: teamId });
+    //TODO 여기서 부터하기 track도 필요
+    const team = await this.teamRepo.findTeamDetail(teamId);
+
+    // await this.teamRepo.findOne({
+    //   where: { id: teamId },
+    //   relations: ['users', 'project'],
+    // });
 
     if (!team)
       throw new BusinessException(

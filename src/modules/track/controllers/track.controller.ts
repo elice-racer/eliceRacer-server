@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { TrackService } from '../services/track.service';
 import { ApiTags } from '@nestjs/swagger';
-import { PaginationAllTracksDto } from '../dto/pagination-all-tracks.dto';
+import { PaginationAllTracksDto } from '../dto/requesets/pagination-all-tracks.dto';
 
 @ApiTags('track')
 @Controller('tracks')

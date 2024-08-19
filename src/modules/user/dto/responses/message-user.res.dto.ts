@@ -1,6 +1,6 @@
 import { TrackResDto } from 'src/modules/track/dto';
-import { UserRole } from '../entities';
 import { Expose } from 'class-transformer';
+import { UserRole } from '../../entities';
 
 export class MessageUserDto {
   @Expose()

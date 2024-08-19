@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateAdminDto } from '../dto/create-admin.dto';
+import { CreateAdminReqDto } from '../dto/requests/create-admin-req.dto';
 import * as argon2 from 'argon2';
 import { excelDateToJSDate, generateToken } from 'src/common/utils';
 import { MailService } from 'src/modules/mail/mail.service';
@@ -48,7 +48,7 @@ export class AdminService {
     return result;
   }
 
-  async signup(dto: CreateAdminDto): Promise<void> {
+  async signup(dto: CreateAdminReqDto): Promise<void> {
     const verificationToken = generateToken();
 
     const admin = await this.createAdmin(dto);
@@ -67,7 +67,7 @@ export class AdminService {
     ]);
   }
 
-  async createAdmin(dto: CreateAdminDto) {
+  async createAdmin(dto: CreateAdminReqDto) {
     const user = await this.adminRepo.findUserByEmailOrUsername(dto.email);
 
     if (user)

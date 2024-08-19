@@ -20,7 +20,9 @@ jest.mock('./src/modules/team/services/team.service');
 jest.mock('./src/modules/admin/services/admin.service');
 jest.mock('./src/modules/user/services/skill.service');
 jest.mock('./src/modules/notice/services/notice.service');
-
+jest.mock('./src/modules/chat/services/chat.service');
+jest.mock('./src/modules/chat/services/message.service');
+jest.mock('./src/modules/chat/chat.gateway');
 //Repository
 jest.mock('./src/modules/auth/repositories/verification.repository');
 jest.mock('./src/modules/user/repositories/user.repository');
@@ -32,6 +34,7 @@ jest.mock('./src/modules/project/repositories/project.repository');
 jest.mock('./src/modules/team/repositories/team.repository');
 jest.mock('./src/modules/user/repositories/skill.repository');
 jest.mock('./src/modules/notice/repositories/notice.repository');
+jest.mock('./src/modules/chat/repositories/chat.repository');
 
 //utils
 jest.mock('./src/common/utils/verification-number-generator');

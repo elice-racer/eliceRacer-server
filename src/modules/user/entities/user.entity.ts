@@ -21,7 +21,7 @@ export enum UserStatus {
   VERIFIED_AND_REGISTERED = 2,
 }
 
-@Entity({ name: 'users' }) // 데이터베이스 테이블 이름은 스네이크 케이스
+@Entity({ name: 'users' })
 export class User extends BaseEntity {
   @Column({ nullable: true, unique: true })
   email: string;
