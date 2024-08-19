@@ -35,6 +35,24 @@ export class ChatService {
     return chat;
   }
 
+  async getChatByTeamId(teamId: string) {
+    const chat = await this.chatRepo.findOne({
+      where: {
+        team: { id: teamId },
+      },
+    });
+
+    if (!chat)
+      throw new BusinessException(
+        `chat`,
+        `채팅방이 존재하지 않습니다.`,
+        `채팅방이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return chat;
+  }
+
   async getChatOfCurrentUser(userId: string): Promise<Chat[]> {
     const user = await this.userRepo.findOne({
       where: { id: userId },
@@ -52,8 +70,6 @@ export class ChatService {
     return user.chats;
   }
 
-  //TODO chatRoom 생성하는 건 하나만 두고
-  //TODO team일경우에는 호출하는 방식으로 수정
   async createChat(currentUser: User, dto: CreateChatRoomDto) {
     const users = await this.userRepo.find({ where: { id: In(dto.userIds) } });
 
@@ -88,7 +104,10 @@ export class ChatService {
     return this.chatRepo.createGroupChat(currentUser, users, dto.chatName);
   }
 
-  async createTeamChat(currentUser: User, dto: CreateTeamChatDto) {
+  async createTeamChat(
+    currentUser: User,
+    dto: CreateTeamChatDto,
+  ): Promise<Chat> {
     const team = await this.teamRepo.findOne({
       where: { id: dto.teamId },
       relations: ['users', 'project'],

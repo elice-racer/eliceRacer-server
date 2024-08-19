@@ -1,10 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class VerifyPasswordResetReqDto {
+export class VerifyPasswordUpdateSmsReqDto {
   @ApiProperty({
     description: '등록되어있는 핸드폰번호',
+    example: '01012345678',
+    required: true,
   })
+  @IsString()
   @IsNotEmpty()
   phoneNumber: string;
 
@@ -13,6 +16,7 @@ export class VerifyPasswordResetReqDto {
     example: '123456',
     required: true,
   })
+  @IsString()
   @IsNotEmpty()
   authCode: string;
 }

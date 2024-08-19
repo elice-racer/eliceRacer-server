@@ -14,7 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
-import { CreateAdminDto, VerifyEamilDto } from '../dto';
+import { CreateAdminDto, VerifyEamilReqDto } from '../dto';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { TrackService } from 'src/modules/track/services/track.service';
 import { TrackDto, TrackResDto } from 'src/modules/track/dto';
@@ -28,7 +28,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   CreateNoticeDto,
   OutputNoticeDto,
-  UpdateNoticeDto,
+  UpdateNoticeReqDto,
 } from 'src/modules/notice/dto';
 import { NoticeService } from 'src/modules/notice/services/notice.service';
 import { CurrentUser } from 'src/common/decorators';
@@ -60,12 +60,15 @@ export class AdminController {
   ) {}
 
   @Post('/signup')
-  async singup(@Body() dto: CreateAdminDto) {
+  async singup(@Body() dto: CreateAdminDto): Promise<void> {
     return await this.adminService.signup(dto);
   }
 
   @Get('/verify-email')
-  async verifyEmail(@Res() res: Response, @Query() dto: VerifyEamilDto) {
+  async verifyEmail(
+    @Res() res: Response,
+    @Query() dto: VerifyEamilReqDto,
+  ): Promise<void> {
     const result = await this.adminService.verifyEmail(dto.id, dto.token);
     if (result) res.redirect('https://elicerracer.store/auth/success-auth');
     if (!result) res.redirect('https://elicerracer.store/auth/fail');
@@ -134,7 +137,7 @@ export class AdminController {
     await this.teamService.deleteTeam(teamId);
   }
 
-  @Patch('/teams/:teamId')
+  @Put('/teams/:teamId')
   @Serialize(OutputTeamDto)
   async updateTeamMember(
     @Param('teamId') teamId: string,
@@ -159,7 +162,7 @@ export class AdminController {
   async updateNotice(
     @CurrentUser() user: User,
     @Param('noticeId') noticeId: string,
-    @Body() dto: UpdateNoticeDto,
+    @Body() dto: UpdateNoticeReqDto,
   ) {
     return await this.noticeService.updateNotice(user.id, noticeId, dto);
   }

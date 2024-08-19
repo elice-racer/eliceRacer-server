@@ -56,6 +56,12 @@ export class ChatController {
     return await this.chatService.createChat(currentUser, dto);
   }
 
+  @Get('/teams/:teamId')
+  @Serialize(ChatRoomResDto)
+  async getTeamChat(@Param('teamId') teamId: string) {
+    return await this.chatService.getChatByTeamId(teamId);
+  }
+
   @Get('/:chatId')
   @Serialize(CreateChatResDto)
   async getChatRoom(@Param('chatId') chatId: string) {

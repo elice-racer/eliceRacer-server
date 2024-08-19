@@ -9,14 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { TeamService } from '../services/team.service';
-import {
-  OutputTeamDto,
-  PaginationTeamsByCardinalDto,
-  PaginationTeamsByProjectDto,
-  PaginationTeamsByTrackDto,
-  PaginationTeamsDto,
-  UpdateTeamReqDto,
-} from '../dto';
+import { OutputTeamDto, PaginationAllTeamsDto, UpdateTeamReqDto } from '../dto';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards';
@@ -33,26 +26,8 @@ export class TeamController {
 
   @Get('/all')
   @Serialize(OutputTeamDto)
-  async getAllTeams(@Query() dto: PaginationTeamsDto) {
+  async getAllTeams(@Query() dto: PaginationAllTeamsDto) {
     return await this.teamService.getAllTeams(dto);
-  }
-
-  @Get('/tracks/all')
-  @Serialize(OutputTeamDto)
-  async getTeamsByTrack(@Query() dto: PaginationTeamsByTrackDto) {
-    return await this.teamService.getTeamsByTrack(dto);
-  }
-
-  @Get('/cardinals/all')
-  @Serialize(OutputTeamDto)
-  async getTeamsByCardinalNo(@Query() dto: PaginationTeamsByCardinalDto) {
-    return await this.teamService.getTeamsByCardinalNo(dto);
-  }
-
-  @Get('/projects/all')
-  @Serialize(OutputTeamDto)
-  async getTeamsByProjects(@Query() dto: PaginationTeamsByProjectDto) {
-    return await this.teamService.getTeamsByProject(dto);
   }
 
   @Get('/:teamId')
