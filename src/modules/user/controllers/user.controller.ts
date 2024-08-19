@@ -148,6 +148,7 @@ export class UserController {
 
   @Put('/profileImages')
   @UseGuards(JwtAuthGuard)
+  @Serialize(OutputUserDto)
   @ApiBearerAuth('access-token')
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfileImage(

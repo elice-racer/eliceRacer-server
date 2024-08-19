@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-
+import { IsUrl } from 'class-validator';
 import { UserRole } from '../../entities';
 
 export class OutputUserDto {
@@ -37,6 +37,7 @@ export class OutputUserDto {
   tmi: string;
 
   @Expose()
+  @IsUrl()
   profileImage: string;
 
   @Expose()
