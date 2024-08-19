@@ -6,12 +6,12 @@ import { BusinessException } from 'src/exception';
 import { Message } from '../entities';
 import { User } from 'src/modules/user/entities';
 import { Chat } from '../entities/chat.entity';
-import { SendMessageDto } from '../dto/send-message.dto';
+import { SendMessageDto } from '../dto/requesets/send-message.dto';
 import { PaginationMessagesDto } from '../dto';
 import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
 import { Serialize } from 'src/interceptors';
-import { MessageResDto } from '../dto/message-res.dto';
+import { MessageResDto } from '../dto/responses/message-res.dto';
 import { plainToInstance } from 'class-transformer';
 
 @Injectable()

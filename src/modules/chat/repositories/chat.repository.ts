@@ -4,6 +4,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/modules/user/entities';
 import { Team } from 'src/modules/team/entities/team.entity';
+import { ChatRoomsReqDto } from '../dto/requesets/chat-rooms-req.dto';
 
 @Injectable()
 export class ChatRepository extends Repository<Chat> {
@@ -14,6 +15,33 @@ export class ChatRepository extends Repository<Chat> {
     private readonly entityManager: EntityManager,
   ) {
     super(repo.target, repo.manager, repo.queryRunner);
+  }
+
+  async findChatRooms(dto: ChatRoomsReqDto) {
+    const { trackName, cardinalNo, round, type } = dto;
+
+    const query = this.repo
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.users', 'user')
+      .leftJoin('chat.team', 'team')
+      .leftJoinAndSelect('team.project', 'project')
+      .leftJoinAndSelect('project.track', 'track')
+      .orderBy('track.trackName', 'ASC')
+      .addOrderBy('track.cardinalNo', 'ASC')
+      .addOrderBy('project.round', 'ASC')
+      .addOrderBy('team.teamNumber', 'ASC');
+
+    if (trackName !== 'ALL')
+      query.andWhere('track.trackName = :trackName', { trackName });
+
+    if (cardinalNo !== 0)
+      query.andWhere('track.cardinalNo =:cardinalNo', { cardinalNo });
+
+    if (round !== 0) query.andWhere('project.round = :round', { round });
+
+    if (type !== 'ALL') query.andWhere('chat.type = :type', { type });
+
+    return query.getMany();
   }
 
   async findPersonalChat(
@@ -84,10 +112,6 @@ export class ChatRepository extends Repository<Chat> {
       );
       const savedChat = await queryRunner.manager.save(chat);
 
-      if (team) {
-        await this.updateTeamChatStatus(queryRunner.manager, team);
-      }
-
       await queryRunner.commitTransaction();
       return savedChat;
     } catch (error) {
@@ -117,11 +141,6 @@ export class ChatRepository extends Repository<Chat> {
     }
 
     return chat;
-  }
-
-  private async updateTeamChatStatus(manager: EntityManager, team: Team) {
-    team.isChatCreated = true;
-    await manager.save(team);
   }
 
   async isMember(chatId: string, userId: string): Promise<boolean> {

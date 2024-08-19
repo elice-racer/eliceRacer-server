@@ -12,7 +12,6 @@ export const validateData = (
   const validData = data
     .map((item) => {
       const newItem: any = {};
-
       // fields를 사용하여 keyCache 구축 및 필드 검증
       fields.forEach((field) => {
         if (!keyCache[field.key]) {
@@ -59,13 +58,15 @@ export const validateData = (
   return validData;
 };
 
-export const validateCoaches = (data: any[], fields: any[]): any[] => {
-  const keyCache: any = {};
+export const validateDataWithCoaches = (
+  data: Record<string, string | string[]>[],
+  fields: Field[],
+) => {
+  const keyCache: Record<string, string> = {};
 
   const validData = data
     .map((item) => {
       const newItem: any = {};
-
       // fields를 사용하여 keyCache 구축 및 필드 검증
       fields.forEach((field) => {
         if (!keyCache[field.key]) {
@@ -80,7 +81,7 @@ export const validateCoaches = (data: any[], fields: any[]): any[] => {
         }
       });
       const coaches = Object.keys(item)
-        .filter((key) => key.toLowerCase().includes('코치'))
+        .filter((key) => key.includes('코치'))
         .map((key) => item[key])
         .filter(Boolean);
       if (coaches.length > 0) {
@@ -88,6 +89,32 @@ export const validateCoaches = (data: any[], fields: any[]): any[] => {
       } else {
         newItem.coaches = []; // 코치 정보가 없다면 빈 배열 할당
       }
+
+      const filledFields = fields.filter((field) => newItem[field.key]).length;
+      const missingFields = fields.filter(
+        (field) => !newItem[field.key],
+      ).length;
+
+      if (filledFields > 0 && missingFields > 0) {
+        throw new BusinessException(
+          'admin',
+          `${JSON.stringify(item)}필드에 빈 값이 존재합니다.`,
+          `${JSON.stringify(item)}필드에 빈 값이 존재합니다. 채워서 다시 입력해주세요`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // 모든 필수 필드가 존재하는지 확인
+      const hasAllRequiredFields = fields.every((field) => newItem[field.key]);
+
+      if (!hasAllRequiredFields) {
+        console.error(
+          `Missing required fields in item: ${JSON.stringify(item)}`,
+        );
+        return null; // 해당 엔트리 건너뛰기
+      }
+
+      // 필수 필드가 모두 있으면 newItem 반환
       return newItem;
     })
     .filter((item) => item !== null); // null 아닌 항목만 필터링

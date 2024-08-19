@@ -137,7 +137,7 @@ export class OfficehourService {
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
 
     date.setUTCHours(hours, minutes, 0, 0); // UTC 기준 시간으로 설정
-    console.log(date);
+
     return date;
   }
 }

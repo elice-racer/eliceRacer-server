@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
 import { NoticeService } from '../services/notice.service';
 import {
+  DetailNoticeResDto,
   OutputNoticeDto,
   PaginationNoticeDto,
   PaginationNoticesByAuthorDto,
@@ -23,11 +24,13 @@ export class NoticeController {
   @Get('/all')
   @Serialize(OutputNoticeDto)
   async getAllNotice(@Query() dto: PaginationNoticeDto) {
-    return await this.noticeService.getAllNotice(dto);
+    const { notices, pagination } = await this.noticeService.getAllNotice(dto);
+
+    return { notices, pagination };
   }
 
   @Get('/:noticeId')
-  @Serialize(OutputNoticeDto)
+  @Serialize(DetailNoticeResDto)
   async getNotice(@Param('noticeId') noticeId: string) {
     return await this.noticeService.getNotice(noticeId);
   }

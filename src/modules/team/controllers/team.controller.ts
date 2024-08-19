@@ -3,18 +3,16 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
+  Put,
   Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { TeamService } from '../services/team.service';
 import {
+  DetailTeamResDto,
   OutputTeamDto,
-  PaginationTeamsByCardinalDto,
-  PaginationTeamsByProjectDto,
-  PaginationTeamsByTrackDto,
-  PaginationTeamsDto,
+  PaginationAllTeamsDto,
   UpdateTeamReqDto,
 } from '../dto';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
@@ -33,35 +31,22 @@ export class TeamController {
 
   @Get('/all')
   @Serialize(OutputTeamDto)
-  async getAllTeams(@Query() dto: PaginationTeamsDto) {
+  async getAllTeams(@Query() dto: PaginationAllTeamsDto) {
     return await this.teamService.getAllTeams(dto);
   }
 
-  @Get('/tracks/all')
-  @Serialize(OutputTeamDto)
-  async getTeamsByTrack(@Query() dto: PaginationTeamsByTrackDto) {
-    return await this.teamService.getTeamsByTrack(dto);
-  }
-
-  @Get('/cardinals/all')
-  @Serialize(OutputTeamDto)
-  async getTeamsByCardinalNo(@Query() dto: PaginationTeamsByCardinalDto) {
-    return await this.teamService.getTeamsByCardinalNo(dto);
-  }
-
-  @Get('/projects/all')
-  @Serialize(OutputTeamDto)
-  async getTeamsByProjects(@Query() dto: PaginationTeamsByProjectDto) {
-    return await this.teamService.getTeamsByProject(dto);
-  }
-
   @Get('/:teamId')
-  @Serialize(OutputTeamDto)
+  @Serialize(DetailTeamResDto)
   async getTeam(@Param('teamId') teamId: string) {
     return await this.teamService.getTeam(teamId);
   }
 
-  @Patch('/:teamId')
+  //TODO 동시성제어
+  //PATCH 에서 PUT으로 바꿈
+  //TODO 팀 이름, 깃랩, 노션 수정 별개로 할 수 있게 하기.
+  //TODO 그리고 team Number 수정하는거 빼기
+  //TODO 어떻게 업데이트 할지 정하기
+  @Put('/:teamId')
   @Serialize(OutputTeamDto)
   async updateTeam(
     @CurrentUser() user: User,

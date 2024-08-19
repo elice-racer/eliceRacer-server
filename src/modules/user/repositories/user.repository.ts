@@ -4,11 +4,8 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import {
   CreateUserDto,
+  PaginationAllUsersDto,
   PaginationParticipantsDto,
-  PaginationRacersByCardinalDto,
-  PaginationRacersByTrackDto,
-  PaginationRacersDto,
-  PaginationUsersDto,
 } from '../dto';
 
 @Injectable()
@@ -43,6 +40,48 @@ export class UserRepository extends Repository<User> {
     return this.repo.save(mergedUser);
   }
 
+  async findAllUsers(user: User, dto: PaginationAllUsersDto) {
+    const {
+      pageSize,
+      trackName,
+      cardinalNo,
+      role,
+      lastId,
+      lastTrackName,
+      lastCardinalNo,
+      lastRealName,
+    } = dto;
+
+    const query = this.repo
+      .createQueryBuilder('user')
+      .where('user.id != :userId', { userId: user.id })
+      .leftJoinAndSelect('user.track', 'track')
+      .orderBy('track.trackName', 'ASC')
+      .addOrderBy('track.cardinalNo', 'ASC')
+      .addOrderBy('user.realName', 'ASC')
+      .addOrderBy('user.id', 'ASC');
+
+    if (role !== 'ALL') query.andWhere('user.role = :role', { role });
+
+    if (trackName !== 'ALL')
+      query.andWhere('track.trackName = :trackName', { trackName });
+
+    if (cardinalNo !== 0)
+      query.andWhere('track.cardinalNo = :cardinalNo', { cardinalNo });
+
+    if (lastRealName && lastId && lastTrackName && lastCardinalNo) {
+      query.andWhere(
+        '(track.trackName > :trackName) OR ' +
+          '(track.trackName = :lastTrackName AND track.cardinalNo > :lastCardinalNo) OR ' +
+          '(track.trackName = :lastTrackName AND track.cardinalNo = :lastCardinalNo AND user.realName > :lastRealName) OR ' +
+          '(track.trackName = :lastTrackName AND track.cardinalNo = :lastCardinalNo AND user.realName = :lastRealName AND user.id > :lastId)',
+        { lastRealName, lastId, lastTrackName, lastCardinalNo },
+      );
+    }
+
+    return query.limit(pageSize + 1).getMany();
+  }
+
   async findUserByIdWithTracks(userId: string): Promise<User> | undefined {
     return this.repo
       .createQueryBuilder('users')
@@ -51,114 +90,6 @@ export class UserRepository extends Repository<User> {
         userId,
       })
       .getOne();
-  }
-
-  async findAllUsers(user: User, dto: PaginationUsersDto) {
-    const { lastRealName, lastId, pageSize, role } = dto;
-
-    const query = this.repo
-      .createQueryBuilder('users')
-      .andWhere('user.id != :userId', { userId: user.id })
-      .orderBy('users.realName', 'ASC')
-      .addOrderBy('users.id', 'ASC');
-
-    if (role !== 'ALL') {
-      query.where('users.role = :role', { role });
-    }
-    if (lastRealName && lastId) {
-      query.andWhere(
-        `(users.realName > :lastRealName) OR (users.realName = :lastRealName AND users.id > :lastId) `,
-        { lastRealName, lastId },
-      );
-    }
-
-    return await query.limit(pageSize + 1).getMany();
-  }
-
-  async findAllRcers(
-    dto: PaginationRacersDto,
-    pageSize: number,
-  ): Promise<User[] | []> {
-    const { lastTrackName, lastCardinalNo, lastRealName, lastId } = dto;
-    const role = UserRole.RACER;
-
-    const query = this.repo
-      .createQueryBuilder('users')
-      .leftJoinAndSelect('users.track', 'tracks')
-      .where('users.role = :role', { role })
-      .orderBy('tracks.trackName', 'ASC')
-      .addOrderBy('tracks.cardinalNo', 'ASC')
-      .addOrderBy('users.realName', 'ASC')
-      .addOrderBy('users.id', 'ASC');
-
-    if (lastTrackName && lastCardinalNo && lastRealName && lastId) {
-      query.andWhere(
-        `(tracks.trackName > :lastTrackName) OR (tracks.trackName = :lastTrackName AND tracks.cardinalNo > :lastCardinalNo) OR 
-          (tracks.trackName = :lastTrackName AND tracks.cardinalNo = :lastCardinalNo AND users.realName > :lastRealName) OR
-          (tracks.trackName = :lastTrackName AND tracks.cardinalNo = :lastCardinalNo AND users.realName = :lastRealName AND users.id > :lastId)`,
-        { lastTrackName, lastCardinalNo, lastRealName, lastId },
-      );
-    }
-
-    return await query.limit(pageSize + 1).getMany();
-  }
-
-  async findRacersByTrack(
-    dto: PaginationRacersByTrackDto,
-  ): Promise<User[] | []> {
-    const { trackName, pageSize, lastRealName, lastId, lastCardinalNo } = dto;
-
-    const role = UserRole.RACER;
-
-    const query = this.repo
-      .createQueryBuilder('users')
-      .leftJoinAndSelect('users.track', 'tracks')
-      .where('tracks.trackName = :trackName', { trackName })
-      .andWhere('users.role = :role', { role })
-      .orderBy('tracks.cardinalNo', 'ASC')
-      .addOrderBy('users.realName', 'ASC')
-      .addOrderBy('users.id', 'ASC');
-
-    if (lastCardinalNo && lastRealName && lastId) {
-      const lastcardinalNo = parseInt(lastCardinalNo);
-      query.andWhere(
-        `((tracks.cardinalNo > :lastcardinalNo) OR 
-        (tracks.cardinalNo = :lastcardinalNo AND users.realName > :lastRealName) OR
-        (tracks.cardinalNo = :lastcardinalNo AND users.realName = :lastRealName AND users.id > :lastId))`,
-        { lastcardinalNo, lastRealName, lastId },
-      );
-    }
-
-    return await query.limit(pageSize + 1).getMany();
-  }
-
-  async findRacersByTrackAndCardinalNo(
-    dto: PaginationRacersByCardinalDto,
-  ): Promise<User[] | []> {
-    const { trackName, cardinalNo, pageSize, lastRealName, lastId } = dto;
-
-    const role = UserRole.RACER;
-
-    const query = this.repo
-      .createQueryBuilder('users')
-      .leftJoinAndSelect('users.track', 'tracks')
-      .where('tracks.trackName = :trackName', { trackName })
-      .andWhere('users.role = :role', { role })
-      .andWhere('tracks.cardinalNo = :cardinalNo', {
-        cardinalNo: parseInt(cardinalNo),
-      })
-      .orderBy('users.realName', 'ASC')
-      .addOrderBy('users.id', 'ASC');
-
-    if (lastRealName && lastId) {
-      query.andWhere(
-        `((users.realName > :lastRealName) OR 
-        (users.realName = :lastRealName AND users.id > :lastId))`,
-        { lastRealName, lastId },
-      );
-    }
-
-    return query.limit(parseInt(pageSize) + 1).getMany();
   }
 
   async findUserByIdWithDetail(userId: string): Promise<User> | undefined {

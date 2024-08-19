@@ -11,13 +11,13 @@ import {
   ENV_REFRESH_TOKEN_EXPIRY,
 } from 'src/common/const';
 import { TokenPayload, TokenPayloadRes } from '../types';
-import { LoginResDto, PasswordResetReqDto, VerifyCodeResDto } from '../dto';
+import { SendPasswordUpdateSmsReqDto, VerifyCodeResDto } from '../dto';
 import { VerificationService } from './verification.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { AuthRepository } from '../repositories';
 import { BusinessException } from 'src/exception';
 import { v4 as uuidv4 } from 'uuid';
-import { updatePasswordReqDto } from '../dto/update-password-req.dto';
+import { updatePasswordReqDto } from '../dto/requests/update-password-req.dto';
 
 @Injectable()
 export class AuthService {
@@ -80,7 +80,7 @@ export class AuthService {
     return accessToken;
   }
 
-  async login(identifier: string, password: string): Promise<LoginResDto> {
+  async login(identifier: string, password: string) {
     const user = await this.validateUser(identifier, password);
 
     const payload: TokenPayload = this.createTokenPayload(user.id);
@@ -209,7 +209,7 @@ export class AuthService {
 
     return true;
   }
-  async handlePasswordResetVerification(dto: PasswordResetReqDto) {
+  async handlePasswordResetVerification(dto: SendPasswordUpdateSmsReqDto) {
     const { identifier, phoneNumber } = dto;
 
     const userId = await this.checkPhoneNumberMatch(identifier, phoneNumber);

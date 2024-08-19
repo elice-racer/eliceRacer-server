@@ -8,6 +8,7 @@ import { Chat, ChatType } from '../entities/chat.entity';
 import { ChatGateway } from '../chat.gateway';
 import { User } from 'src/modules/user/entities';
 import { In } from 'typeorm';
+import { ChatRoomsReqDto } from '../dto/requesets/chat-rooms-req.dto';
 
 @Injectable()
 export class ChatService {
@@ -22,6 +23,39 @@ export class ChatService {
     const chat = await this.chatRepo.findOne({
       where: { id: chatId },
       relations: ['team', 'users'],
+    });
+
+    if (!chat)
+      throw new BusinessException(
+        `chat`,
+        `채팅방이 존재하지 않습니다.`,
+        `채팅방이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return chat;
+  }
+
+  async getChatRooms(dto: ChatRoomsReqDto) {
+    const chatRooms = await this.chatRepo.findChatRooms(dto);
+
+    if (!chatRooms)
+      throw new BusinessException(
+        `chat`,
+        `채팅방이 존재하지 않습니다.`,
+        `채팅방이 존재하지 않습니다.`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    console.log(chatRooms);
+    return chatRooms;
+  }
+
+  async getChatByTeamId(teamId: string) {
+    const chat = await this.chatRepo.findOne({
+      where: {
+        team: { id: teamId },
+      },
     });
 
     if (!chat)
@@ -52,8 +86,6 @@ export class ChatService {
     return user.chats;
   }
 
-  //TODO chatRoom 생성하는 건 하나만 두고
-  //TODO team일경우에는 호출하는 방식으로 수정
   async createChat(currentUser: User, dto: CreateChatRoomDto) {
     const users = await this.userRepo.find({ where: { id: In(dto.userIds) } });
 
@@ -88,10 +120,13 @@ export class ChatService {
     return this.chatRepo.createGroupChat(currentUser, users, dto.chatName);
   }
 
-  async createTeamChat(currentUser: User, dto: CreateTeamChatDto) {
+  async createTeamChat(
+    currentUser: User,
+    dto: CreateTeamChatDto,
+  ): Promise<Chat> {
     const team = await this.teamRepo.findOne({
       where: { id: dto.teamId },
-      relations: ['users', 'project'],
+      relations: ['users', 'project', 'chat'],
     });
 
     if (!team)
@@ -102,7 +137,7 @@ export class ChatService {
         HttpStatus.NOT_FOUND,
       );
 
-    if (team.isChatCreated)
+    if (team.chat)
       throw new BusinessException(
         'team',
         '해당 팀은 이미 채팅방이 존재합니다',

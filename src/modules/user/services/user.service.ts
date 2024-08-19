@@ -4,11 +4,7 @@ import { User, UserRole, UserStatus } from '../entities';
 import {
   CreateUserDto,
   PaginationParticipantsDto,
-  PaginationRacersByCardinalDto,
-  PaginationRacersByTrackDto,
-  PaginationRacersDto,
-  PaginationUsersDto,
-  updateReqDto,
+  updateUserReqDto,
 } from '../dto';
 import { hashPassword } from 'src/common/utils';
 import { BusinessException } from 'src/exception';
@@ -18,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
 import { SkillService } from './skill.service';
 import { UploadService } from 'src/modules/upload/services/upload.service';
+import { PaginationAllUsersDto } from '../dto/requests/pagination-all-users.dto';
 
 @Injectable()
 export class UserService {
@@ -48,6 +45,22 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
+  async getAllUsers(user: User, dto: PaginationAllUsersDto) {
+    const { pageSize, role, trackName, cardinalNo } = dto;
+
+    const users = await this.userRepo.findAllUsers(user, dto);
+
+    let next: null | string = null;
+
+    if (users.length > pageSize) {
+      const lastUser = users[pageSize - 1];
+      next = `${this.baseUrl}/api/users/alls?pageSize=${pageSize}&role=${role}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
+      users.pop();
+    }
+
+    return { users, pagination: { next, count: users.length } };
+  }
+
   async getUser(userId: string): Promise<User> | undefined {
     const userWithDetail = await this.userRepo.findUserByIdWithDetail(userId);
 
@@ -60,97 +73,6 @@ export class UserService {
       );
 
     return userWithDetail;
-  }
-
-  async getAllUsers(user: User, dto: PaginationUsersDto) {
-    const { pageSize, role } = dto;
-
-    const users = await this.userRepo.findAllUsers(user, dto);
-
-    let next: string | null = null;
-
-    if (users.length > pageSize) {
-      const lastUser = users[pageSize - 1];
-      next = `${this.baseUrl}/api/users/all?pageSize=${pageSize}&role=${role.toLowerCase()}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
-      users.pop();
-    }
-
-    return { users, pagination: { next, count: users.length } };
-  }
-
-  //모든 레이서
-  async getAllRacres(dto: PaginationRacersDto) {
-    const { pageSize } = dto;
-    const pageSizeToInt = parseInt(pageSize);
-
-    const users = await this.userRepo.findAllRcers(dto, pageSizeToInt);
-
-    let next: string | null = null;
-
-    if (users.length > pageSizeToInt) {
-      const lastUser = users[pageSizeToInt - 1];
-      next = `${this.baseUrl}/api/users/racers/all?pageSize=${pageSize}&lastTrackName=${lastUser.track.trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
-      users.pop();
-    }
-
-    return { users, pagination: { next, count: users.length } };
-  }
-
-  //트랙별 모든 레이서
-  async getAllRacersByTrack(dto: PaginationRacersByTrackDto) {
-    const { trackName, pageSize } = dto;
-
-    const track = await this.trackRepo.findOne({ where: { trackName } });
-
-    if (!track)
-      throw new BusinessException(
-        `user`,
-        `해당 트랙(${trackName})이 존재하지 않습니다.`,
-        `해당 트랙(${trackName})이 존재하지 않습니다.`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    const users = await this.userRepo.findRacersByTrack(dto);
-
-    let next: string | null = null;
-    if (users.length > pageSize) {
-      const lastUser = users[pageSize - 1];
-      next = `${this.baseUrl}/api/users/racers/tracks/all?pageSize=${pageSize}&trackName=${trackName}&lastCardinalNo=${lastUser.track.cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
-      users.pop();
-    }
-
-    return { users, pagination: { next, count: users.length } };
-  }
-
-  //트랙+기수별 모든 레이서
-  async getAllRacersByCardinalNo(dto: PaginationRacersByCardinalDto) {
-    const { trackName, cardinalNo, pageSize } = dto;
-    const cardinalNoToInt = parseInt(cardinalNo);
-    const pageSizeToInt = parseInt(pageSize);
-
-    const track = await this.trackRepo.findOne({
-      where: { trackName, cardinalNo: cardinalNoToInt },
-    });
-
-    if (!track)
-      throw new BusinessException(
-        `user`,
-        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
-        `해당 트랙(${trackName}${cardinalNo})이 존재하지 않습니다.`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    const users = await this.userRepo.findRacersByTrackAndCardinalNo(dto);
-
-    let next: string | null = null;
-    if (users.length > pageSizeToInt) {
-      const lastUser = users[pageSizeToInt - 1];
-      next = `${this.baseUrl}/api/users/racers/cardinals/all?pageSize=${pageSize}&trackName=${trackName}&cardinalNo=${cardinalNo}&lastRealName=${lastUser.realName}&lastId=${lastUser.id}`;
-
-      users.pop();
-    }
-
-    return { users, pagination: { next, count: users.length } };
   }
 
   async updateUserRole(userId: string, role: UserRole) {
@@ -168,7 +90,7 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
-  async updateMypage(userId: string, dto: updateReqDto): Promise<User> {
+  async updateMypage(userId: string, dto: updateUserReqDto): Promise<User> {
     const user = await this.userRepo.findUserByIdWithTracks(userId);
     if (!user) {
       throw new BusinessException(
@@ -352,7 +274,10 @@ export class UserService {
     return this.userRepo.searchUsers(query);
   }
 
-  async uploadProfileImage(file: Express.Multer.File, user: User) {
+  async uploadProfileImage(
+    file: Express.Multer.File,
+    user: User,
+  ): Promise<User> {
     const currentImageUrl = user.profileImage;
 
     if (currentImageUrl) {

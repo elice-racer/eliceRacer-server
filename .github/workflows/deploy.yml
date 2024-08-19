@@ -57,7 +57,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: production-elicerracer
+          ECR_REPOSITORY: prod-elicerracer
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -74,12 +74,16 @@ jobs:
 
           # image: ${{ steps.login-ecr.outputs.registry }}/elicerracer:${{ github.sha }}
 
+      - name: Replace AWS Account ID in appspec.yaml
+        run: |
+          sed -i "s/ACCOUNT_ID/${{ secrets.AWS_ACCOUNT_ID }}/g" appspec.yaml
+
       - name: Deploy ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           service: elicerracer
-          cluster: project-elicerracer
+          cluster: prod-elicerracer
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           codedeploy-appspec: appspec.yaml
-          codedeploy-application: production-elicerracer
-          codedeploy-deployment-group: production-elicerracer
+          codedeploy-application: prod-elicerracer
+          codedeploy-deployment-group: prod-elicerracer

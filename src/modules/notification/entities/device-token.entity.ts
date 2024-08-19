@@ -2,7 +2,7 @@ import { BaseEntity } from 'src/common/entity';
 import { User } from 'src/modules/user/entities';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'tokens' })
 export class DeviceToken extends BaseEntity {
   @Column()
   token: string;

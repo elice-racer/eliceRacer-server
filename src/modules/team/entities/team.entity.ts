@@ -1,4 +1,5 @@
 import { BaseEntity } from 'src/common/entity';
+import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { Officehour } from 'src/modules/officehour/entities/officehour.entity';
 import { Project } from 'src/modules/project/entities';
 import { User } from 'src/modules/user/entities';
@@ -9,6 +10,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 
 @Entity({ name: 'teams' })
@@ -39,6 +41,6 @@ export class Team extends BaseEntity {
   @OneToMany(() => Officehour, (officehour) => officehour.team)
   officehours: Officehour[];
 
-  @Column({ default: false })
-  isChatCreated: boolean;
+  @OneToOne(() => Chat, (chat) => chat.team) // Chat 엔티티와의 관계 설정
+  chat: Chat;
 }
