@@ -26,7 +26,7 @@ import { ResponseInterceptor } from 'src/interceptors';
 import { Serialize } from 'src/interceptors';
 import { OutputUserDto } from '../dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { MiniProfileDto } from '../dto/mini-profile.dto';
+import { MiniProfileDto } from '../dto/responses/mini-profile.dto';
 import { SkillService } from '../services/skill.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -44,7 +44,7 @@ export class UserController {
     return await this.userService.chang(identifier);
   }
 
-  @Get('/all')
+  @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Serialize(OutputUserDto)
@@ -134,7 +134,7 @@ export class UserController {
   @Get('/:userId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @Serialize(OutputUserDto)
+  @Serialize(DetailUserResDto)
   async getUser(@Param('userId') userId: string): Promise<User> {
     return await this.userService.getUser(userId);
   }

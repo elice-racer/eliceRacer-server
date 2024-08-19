@@ -3,13 +3,18 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
+  Put,
   Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { TeamService } from '../services/team.service';
-import { OutputTeamDto, PaginationAllTeamsDto, UpdateTeamReqDto } from '../dto';
+import {
+  DetailTeamResDto,
+  OutputTeamDto,
+  PaginationAllTeamsDto,
+  UpdateTeamReqDto,
+} from '../dto';
 import { ResponseInterceptor, Serialize } from 'src/interceptors';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards';
@@ -31,12 +36,17 @@ export class TeamController {
   }
 
   @Get('/:teamId')
-  @Serialize(OutputTeamDto)
+  @Serialize(DetailTeamResDto)
   async getTeam(@Param('teamId') teamId: string) {
     return await this.teamService.getTeam(teamId);
   }
 
-  @Patch('/:teamId')
+  //TODO 동시성제어
+  //PATCH 에서 PUT으로 바꿈
+  //TODO 팀 이름, 깃랩, 노션 수정 별개로 할 수 있게 하기.
+  //TODO 그리고 team Number 수정하는거 빼기
+  //TODO 어떻게 업데이트 할지 정하기
+  @Put('/:teamId')
   @Serialize(OutputTeamDto)
   async updateTeam(
     @CurrentUser() user: User,

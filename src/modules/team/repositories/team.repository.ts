@@ -61,4 +61,15 @@ export class TeamRepository extends Repository<Team> {
 
     return query.limit(pageSize + 1).getMany();
   }
+
+  async findTeamDetail(teamId: string) {
+    return this.repo
+      .createQueryBuilder('team')
+      .leftJoinAndSelect('team.users', 'user')
+      .leftJoinAndSelect('team.chat', 'chat')
+      .leftJoinAndSelect('team.project', 'project')
+      .leftJoinAndSelect('project.track', 'track')
+      .where('team.id =:teamId', { teamId })
+      .getOne();
+  }
 }

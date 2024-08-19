@@ -17,7 +17,7 @@ import { RefreshTokenService } from './refresh-token.service';
 import { AuthRepository } from '../repositories';
 import { BusinessException } from 'src/exception';
 import { v4 as uuidv4 } from 'uuid';
-import { updatePasswordReqDto } from '../dto/update-password-req.dto';
+import { updatePasswordReqDto } from '../dto/requests/update-password-req.dto';
 
 @Injectable()
 export class AuthService {

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { ChatType } from '../entities/chat.entity';
+import { ChatType } from '../../entities/chat.entity';
 
 export class ChatRoomResDto {
   @ApiProperty({
@@ -33,6 +33,6 @@ export class ChatRoomResDto {
     type: 'number',
   })
   @Expose()
-  @Transform(({ value }) => value.length)
-  users: number;
+  @Transform(({ value }) => console.log(value))
+  usersCount: number;
 }

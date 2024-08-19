@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { ENV_SERVER_URL_KEY } from 'src/common/const';
 import { SkillService } from './skill.service';
 import { UploadService } from 'src/modules/upload/services/upload.service';
-import { PaginationAllUsersDto } from '../dto/pagination-all-users.dto';
+import { PaginationAllUsersDto } from '../dto/requests/pagination-all-users.dto';
 
 @Injectable()
 export class UserService {

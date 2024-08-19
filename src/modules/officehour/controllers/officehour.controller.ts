@@ -17,5 +17,9 @@ export class OfficehourController {
     return await this.officehourService.getOfficehourByTeam(teamId);
   }
 
+  // @Get('/:officehourId')
+  // async getOfficehourById(@Param('officehourId') officehourId: string) {
+  //   return await this.officehourService;
+  // }
   //TODO officehour id로 가져오기
 }

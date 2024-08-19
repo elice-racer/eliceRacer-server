@@ -1,2 +1,2 @@
-export * from './create-admin.dto';
-export * from './verify-email-req.dto';
+export * from './requests/create-admin-req.dto';
+export * from './requests/verify-email-req.dto';
