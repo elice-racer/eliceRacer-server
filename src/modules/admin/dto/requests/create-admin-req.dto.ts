@@ -3,7 +3,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsString,
-  Matches,
+  // Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -16,9 +16,9 @@ export class CreateAdminReqDto {
   })
   @IsNotEmpty()
   @IsEmail()
-  @Matches(/^[^@]+@elicer\.com$/, {
-    message: '관리자 가입은 elicer.com 로만 허용됩니다',
-  })
+  // @Matches(/^[^@]+@elicer\.com$/, {
+  //   message: '관리자 가입은 elicer.com 로만 허용됩니다',
+  // })
   email: string;
 
   @ApiProperty({ description: '실명', example: '임지은', required: true })
